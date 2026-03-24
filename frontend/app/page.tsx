@@ -32,6 +32,7 @@ interface PipelineState {
   aggregate_rankings: AggregateRank[];
   label_map: Record<string, string>;
   chairman: { model: string; rationale: string };
+  perspectives?: Record<string, string>;
   optimised_prompt: string;
 }
 
@@ -237,13 +238,13 @@ function StageProcessing({
   const [error, setError] = useState<string | null>(null);
 
   const agents = [
-    { code: "S1", name: "Intent Extractor", model: "claude-3.5-sonnet", desc: "Parses domain, intent, gaps, and constraints" },
-    { code: "S2A", name: "Chain-of-Thought Rewriter", model: "gpt-4o", desc: "Inserts step-by-step reasoning scaffolds" },
-    { code: "S2B", name: "Role-Assignment Rewriter", model: "claude-3.5-sonnet", desc: "Assigns domain-expert persona" },
-    { code: "S2C", name: "Structured Template Rewriter", model: "gpt-4o", desc: "Adds format specs and constraints" },
-    { code: "R1", name: "Peer Reviewer 1", model: "gpt-4o", desc: "Anonymised evaluation of all candidates" },
-    { code: "R2", name: "Peer Reviewer 2", model: "claude-3.5-sonnet", desc: "Anonymised evaluation of all candidates" },
-    { code: "R3", name: "Peer Reviewer 3", model: "gpt-4o", desc: "Anonymised evaluation of all candidates" },
+    { code: "S1", name: "Intent Extractor", model: "gemma-3-1b-it", desc: "Parses domains, gaps, and constraints" },
+    { code: "S2A", name: "Autonomous Prompt Engineer A", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
+    { code: "S2B", name: "Autonomous Prompt Engineer B", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
+    { code: "S2C", name: "Autonomous Prompt Engineer C", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
+    { code: "R1", name: "Peer Reviewer 1", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
+    { code: "R2", name: "Peer Reviewer 2", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
+    { code: "R3", name: "Peer Reviewer 3", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
   ];
 
   React.useEffect(() => {
@@ -352,7 +353,7 @@ function StageCouncil({
   theme: string;
   onContinue: () => void;
 }) {
-  const { peer_reviews, aggregate_rankings, label_map, chairman, candidate_a, candidate_b, candidate_c } = pipelineState;
+  const { peer_reviews, aggregate_rankings, label_map, chairman, candidate_a, candidate_b, candidate_c, perspectives } = pipelineState;
   const [revealedReviewers, setRevealedReviewers] = useState(0);
   const [showRankings, setShowRankings] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
@@ -475,13 +476,13 @@ function StageCouncil({
             <div className="glass-card" style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, marginBottom: 28 }}>
               <div className="tabs-header">
                 <button className={`tab-btn ${activeTab === "a" ? "active" : ""}`} onClick={() => setActiveTab("a")}>
-                  Base Model / Direct
+                  A: {perspectives?.["Candidate A"] ? (perspectives["Candidate A"].length > 25 ? perspectives["Candidate A"].slice(0, 25) + "..." : perspectives["Candidate A"]) : "Dynamic Strategy A"}
                 </button>
                 <button className={`tab-btn ${activeTab === "b" ? "active" : ""}`} onClick={() => setActiveTab("b")}>
-                  Persona / Expert Strategy
+                  B: {perspectives?.["Candidate B"] ? (perspectives["Candidate B"].length > 25 ? perspectives["Candidate B"].slice(0, 25) + "..." : perspectives["Candidate B"]) : "Dynamic Strategy B"}
                 </button>
                 <button className={`tab-btn ${activeTab === "c" ? "active" : ""}`} onClick={() => setActiveTab("c")}>
-                  Chain-of-Thought
+                  C: {perspectives?.["Candidate C"] ? (perspectives["Candidate C"].length > 25 ? perspectives["Candidate C"].slice(0, 25) + "..." : perspectives["Candidate C"]) : "Dynamic Strategy C"}
                 </button>
               </div>
               <div style={{
@@ -613,7 +614,8 @@ function StageReview({
       {/* Intent chips */}
       {intent && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
-          {intent.domain && <span className="badge badge-optimised" style={{ fontSize: 11 }}>{intent.domain}</span>}
+          {intent.topic_domain && <span className="badge badge-optimised" style={{ fontSize: 11 }}>Topic: {intent.topic_domain}</span>}
+          {intent.format_domain && <span className="badge badge-optimised" style={{ fontSize: 11 }}>Format: {intent.format_domain}</span>}
           {intent.query_quality && <span className="badge badge-original" style={{ fontSize: 11 }}>quality: {intent.query_quality}</span>}
           {(intent.missing_info || []).slice(0, 3).map((m: string, i: number) => (
             <span key={i} className="badge badge-original" style={{ fontSize: 11 }}>
@@ -809,14 +811,14 @@ function formatMarkdown(text: string): string {
     .replace(/## (.*?)$/gm, "<h2>$1</h2>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/^\- (.*)$/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+    .replace(/(<li>[\s\S]*<\/li>)/g, "<ul>$1</ul>")
     .replace(/\n\n/g, "<br/><br/>")
     .replace(/\|(.+)\|/g, (match) => {
       const cells = match.split("|").filter(Boolean).map((c) => c.trim());
       if (cells.every((c) => /^[-:]+$/.test(c))) return "";
       return `<tr>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`;
     })
-    .replace(/(<tr>.*<\/tr>)/gs, "<table>$1</table>")
+    .replace(/(<tr>[\s\S]*<\/tr>)/g, "<table>$1</table>")
     .replace(/---/g, "<hr/>")
     .replace(/\n/g, "<br/>");
 }

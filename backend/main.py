@@ -78,6 +78,7 @@ def optimize(req: OptimizeRequest):
         "aggregate_rankings": state.get("aggregate_rankings", []),
         "label_map": state.get("label_map", {}),
         "chairman": state.get("chairman", {}),
+        "perspectives": state.get("perspectives", {}),
         "optimised_prompt": state.get("optimised_prompt", ""),
     }
 
