@@ -9,7 +9,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
 DEMO_CANDIDATE_A = """{
-  "optimised_prompt": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\n\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\n2. Document all interventions performed during the stay\n3. Record the patient's response to treatment\n4. List all discharge medications with dosage\n5. Provide follow-up instructions\n\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
+  "optimised_prompt": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\\n\\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\\n2. Document all interventions performed during the stay\\n3. Record the patient's response to treatment\\n4. List all discharge medications with dosage\\n5. Provide follow-up instructions\\n\\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
   "perspective_used": "Chain-of-Thought Heuristics"
 }"""
 
