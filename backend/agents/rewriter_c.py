@@ -8,44 +8,10 @@ import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-DEMO_CANDIDATE_C = """Generate a clinical discharge summary for a diabetic patient using the following structured format. Adhere strictly to all constraints listed below.
-
-**OUTPUT FORMAT (use these exact section headers):**
-
-## DISCHARGE SUMMARY
-
-**Patient Information:** [Age, Sex — no identifying information]
-**Admission Date:** [Date] | **Discharge Date:** [Date]
-**Primary Diagnosis:** [ICD-10 code + plain language description]
-**Attending Physician:** [Name, Credentials]
-
-**Reason for Admission:**
-[2–3 sentences describing presenting symptoms and circumstances]
-
-**Hospital Course:**
-[Chronological narrative of treatment, interventions, and patient response. Include: blood glucose trends, medication adjustments, consultations ordered, patient education sessions conducted]
-
-**Discharge Condition:** ☐ Stable ☐ Improved ☐ Guarded
-
-**Discharge Medications:**
-| Medication | Dose | Route | Frequency | Duration |
-|------------|------|-------|-----------|----------|
-| [Name] | [Dose] | [PO/SC/IV] | [Freq] | [Until follow-up] |
-
-**Follow-Up Instructions:**
-- Appointment 1: Endocrinology — within 2 weeks
-- Appointment 2: Primary Care — within 4 weeks
-- Daily monitoring: Blood glucose targets [80–130 mg/dL fasting; <180 mg/dL postprandial]
-- Return to ED if: blood glucose >300 mg/dL, signs of DKA, or chest pain
-
-**Patient Education Provided:** ☐ Insulin self-administration ☐ Glucose monitoring ☐ Dietary guidance ☐ Sick-day rules
-
-**CONSTRAINTS:**
-- Use clinical but accessible language (Grade 8 reading level for patient instructions)
-- All medications must include generic name, brand name in parentheses
-- Must flag any high-risk medications with ⚠️
-- Do not include any patient identifying information (HIPAA compliance)
-- Discharge instructions section must be comprehensible to a non-medical patient"""
+DEMO_CANDIDATE_C = """{
+  "optimised_prompt": "Generate a clinical discharge summary. Use this template:\\n## DISCHARGE SUMMARY\\n**Patient:** [Age/Sex]\\n**Reason for Admission:** [Narrative]\\n**Discharge Medications:** [Table with columns: Medication | Dose | Route]\\n**Constraints:** HIPAA compliant, 8th-grade reading level.",
+  "perspective_used": "Rigid Formatting Constraints"
+}"""
 
 SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
 Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 

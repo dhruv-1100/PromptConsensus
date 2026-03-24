@@ -8,15 +8,10 @@ import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-DEMO_CANDIDATE_A = """Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:
-
-1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)
-2. Document all interventions performed during the stay (insulin titration, dietary counselling, foot exam)
-3. Record the patient's response to treatment and any complications encountered
-4. List all discharge medications with dosage, frequency, and administration instructions
-5. Provide specific follow-up instructions: endocrinology appointment within 2 weeks, daily glucose monitoring targets (80–130 mg/dL fasting), and emergency return criteria
-
-Now generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding to the next."""
+DEMO_CANDIDATE_A = """{
+  "optimised_prompt": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\n\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\n2. Document all interventions performed during the stay\n3. Record the patient's response to treatment\n4. List all discharge medications with dosage\n5. Provide follow-up instructions\n\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
+  "perspective_used": "Chain-of-Thought Heuristics"
+}"""
 
 SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
 Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
