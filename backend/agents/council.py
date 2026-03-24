@@ -261,12 +261,13 @@ def peer_review(
                 positions[label].append(pos)
 
     aggregate = []
-    candidate_letter = {"Agent A \u2014 Chain-of-Thought": "A", "Agent B \u2014 Role-Assignment": "B", "Agent C \u2014 Structured Template": "C"}
     for label, ranks in positions.items():
         agent_name = label_map.get(label, label)
+        # Extract candidate letter from "Candidate A" → "A", etc.
+        candidate_letter = agent_name.replace("Candidate ", "") if agent_name.startswith("Candidate ") else "?"
         aggregate.append({
             "label": label,
-            "candidate": candidate_letter.get(agent_name, "?"),
+            "candidate": candidate_letter,
             "average_rank": round(sum(ranks) / len(ranks), 2),
             "votes": len(ranks),
             "ranks": ranks,
@@ -315,8 +316,17 @@ def chairman_synthesise(
     response = llm.invoke(messages)
     optimised = response.content.strip()
 
+    # Fallback: if the model returned a label/reference instead of an actual prompt,
+    # use the winning candidate's real prompt text
+    candidates_by_agent = {"Candidate A": candidate_a, "Candidate B": candidate_b, "Candidate C": candidate_c}
+    is_label_like = len(optimised.split()) < 15 or "Response " in optimised or "Candidate " in optimised
+    if is_label_like and aggregate:
+        winner_label = aggregate[0]["label"]
+        winner_agent = label_map.get(winner_label, "")
+        optimised = candidates_by_agent.get(winner_agent, candidate_a)
+
     chairman_info = {
-        "model": "claude-3-5-sonnet",
+        "model": "gemma-3-1b-it",
         "rationale": f"Based on council consensus: {aggregate[0]['label']} ranked first with average rank {aggregate[0]['average_rank']}.",
     }
 

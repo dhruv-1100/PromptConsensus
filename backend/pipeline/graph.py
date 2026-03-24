@@ -76,7 +76,13 @@ def run_pipeline(
 
     # Parse JSON structured candidate outputs to isolate the prompt and perspective
     import json
-    def parse_cand(cand_text: str):
+    DEFAULT_PERSPECTIVES = {
+        "A": "Chain-of-Thought Reasoning",
+        "B": "Role-Assignment & Few-Shot",
+        "C": "Structured Domain Templates",
+    }
+
+    def parse_cand(cand_text: str, agent_key: str):
         try:
             # Strip markdown fences if present
             clean = cand_text.strip()
@@ -86,13 +92,18 @@ def run_pipeline(
                     clean = clean[4:]
                 clean = clean.strip()
             data = json.loads(clean)
-            return data.get("optimised_prompt", cand_text), data.get("perspective_used", "Unknown")
+            perspective = data.get("perspective_used", "") or ""
+            prompt = data.get("optimised_prompt", cand_text)
+            # If perspective is empty or generic, use the default
+            if not perspective.strip() or perspective.strip().lower() == "unknown":
+                perspective = DEFAULT_PERSPECTIVES[agent_key]
+            return prompt, perspective
         except Exception:
-            return cand_text, "Unknown"
+            return cand_text, DEFAULT_PERSPECTIVES[agent_key]
 
-    prompt_a, persp_a = parse_cand(candidate_a)
-    prompt_b, persp_b = parse_cand(candidate_b)
-    prompt_c, persp_c = parse_cand(candidate_c)
+    prompt_a, persp_a = parse_cand(candidate_a, "A")
+    prompt_b, persp_b = parse_cand(candidate_b, "B")
+    prompt_c, persp_c = parse_cand(candidate_c, "C")
 
     state["candidate_a"] = prompt_a
     state["candidate_b"] = prompt_b
