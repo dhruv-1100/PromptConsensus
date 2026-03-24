@@ -357,7 +357,7 @@ function StageCouncil({
   const [revealedReviewers, setRevealedReviewers] = useState(0);
   const [showRankings, setShowRankings] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
-  const [activeReview, setActiveReview] = useState(0);
+  const [activeReview, setActiveReview] = useState(-1);
   const [activeTab, setActiveTab] = useState<string>("a");
   const [showScores, setShowScores] = useState(false);
   const [councilPhase, setCouncilPhase] = useState<CouncilPhase>("idle");
@@ -444,32 +444,29 @@ function StageCouncil({
                 </div>
               ))}
             </div>
-
-            {/* Accordion Expansion */}
-            {activeReview === i && (
-              <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16, animation: "fadeIn 0.2s" }}>
-                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 8, fontWeight: 500, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>FULL EVALUATION</span>
-                  <span style={{ color: "var(--terracotta)", background: "var(--bg-surface)", padding: "4px 8px", borderRadius: 4 }}>
-                    Top Pick: {review.parsed_ranking[0]} = {label_map[review.parsed_ranking[0]] || review.parsed_ranking[0]}
-                  </span>
-                </div>
-                <div style={{
-                  fontFamily: "var(--mono)", fontSize: 12, lineHeight: 1.6,
-                  color: "var(--text-secondary)", whiteSpace: "pre-wrap",
-                  background: "var(--bg-elevated)", padding: 12, borderRadius: 6
-                }}>
-                  {review.evaluation}
-                </div>
-              </div>
-            )}
-            
-            <div style={{ textAlign: "center", marginTop: "auto", paddingTop: 12, color: "var(--text-secondary)", fontSize: 16 }}>
-              <span style={{ transition: "transform 0.2s", display: "inline-block", transform: activeReview === i ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
-            </div>
           </div>
         ))}
       </div>
+
+      {/* Selected reviewer's full evaluation */}
+      {revealedReviewers > 0 && activeReview !== -1 && (
+        <div style={{ marginTop: 16, marginBottom: 28, animation: "fadeIn 0.2s" }}>
+          <div className="section-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span>{peer_reviews[activeReview]?.reviewer} — Full Evaluation</span>
+            <span style={{ color: "var(--terracotta)", background: "var(--bg-surface)", padding: "4px 10px", borderRadius: 4, fontSize: 13, textTransform: "none", fontWeight: 500 }}>
+              Top Pick: {peer_reviews[activeReview]?.parsed_ranking[0]} = {label_map[peer_reviews[activeReview]?.parsed_ranking[0]] || peer_reviews[activeReview]?.parsed_ranking[0]}
+            </span>
+          </div>
+          <div style={{
+            fontFamily: "var(--mono)", fontSize: 13, lineHeight: 1.8,
+            color: "var(--text-secondary)", whiteSpace: "pre-wrap",
+            background: "var(--bg-surface)", border: "1px solid var(--border)",
+            borderRadius: "var(--radius)", padding: "18px 22px",
+          }}>
+            {peer_reviews[activeReview]?.evaluation}
+          </div>
+        </div>
+      )}
 
       {/* Agent candidates */}
       {revealedReviewers > 0 && (
