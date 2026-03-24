@@ -398,7 +398,10 @@ function StageCouncil({
   }, [peer_reviews]);
 
   const winner = aggregate_rankings.length > 0 ? aggregate_rankings[0] : null;
-  const winnerAgent = winner ? label_map[winner.label] || winner.label : "";
+  let winnerAgent = winner ? label_map[winner.label] || winner.label : "";
+  if (winnerAgent && perspectives && perspectives[winnerAgent]) {
+    winnerAgent = `${winnerAgent} (${perspectives[winnerAgent]})`;
+  }
 
   // Map candidate letter to text
   const candidateText: Record<string, string> = { A: candidate_a, B: candidate_b, C: candidate_c };
@@ -571,7 +574,7 @@ function StageReview({
   onStartOver: () => void;
 }) {
   const { raw_query, intent, optimised_prompt, candidate_a, candidate_b, candidate_c,
-    aggregate_rankings, label_map, chairman } = pipelineState;
+    aggregate_rankings, label_map, chairman, perspectives } = pipelineState;
   const [editedPrompt, setEditedPrompt] = useState(optimised_prompt);
   const [copied, setCopied] = useState(false);
 
@@ -603,6 +606,7 @@ function StageReview({
         }}>
           <span className="badge badge-optimised" style={{ fontSize: 11 }}>
             Council winner: {label_map[winner.label] || winner.label}
+            {perspectives?.[label_map[winner.label] || winner.label] && ` (${perspectives[label_map[winner.label] || winner.label]})`}
           </span>
           <span className="badge badge-original" style={{ fontSize: 11 }}>
             Avg rank: {winner.average_rank} / {winner.votes} votes
