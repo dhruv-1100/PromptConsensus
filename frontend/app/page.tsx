@@ -416,6 +416,7 @@ function StageCouncil({
         peerReviews={peer_reviews}
         aggregateRankings={aggregate_rankings}
         labelMap={label_map}
+        perspectives={perspectives}
         phase={councilPhase}
         revealedCount={revealedReviewers}
         theme={theme}

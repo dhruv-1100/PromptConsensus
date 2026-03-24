@@ -22,6 +22,7 @@ interface CouncilSceneProps {
   peerReviews: PeerReview[];
   aggregateRankings: AggregateRank[];
   labelMap: Record<string, string>;
+  perspectives?: Readonly<Record<string, string>>;
   phase: CouncilPhase;
   revealedCount: number;
   theme?: string;
@@ -33,6 +34,7 @@ export default function CouncilScene({
   peerReviews,
   aggregateRankings,
   labelMap,
+  perspectives,
   phase,
   revealedCount,
   theme,
@@ -58,8 +60,16 @@ export default function CouncilScene({
   }, [aggregateRankings]);
 
   const candidateAgentNames = useMemo(() => {
-    return CANDIDATE_LABELS.map((l) => labelMap[`Response ${l}`] || `Response ${l}`);
-  }, [labelMap]);
+    return CANDIDATE_LABELS.map((l) => {
+      const orig = labelMap[`Response ${l}`];
+      if (!orig) return `Response ${l}`;
+      const p = perspectives?.[orig];
+      if (p) {
+        return p.length > 25 ? p.slice(0, 24) + "…" : p;
+      }
+      return orig;
+    });
+  }, [labelMap, perspectives]);
 
   // Layout constants for SVG viewBox="0 0 1000 500"
   const Y_POS = [22, 50, 78]; // HTML percentages
