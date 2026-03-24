@@ -18,15 +18,15 @@ DEMO_CANDIDATE_A = """Let's approach this systematically. First, establish the p
 
 Now generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding to the next."""
 
-SYSTEM_PROMPT = """You are an expert prompt engineer specialising in chain-of-thought reasoning strategies. 
-Your task is to rewrite user queries to elicit better, more structured LLM responses by:
-- Adding explicit step-by-step reasoning scaffolds
-- Breaking complex tasks into numbered sequential steps
-- Instructing the LLM to "think through" each component before generating output
-- Making implicit reasoning explicit
+SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
+Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
 
-The rewritten prompt should make the LLM's reasoning process transparent and structured.
-Return ONLY the rewritten prompt, with no preamble or explanation."""
+You MUST return your output ONLY as valid JSON matching this exact schema:
+{
+  "optimised_prompt": "<your final, ready-to-use prompt>",
+  "perspective_used": "<the name and brief explanation of the optimization technique you chose>"
+}
+Do not include any other text, markdown fences, or preamble."""
 
 
 def rewrite_chain_of_thought(raw_query: str, intent: dict, demo_mode: bool = False) -> str:
@@ -43,14 +43,15 @@ def rewrite_chain_of_thought(raw_query: str, intent: dict, demo_mode: bool = Fal
         google_api_key=os.environ.get("GOOGLE_API_KEY"),
     )
 
-    context = f"""Domain: {intent.get('domain', 'general')}
+    context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
+Format Domain: {intent.get('format_domain', 'general')}
 Core intent: {intent.get('intent', '')}
 Missing information to address: {', '.join(intent.get('missing_info', []))}
 Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
 
     messages = [
         HumanMessage(
-            content=f"{SYSTEM_PROMPT}\n\nRewrite this query using chain-of-thought reasoning:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
+            content=f"{SYSTEM_PROMPT}\n\nRewrite this query dynamically using the best possible perspective:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
         ),
     ]
 

@@ -3,8 +3,9 @@ pipeline/graph.py
 Pipeline orchestrating all ConsensusPrompt agents.
 Runs intent extraction → three parallel rewrites → council peer review → chairman synthesis.
 """
-import asyncio
+import json
 import os
+import datetime
 from typing import Any
 from dotenv import load_dotenv
 
@@ -72,18 +73,39 @@ def run_pipeline(
         run_rewriters_async(raw_query, intent, demo_mode)
     )
 
-    state["candidate_a"] = candidate_a
-    state["candidate_b"] = candidate_b
-    state["candidate_c"] = candidate_c
+    # Parse JSON structured candidate outputs to isolate the prompt and perspective
+    import json
+    def parse_cand(cand_text: str):
+        try:
+            # Strip markdown fences if present
+            clean = cand_text.strip()
+            if clean.startswith("```"):
+                clean = clean.split("```")[1]
+                if clean.startswith("json"):
+                    clean = clean[4:]
+                clean = clean.strip()
+            data = json.loads(clean)
+            return data.get("optimised_prompt", cand_text), data.get("perspective_used", "Unknown")
+        except Exception:
+            return cand_text, "Unknown"
+
+    prompt_a, persp_a = parse_cand(candidate_a)
+    prompt_b, persp_b = parse_cand(candidate_b)
+    prompt_c, persp_c = parse_cand(candidate_c)
+
+    state["candidate_a"] = prompt_a
+    state["candidate_b"] = prompt_b
+    state["candidate_c"] = prompt_c
+    state["perspectives"] = {"Candidate A": persp_a, "Candidate B": persp_b, "Candidate C": persp_c}
     notify("Rewriting complete", 60)
 
     # S3a + S3b: Council peer review + aggregate ranking
     notify("Council peer review in progress", 65)
     reviews, aggregate, label_map = peer_review(
         raw_query=raw_query,
-        candidate_a=candidate_a,
-        candidate_b=candidate_b,
-        candidate_c=candidate_c,
+        candidate_a=prompt_a,
+        candidate_b=prompt_b,
+        candidate_c=prompt_c,
         demo_mode=demo_mode,
     )
     state["peer_reviews"] = reviews
@@ -95,9 +117,9 @@ def run_pipeline(
     notify("Chairman synthesising final prompt", 88)
     optimised_prompt, chairman_info = chairman_synthesise(
         raw_query=raw_query,
-        candidate_a=candidate_a,
-        candidate_b=candidate_b,
-        candidate_c=candidate_c,
+        candidate_a=prompt_a,
+        candidate_b=prompt_b,
+        candidate_c=prompt_c,
         peer_reviews=reviews,
         aggregate=aggregate,
         label_map=label_map,
@@ -106,6 +128,31 @@ def run_pipeline(
     state["chairman"] = chairman_info
     state["optimised_prompt"] = optimised_prompt
     notify("Consensus reached", 100)
+
+    # Analytics Logging
+    try:
+        if aggregate and len(aggregate) > 0:
+            winning_label = aggregate[0].get("label", "Unknown") # 'Candidate A'
+            winning_perspective = state["perspectives"].get(winning_label, "Unknown")
+            
+            entry = {
+                "timestamp": datetime.datetime.utcnow().isoformat(),
+                "topic_domain": intent.get("topic_domain", "general"),
+                "format_domain": intent.get("format_domain", "general"),
+                "winning_model": winning_label,
+                "perspective_used": winning_perspective
+            }
+            log_path = os.path.join(os.path.dirname(__file__), "..", "optimisation_insights.json")
+            
+            logs = []
+            if os.path.exists(log_path):
+                with open(log_path, "r") as f:
+                    logs = json.load(f)
+            logs.append(entry)
+            with open(log_path, "w") as f:
+                json.dump(logs, f, indent=4)
+    except Exception as e:
+        print("Failed to write optimisation insights:", e)
 
     return state
 

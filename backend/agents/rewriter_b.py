@@ -23,14 +23,15 @@ Follow-up: Endocrinology in 10–14 days; Primary care in 4 weeks; Daily glucose
 
 Now, using this same expert voice, level of detail, and structure, please write a comprehensive clinical discharge summary for a diabetic patient. Include all standard sections: reason for admission, hospital course, discharge condition, medications, follow-up plan, and patient education provided."""
 
-SYSTEM_PROMPT = """You are an expert prompt engineer specialising in role-assignment and few-shot formatting strategies.
-Your task is to rewrite user queries to elicit better LLM responses by:
-- Assigning the LLM a specific, credentialed expert persona relevant to the domain
-- Including 1-2 high-quality few-shot examples that demonstrate the desired output format
-- Making the expected output structure crystal clear through example
-- Calibrating the LLM's "voice" and expertise level for the domain
+SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
+Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
 
-Return ONLY the rewritten prompt with persona assignment and examples included, no preamble."""
+You MUST return your output ONLY as valid JSON matching this exact schema:
+{
+  "optimised_prompt": "<your final, ready-to-use prompt>",
+  "perspective_used": "<the name and brief explanation of the optimization technique you chose>"
+}
+Do not include any other text, markdown fences, or preamble."""
 
 
 def rewrite_role_assignment(raw_query: str, intent: dict, demo_mode: bool = False) -> str:
@@ -48,14 +49,15 @@ def rewrite_role_assignment(raw_query: str, intent: dict, demo_mode: bool = Fals
         google_api_key=os.environ.get("GOOGLE_API_KEY"),
     )
 
-    context = f"""Domain: {intent.get('domain', 'general')}
+    context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
+Format Domain: {intent.get('format_domain', 'general')}
 Core intent: {intent.get('intent', '')}
 Missing information to address: {', '.join(intent.get('missing_info', []))}
 Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
 
     messages = [
         HumanMessage(
-            content=f"{SYSTEM_PROMPT}\n\nRewrite this query using role-assignment and few-shot formatting:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
+            content=f"{SYSTEM_PROMPT}\n\nRewrite this query dynamically using the best possible perspective:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
         ),
     ]
 

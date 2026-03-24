@@ -47,15 +47,15 @@ DEMO_CANDIDATE_C = """Generate a clinical discharge summary for a diabetic patie
 - Do not include any patient identifying information (HIPAA compliance)
 - Discharge instructions section must be comprehensible to a non-medical patient"""
 
-SYSTEM_PROMPT = """You are an expert prompt engineer specialising in structured template and domain constraint strategies.
-Your task is to rewrite user queries by:
-- Providing a detailed output template with exact section headers and formatting specifications
-- Adding explicit domain-specific constraints the LLM must adhere to
-- Specifying output format (tables, bullet points, specific notation)
-- Including quality requirements and compliance requirements relevant to the domain
-- Making every requirement explicit so the LLM has zero ambiguity
+SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
+Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
 
-Return ONLY the rewritten prompt including the template and constraints, no preamble."""
+You MUST return your output ONLY as valid JSON matching this exact schema:
+{
+  "optimised_prompt": "<your final, ready-to-use prompt>",
+  "perspective_used": "<the name and brief explanation of the optimization technique you chose>"
+}
+Do not include any other text, markdown fences, or preamble."""
 
 
 def rewrite_structured_template(raw_query: str, intent: dict, demo_mode: bool = False) -> str:
@@ -72,14 +72,15 @@ def rewrite_structured_template(raw_query: str, intent: dict, demo_mode: bool = 
         google_api_key=os.environ.get("GOOGLE_API_KEY"),
     )
 
-    context = f"""Domain: {intent.get('domain', 'general')}
+    context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
+Format Domain: {intent.get('format_domain', 'general')}
 Core intent: {intent.get('intent', '')}
 Missing information to address: {', '.join(intent.get('missing_info', []))}
 Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
 
     messages = [
         HumanMessage(
-            content=f"{SYSTEM_PROMPT}\n\nRewrite this query using structured templates and domain constraints:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
+            content=f"{SYSTEM_PROMPT}\n\nRewrite this query dynamically using the best possible perspective:\n\nOriginal query: {raw_query}\n\nContext:\n{context}"
         ),
     ]
 

@@ -13,7 +13,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 # ---------------------------------------------------------------------------
 DEMO_INTENT = {
     "intent": "Generate a professional clinical discharge summary for a diabetic patient",
-    "domain": "healthcare",
+    "topic_domain": "healthcare",
+    "format_domain": "clinical document",
     "missing_info": [
         "Patient's age and comorbidities",
         "Medications at time of discharge",
@@ -32,7 +33,8 @@ SYSTEM_PROMPT = """You are an expert prompt analyst. Your job is to deeply analy
 Return ONLY valid JSON with this exact schema:
 {
   "intent": "<one sentence describing the core goal>",
-  "domain": "<domain: healthcare | education | research | legal | business | general>",
+  "topic_domain": "<domain: healthcare | education | research | legal | business | general>",
+  "format_domain": "<format: JSON | blog post | email | code snippet | essay | clinical document | general>",
   "missing_info": ["<piece of info missing from query>", ...],
   "constraints": ["<implicit or explicit constraint>", ...],
   "query_quality": "<poor | moderate | good>"
