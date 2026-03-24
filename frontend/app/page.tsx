@@ -242,9 +242,9 @@ function StageProcessing({
     { code: "S2A", name: "Autonomous Prompt Engineer A", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
     { code: "S2B", name: "Autonomous Prompt Engineer B", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
     { code: "S2C", name: "Autonomous Prompt Engineer C", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
-    { code: "R1", name: "Peer Reviewer 1", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
-    { code: "R2", name: "Peer Reviewer 2", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
-    { code: "R3", name: "Peer Reviewer 3", model: "gemma-3-1b-it", desc: "Anonymised evaluation of all candidates" },
+    { code: "CE-A", name: "Cross-Examination: Agent A", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
+    { code: "CE-B", name: "Cross-Examination: Agent B", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
+    { code: "CE-C", name: "Cross-Examination: Agent C", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
   ];
 
   React.useEffect(() => {

@@ -18,7 +18,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 DEMO_PEER_REVIEWS = [
     {
-        "reviewer": "Reviewer 1 (GPT-4o)",
+        "reviewer": "Autonomous Engineer A",
         "model": "gpt-4o",
         "evaluation": (
             "Response X provides strong step-by-step reasoning scaffolds that guide the model through "
@@ -34,7 +34,7 @@ DEMO_PEER_REVIEWS = [
         "parsed_ranking": ["Response Z", "Response X", "Response Y"],
     },
     {
-        "reviewer": "Reviewer 2 (Claude 3.5 Sonnet)",
+        "reviewer": "Autonomous Engineer B",
         "model": "claude-3-5-sonnet",
         "evaluation": (
             "Response X excels at breaking down the task into numbered steps, ensuring no section is "
@@ -51,7 +51,7 @@ DEMO_PEER_REVIEWS = [
         "parsed_ranking": ["Response Z", "Response X", "Response Y"],
     },
     {
-        "reviewer": "Reviewer 3 (GPT-4o)",
+        "reviewer": "Autonomous Engineer C",
         "model": "gpt-4o",
         "evaluation": (
             "Response X: Strong reasoning scaffolds with clear step numbers. Good for ensuring "
@@ -74,9 +74,9 @@ DEMO_AGGREGATE = [
 ]
 
 DEMO_LABEL_MAP = {
-    "Response X": "Agent A — Chain-of-Thought",
-    "Response Y": "Agent B — Role-Assignment",
-    "Response Z": "Agent C — Structured Template",
+    "Response X": "Candidate A",
+    "Response Y": "Candidate B",
+    "Response Z": "Candidate C",
 }
 
 DEMO_CHAIRMAN = {
@@ -119,14 +119,11 @@ DEMO_OPTIMISED = """You are a board-certified internist completing a clinical di
 
 # ── Prompt templates ───────────────────────────────────────────────────────────
 
-REVIEW_SYSTEM = """You are evaluating anonymised prompt rewrites. You will see two or three candidate prompts labelled "Response X", "Response Y", etc. The labels are anonymous — you do not know which model produced each.
+REVIEW_SYSTEM = """You are a senior AI Prompt Engineer. You recently generated one of the 3 candidate prompts below. 
+Your task is to critically cross-examine ALL THREE candidate prompts (Response X, Response Y, and Response Z) to determine the absolute best prompt optimization.
+You MUST provide a brief critique of each candidate's strengths and weaknesses regarding structural rigor, logic, and constraint adherence.
 
-For each candidate:
-1. Describe its strengths and weaknesses in 2-3 sentences.
-2. Assess how well it would elicit a high-quality LLM response.
-
-Then provide your final ranking. Format it EXACTLY as:
-
+IMPORTANT: End your review with a strict final ranking in this exact format:
 FINAL RANKING:
 1. Response [letter]
 2. Response [letter]
@@ -184,9 +181,9 @@ def _anonymise_candidates(
     """Shuffle candidates into anonymous labels and return (prompt_text, label_map)."""
     import random
     items = [
-        ("Agent A \u2014 Chain-of-Thought", candidate_a),
-        ("Agent B \u2014 Role-Assignment", candidate_b),
-        ("Agent C \u2014 Structured Template", candidate_c),
+        ("Candidate A", candidate_a),
+        ("Candidate B", candidate_b),
+        ("Candidate C", candidate_c),
     ]
     random.shuffle(items)
     labels = ["X", "Y", "Z"]
@@ -198,15 +195,17 @@ def _anonymise_candidates(
     return "\n\n---\n\n".join(parts), label_map
 
 
-def _single_review(reviewer_model: str, user_query: str, anonymised_text: str) -> Dict:
-    """Run one peer review."""
+def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, anonymised_text: str) -> Dict:
+    """Run one cross-examination peer review."""
     llm = _get_llm(reviewer_model)
+    system = f"You are '{reviewer_name}', a senior AI Prompt Engineer." + "\n" + REVIEW_SYSTEM
     messages = [
-        HumanMessage(content=f"{REVIEW_SYSTEM}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
+        HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
     response = llm.invoke(messages)
     text = response.content.strip()
     return {
+        "reviewer": reviewer_name,
         "model": reviewer_model,
         "evaluation": text,
         "parsed_ranking": _parse_ranking(text),
@@ -227,7 +226,7 @@ def peer_review(
 
     anonymised_text, label_map = _anonymise_candidates(candidate_a, candidate_b, candidate_c)
 
-    reviewer_models = ["gemma-3-1b-it", "gemma-3-1b-it", "gemma-3-1b-it"]
+    reviewer_names = ["Autonomous Engineer A", "Autonomous Engineer B", "Autonomous Engineer C"]
 
     # Run reviews in parallel
     try:
@@ -241,8 +240,8 @@ def peer_review(
 
     async def _run():
         tasks = [
-            loop.run_in_executor(None, _single_review, m, raw_query, anonymised_text)
-            for m in reviewer_models
+            loop.run_in_executor(None, _single_review, name, "gemma-3-1b-it", raw_query, anonymised_text)
+            for name in reviewer_names
         ]
         return await asyncio.gather(*tasks)
 
