@@ -5,7 +5,8 @@ Uses Gemini as the backbone LLM for structured intent analysis.
 """
 import json
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
 # ---------------------------------------------------------------------------
@@ -51,18 +52,32 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
     if demo_mode:
         return DEMO_INTENT
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemma-3-1b-it",
-        temperature=0.3,
-        max_tokens=1024,
-        google_api_key=os.environ.get("GOOGLE_API_KEY"),
+    from config import MODELS
+    llm = ChatOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+        model=MODELS["intent_extractor"],
+        temperature=0.0,
+        max_tokens=500,
     )
 
     messages = [
         HumanMessage(content=f"{SYSTEM_PROMPT}\n\nAnalyse this query:\n\n{raw_query}"),
     ]
 
-    response = llm.invoke(messages)
+    import time as _time
+    import random as _random
+    for _attempt in range(5):
+        try:
+            response = llm.invoke(messages)
+            break
+        except Exception as _e:
+            if '429' in str(_e) and _attempt < 4:
+                _wait = 15 + _random.uniform(1, 5) * _attempt
+                print(f"[Intent] 429 limit, waiting {round(_wait, 1)}s...")
+                _time.sleep(_wait)
+            else:
+                raise
     content = response.content.strip()
 
     # Strip markdown code fences if present

@@ -138,31 +138,44 @@ Return ONLY the synthesised prompt, with no preamble or explanation."""
 
 # ── Core functions ─────────────────────────────────────────────────────────────
 
-def _get_llm(model_hint: str):
-    """Return a LangChain chat model for the given hint."""
-    if "claude" in model_hint.lower():
-        from langchain_anthropic import ChatAnthropic
-        return ChatAnthropic(
-            model="claude-3-5-sonnet-20241022",
-            temperature=0.3,
-            max_tokens=2048,
-            api_key=os.environ.get("ANTHROPIC_API_KEY"),
-        )
-    elif "gemini" in model_hint.lower() or "gemma" in model_hint.lower():
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        return ChatGoogleGenerativeAI(
-            model="gemma-3-1b-it",
-            temperature=0.3,
-            max_tokens=2048,
-            google_api_key=os.environ.get("GOOGLE_API_KEY"),
-        )
-    else:
-        from langchain_openai import ChatOpenAI
-        return ChatOpenAI(
-            model="gpt-4o",
-            temperature=0.3,
-            api_key=os.environ.get("OPENAI_API_KEY"),
-        )
+def get_llm(model_name: str, temperature: float = 0.0):
+    """Return a LangChain chat model for the given hint.
+    Includes retry-with-backoff for transient 429 rate limits."""
+    import os
+    import time
+    from langchain_openai import ChatOpenAI
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            llm = ChatOpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.getenv("OPENROUTER_API_KEY"),
+                model=model_name,
+                temperature=temperature,
+                max_tokens=1000
+            )
+            return llm
+        except Exception:
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+            else:
+                raise
+
+
+def _invoke_with_retry(llm, messages, max_retries=3):
+    """Invoke an LLM with retry-on-429 backoff."""
+    import time
+    for attempt in range(max_retries):
+        try:
+            return llm.invoke(messages)
+        except Exception as e:
+            if '429' in str(e) and attempt < max_retries - 1:
+                wait = 2 ** (attempt + 1)
+                print(f"[Retry] 429 rate limit hit, waiting {wait}s before retry {attempt + 2}/{max_retries}...")
+                time.sleep(wait)
+            else:
+                raise
 
 
 def _parse_ranking(text: str) -> List[str]:
@@ -197,12 +210,12 @@ def _anonymise_candidates(
 
 def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, anonymised_text: str) -> Dict:
     """Run one cross-examination peer review."""
-    llm = _get_llm(reviewer_model)
+    llm = get_llm(reviewer_model)
     system = f"You are '{reviewer_name}', a senior AI Prompt Engineer." + "\n" + REVIEW_SYSTEM
     messages = [
         HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
-    response = llm.invoke(messages)
+    response = _invoke_with_retry(llm, messages)
     text = response.content.strip()
     return {
         "reviewer": reviewer_name,
@@ -238,10 +251,12 @@ def peer_review(
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
+    from config import MODELS
+    reviewer_models = [MODELS["reviewer_a"], MODELS["reviewer_b"], MODELS["reviewer_c"]]
     async def _run():
         tasks = [
-            loop.run_in_executor(None, _single_review, name, "gemma-3-1b-it", raw_query, anonymised_text)
-            for name in reviewer_names
+            loop.run_in_executor(None, _single_review, name, model, raw_query, anonymised_text)
+            for name, model in zip(reviewer_names, reviewer_models)
         ]
         return await asyncio.gather(*tasks)
 
@@ -290,7 +305,21 @@ def chairman_synthesise(
     if demo_mode:
         return DEMO_OPTIMISED, DEMO_CHAIRMAN
 
-    llm = _get_llm("gemma-3-1b-it")
+    from config import MODELS
+    # Chairman uses gemma-3-1b-it via native Google AI Studio API
+    chairman_model = MODELS["chairman"]
+    if chairman_model.startswith("gemini") or "gemma" in chairman_model.lower():
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        model_id = chairman_model
+        if "gemma" in model_id.lower() and not model_id.startswith("models/"):
+            model_id = f"models/{model_id}"
+        llm = ChatGoogleGenerativeAI(
+            model=model_id,
+            google_api_key=os.getenv("GOOGLE_API_KEY"),
+            temperature=0.7
+        )
+    else:
+        llm = get_llm(chairman_model, temperature=0.7)
 
     reviews_text = "\n\n".join([
         f"{r['reviewer']}:\n{r['evaluation']}" for r in peer_reviews
@@ -313,7 +342,7 @@ def chairman_synthesise(
         )),
     ]
 
-    response = llm.invoke(messages)
+    response = _invoke_with_retry(llm, messages)
     optimised = response.content.strip()
 
     # Fallback: if the model returned a label/reference instead of an actual prompt,
@@ -326,7 +355,7 @@ def chairman_synthesise(
         optimised = candidates_by_agent.get(winner_agent, candidate_a)
 
     chairman_info = {
-        "model": "gemma-3-1b-it",
+        "model": MODELS["chairman"],
         "rationale": f"Based on council consensus: {aggregate[0]['label']} ranked first with average rank {aggregate[0]['average_rank']}.",
     }
 

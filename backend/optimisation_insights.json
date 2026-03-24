@@ -1,0 +1,219 @@
+[
+    {
+        "timestamp": "2026-03-24T18:29:41.064797",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:32:28.001645",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:33:42.030547",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:36:03.292453",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:36:57.614401",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:42:38.745059",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:46:40.122609",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:49:52.830837",
+        "topic_domain": "healthcare",
+        "format_domain": "essay",
+        "winning_model": "Response X",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:49:54.960074",
+        "topic_domain": "healthcare",
+        "format_domain": "document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:51:19.366819",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:57:00.711489",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T18:59:29.694401",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:00:40.799238",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:00:42.026957",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:06:41.760870",
+        "topic_domain": "education",
+        "format_domain": "tutorial",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:06:44.221415",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:12:15.147301",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:12:15.149833",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:13:56.313793",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:13:56.333228",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:16:08.638772",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:16:20.833812",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:23:50.057561",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:24:44.262419",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:25:16.476058",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:25:18.423116",
+        "topic_domain": "education",
+        "format_domain": "guide",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:26:33.687134",
+        "topic_domain": "education",
+        "format_domain": "guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:26:35.939946",
+        "topic_domain": "education",
+        "format_domain": "guide",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:29:06.471710",
+        "topic_domain": "education",
+        "format_domain": "tutorial",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T19:29:08.617778",
+        "topic_domain": "education",
+        "format_domain": "tutorial | course | guide",
+        "winning_model": "Response Y",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T20:52:01.570046",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    }
+]

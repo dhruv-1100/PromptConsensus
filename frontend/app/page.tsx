@@ -236,15 +236,23 @@ function StageProcessing({
   const [agentStates, setAgentStates] = useState<string[]>(Array(7).fill("waiting"));
   const [started, setStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [agentModels, setAgentModels] = useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    fetch(`${API_URL}/api/config`)
+      .then(r => r.json())
+      .then(d => setAgentModels(d.models || {}))
+      .catch(() => {});
+  }, []);
 
   const agents = [
-    { code: "S1", name: "Intent Extractor", model: "gemma-3-1b-it", desc: "Parses domains, gaps, and constraints" },
-    { code: "S2A", name: "Autonomous Prompt Engineer A", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
-    { code: "S2B", name: "Autonomous Prompt Engineer B", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
-    { code: "S2C", name: "Autonomous Prompt Engineer C", model: "gemma-3-1b-it", desc: "Dynamic prompt optimization strategy" },
-    { code: "CE-A", name: "Cross-Examination: Agent A", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
-    { code: "CE-B", name: "Cross-Examination: Agent B", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
-    { code: "CE-C", name: "Cross-Examination: Agent C", model: "gemma-3-1b-it", desc: "Critiques opposing architectures" },
+    { code: "S1", name: "Intent Extractor", model: agentModels.intent_extractor || "loading...", desc: "Parses domains, gaps, and constraints" },
+    { code: "S2A", name: "Autonomous Prompt Engineer A", model: agentModels.rewriter_a || "loading...", desc: "Dynamic prompt optimization strategy" },
+    { code: "S2B", name: "Autonomous Prompt Engineer B", model: agentModels.rewriter_b || "loading...", desc: "Dynamic prompt optimization strategy" },
+    { code: "S2C", name: "Autonomous Prompt Engineer C", model: agentModels.rewriter_c || "loading...", desc: "Dynamic prompt optimization strategy" },
+    { code: "CE-A", name: "Cross-Examination: Agent A", model: agentModels.reviewer_a || "loading...", desc: "Critiques opposing architectures" },
+    { code: "CE-B", name: "Cross-Examination: Agent B", model: agentModels.reviewer_b || "loading...", desc: "Critiques opposing architectures" },
+    { code: "CE-C", name: "Cross-Examination: Agent C", model: agentModels.reviewer_c || "loading...", desc: "Critiques opposing architectures" },
   ];
 
   React.useEffect(() => {

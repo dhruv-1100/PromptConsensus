@@ -5,7 +5,8 @@ Rewrites the user's query by inserting explicit step-by-step reasoning scaffolds
 Uses Gemini.
 """
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
 DEMO_CANDIDATE_A = """{
@@ -32,10 +33,13 @@ def rewrite_chain_of_thought(raw_query: str, intent: dict, demo_mode: bool = Fal
     if demo_mode:
         return DEMO_CANDIDATE_A
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemma-3-1b-it",
+    from config import MODELS
+    llm = ChatOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+        model=MODELS["rewriter_a"],
         temperature=0.7,
-        google_api_key=os.environ.get("GOOGLE_API_KEY"),
+        max_tokens=1000,
     )
 
     context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
@@ -50,5 +54,14 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    response = llm.invoke(messages)
+    import time as _time
+    for _attempt in range(3):
+        try:
+            response = llm.invoke(messages)
+            break
+        except Exception as _e:
+            if '429' in str(_e) and _attempt < 2:
+                _time.sleep(2 ** (_attempt + 1))
+            else:
+                raise
     return response.content.strip()

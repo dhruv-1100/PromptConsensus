@@ -53,6 +53,11 @@ def health():
     return {"status": "ok", "service": "ConsensusPrompt"}
 
 
+@app.get("/api/config")
+def get_config():
+    from config import MODELS
+    return {"models": MODELS}
+
 @app.post("/api/optimize")
 def optimize(req: OptimizeRequest):
     """
