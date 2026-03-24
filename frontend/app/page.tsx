@@ -429,8 +429,8 @@ function StageCouncil({
           <div
             key={i}
             className={`council-card ${i === activeReview ? "council-card-active" : ""}`}
-            onClick={() => setActiveReview(i)}
-            style={{ animationDelay: `${i * 0.1}s` }}
+            onClick={() => setActiveReview(activeReview === i ? -1 : i)}
+            style={{ animationDelay: `${i * 0.1}s`, cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
           >
             <div className="council-card-header">
               <span className="council-card-title">{review.reviewer}</span>
@@ -444,26 +444,32 @@ function StageCouncil({
                 </div>
               ))}
             </div>
+
+            {/* Accordion Expansion */}
+            {activeReview === i && (
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16, animation: "fadeIn 0.2s" }}>
+                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 8, fontWeight: 500, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>FULL EVALUATION</span>
+                  <span style={{ color: "var(--terracotta)", background: "var(--bg-surface)", padding: "4px 8px", borderRadius: 4 }}>
+                    Top Pick: {review.parsed_ranking[0]} = {label_map[review.parsed_ranking[0]] || review.parsed_ranking[0]}
+                  </span>
+                </div>
+                <div style={{
+                  fontFamily: "var(--mono)", fontSize: 12, lineHeight: 1.6,
+                  color: "var(--text-secondary)", whiteSpace: "pre-wrap",
+                  background: "var(--bg-elevated)", padding: 12, borderRadius: 6
+                }}>
+                  {review.evaluation}
+                </div>
+              </div>
+            )}
+            
+            <div style={{ textAlign: "center", marginTop: "auto", paddingTop: 12, color: "var(--text-secondary)", fontSize: 16 }}>
+              <span style={{ transition: "transform 0.2s", display: "inline-block", transform: activeReview === i ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+            </div>
           </div>
         ))}
       </div>
-
-      {/* Selected reviewer's full evaluation */}
-      {revealedReviewers > 0 && (
-        <div style={{ marginTop: 16, marginBottom: 28 }}>
-          <div className="section-label">
-            {peer_reviews[activeReview]?.reviewer} — Full Evaluation
-          </div>
-          <div style={{
-            fontFamily: "var(--mono)", fontSize: 12, lineHeight: 1.8,
-            color: "var(--text-secondary)", whiteSpace: "pre-wrap",
-            background: "var(--bg-surface)", border: "1px solid var(--border)",
-            borderRadius: "var(--radius)", padding: "16px 18px",
-          }}>
-            {peer_reviews[activeReview]?.evaluation}
-          </div>
-        </div>
-      )}
 
       {/* Agent candidates */}
       {revealedReviewers > 0 && (
