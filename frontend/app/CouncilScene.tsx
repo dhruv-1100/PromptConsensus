@@ -156,6 +156,18 @@ export default function CouncilScene({
 
       {/* HTML Layer */}
       <div className="flowchart-nodes">
+        <div className="flow-column-label" style={{ left: "16%", top: "10%" }}>
+          <span className="flow-column-kicker">Council Input</span>
+          <span className="flow-column-title">Reviewers</span>
+        </div>
+        <div className="flow-column-label" style={{ left: "50%", top: "10%" }}>
+          <span className="flow-column-kicker">Anonymous Prompt Set</span>
+          <span className="flow-column-title">Candidates</span>
+        </div>
+        <div className="flow-column-label flow-column-label-right" style={{ left: "84%", top: "10%" }}>
+          <span className="flow-column-kicker">Chairman Output</span>
+          <span className="flow-column-title">Consensus</span>
+        </div>
         
         {/* Reviewers Column (Left) */}
         {Y_POS.map((y, i) => {

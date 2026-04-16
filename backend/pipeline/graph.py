@@ -49,18 +49,22 @@ def run_pipeline(
         "domain": domain,
     }
 
-    def notify(stage: str, pct: int):
+    def notify(stage_key: str, message: str, pct: int):
         if progress_callback:
-            progress_callback(stage, pct)
+            progress_callback({
+                "stage": stage_key,
+                "message": message,
+                "progress": pct,
+            })
 
     # S1: Intent Extraction
-    notify("Extracting intent", 10)
+    notify("intent", "Extracting intent from query", 10)
     intent = extract_intent(raw_query, demo_mode=demo_mode)
     state["intent"] = intent
-    notify("Intent extracted", 25)
+    notify("intent_complete", "Intent extraction complete", 25)
 
     # S2: Parallel Agent Rewriting
-    notify("Rewriting with three strategies", 30)
+    notify("rewriters", "Rewriting with three parallel strategies", 30)
     try:
         loop = asyncio.get_event_loop()
         if loop.is_closed():
@@ -109,10 +113,10 @@ def run_pipeline(
     state["candidate_b"] = prompt_b
     state["candidate_c"] = prompt_c
     state["perspectives"] = {"Candidate A": persp_a, "Candidate B": persp_b, "Candidate C": persp_c}
-    notify("Rewriting complete", 60)
+    notify("rewriters_complete", "All rewriters finished", 60)
 
     # S3a + S3b: Council peer review + aggregate ranking
-    notify("Council peer review in progress", 65)
+    notify("review", "Council: anonymised peer review in progress", 65)
     reviews, aggregate, label_map = peer_review(
         raw_query=raw_query,
         candidate_a=prompt_a,
@@ -123,10 +127,10 @@ def run_pipeline(
     state["peer_reviews"] = reviews
     state["aggregate_rankings"] = aggregate
     state["label_map"] = label_map
-    notify("Council ranking complete", 85)
+    notify("review_complete", "Council review complete — aggregating rankings", 85)
 
     # S3c: Chairman synthesis
-    notify("Chairman synthesising final prompt", 88)
+    notify("chairman", "Chairman synthesising final prompt", 88)
     optimised_prompt, chairman_info = chairman_synthesise(
         raw_query=raw_query,
         candidate_a=prompt_a,
@@ -139,13 +143,14 @@ def run_pipeline(
     )
     state["chairman"] = chairman_info
     state["optimised_prompt"] = optimised_prompt
-    notify("Consensus reached", 100)
+    notify("complete", "Consensus reached", 100)
 
     # Analytics Logging
     try:
         if aggregate and len(aggregate) > 0:
             winning_label = aggregate[0].get("label", "Unknown") # 'Candidate A'
-            winning_perspective = state["perspectives"].get(winning_label, "Unknown")
+            winning_candidate = state["label_map"].get(winning_label, "Unknown")
+            winning_perspective = state["perspectives"].get(winning_candidate, "Unknown")
             
             entry = {
                 "timestamp": datetime.datetime.utcnow().isoformat(),
@@ -174,6 +179,25 @@ def execute_prompt(final_prompt: str, target_model: str = "gpt-4o", demo_mode: b
     S5: Execute the approved final prompt against the chosen target LLM.
     """
     if demo_mode:
+        prompt_lower = final_prompt.lower()
+        optimisation_signals = [
+            "step 1",
+            "template",
+            "constraints",
+            "follow-up",
+            "grade 8",
+            "hipaa",
+            "you are",
+            "##",
+            "| medication",
+        ]
+        is_optimised = sum(signal in prompt_lower for signal in optimisation_signals) >= 2 or len(final_prompt) > 220
+
+        if not is_optimised:
+            return """The patient was admitted for uncontrolled diabetes with high blood glucose and symptoms of polyuria and polydipsia. He improved after treatment with insulin and monitoring in the hospital.
+
+He is being discharged in stable condition on insulin therapy and metformin. He should follow up with endocrinology within two weeks and with primary care within one month. He was educated about checking glucose, taking insulin correctly, and returning for care if symptoms worsen."""
+
         return """## DISCHARGE SUMMARY
 
 **Primary Diagnosis:** Type 2 Diabetes Mellitus, Uncontrolled (E11.65)

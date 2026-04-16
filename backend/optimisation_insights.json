@@ -215,5 +215,103 @@
         "format_domain": "clinical document",
         "winning_model": "Response Z",
         "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T22:19:06.862750",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-24T22:19:44.081009",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-25T02:28:51.252606",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-25T02:56:48.451914",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-03-25T03:21:58.180064",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Unknown"
+    },
+    {
+        "timestamp": "2026-04-16T22:51:15.650798",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T22:51:15.657721",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T22:53:13.858619",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T22:53:13.864877",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T22:56:34.567333",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T23:09:34.707476",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T23:13:47.339772",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T23:19:51.502531",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-16T23:37:20.260303",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
     }
 ]

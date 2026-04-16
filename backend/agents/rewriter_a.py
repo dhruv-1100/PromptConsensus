@@ -54,14 +54,5 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    import time as _time
-    for _attempt in range(3):
-        try:
-            response = llm.invoke(messages)
-            break
-        except Exception as _e:
-            if '429' in str(_e) and _attempt < 2:
-                _time.sleep(2 ** (_attempt + 1))
-            else:
-                raise
+    response = llm.invoke(messages)
     return response.content.strip()

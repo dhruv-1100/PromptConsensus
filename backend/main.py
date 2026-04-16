@@ -3,10 +3,16 @@ main.py — ConsensusPrompt FastAPI Backend
 Exposes the multi-agent prompt optimisation pipeline as REST endpoints.
 """
 import os
+import json
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from feedback_memory import append_feedback_entry
+from session_store import append_session_entry, list_sessions, export_sessions_csv, get_session_analytics
+from safety_checks import run_safety_checks
 
 load_dotenv()
 
@@ -38,12 +44,55 @@ class ExecuteRequest(BaseModel):
     target_model: str = "gpt-4o"
     demo_mode: bool = True
 
+class SafetyCheckRequest(BaseModel):
+    final_prompt: str
+    domain: str = "general"
+    raw_query: str = ""
+    intent: dict = {}
+
 class FeedbackRequest(BaseModel):
     quality: int
     improvement: int
     trust: int
     control: int
     text: str = ""
+    raw_query: str = ""
+    domain: str = "general"
+    optimised_prompt: str = ""
+    final_prompt: str = ""
+    llm_response: str = ""
+    baseline_response: str = ""
+    target_model: str = ""
+    chairman_model: str = ""
+    compare_mode: bool = False
+    safety_report: dict = {}
+    safety_acknowledged: bool = False
+    intent: dict = {}
+    candidate_a: str = ""
+    candidate_b: str = ""
+    candidate_c: str = ""
+    peer_reviews: list = []
+    aggregate_rankings: list = []
+    label_map: dict = {}
+    perspectives: dict = {}
+    chairman: dict = {}
+
+
+def format_pipeline_response(state: dict) -> dict:
+    """Normalize pipeline state for frontend consumption."""
+    return {
+        "raw_query": state.get("raw_query", ""),
+        "intent": state.get("intent", {}),
+        "candidate_a": state.get("candidate_a", ""),
+        "candidate_b": state.get("candidate_b", ""),
+        "candidate_c": state.get("candidate_c", ""),
+        "peer_reviews": state.get("peer_reviews", []),
+        "aggregate_rankings": state.get("aggregate_rankings", []),
+        "label_map": state.get("label_map", {}),
+        "chairman": state.get("chairman", {}),
+        "perspectives": state.get("perspectives", {}),
+        "optimised_prompt": state.get("optimised_prompt", ""),
+    }
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -73,19 +122,63 @@ def optimize(req: OptimizeRequest):
         demo_mode=req.demo_mode,
     )
 
-    return {
-        "raw_query": state.get("raw_query", ""),
-        "intent": state.get("intent", {}),
-        "candidate_a": state.get("candidate_a", ""),
-        "candidate_b": state.get("candidate_b", ""),
-        "candidate_c": state.get("candidate_c", ""),
-        "peer_reviews": state.get("peer_reviews", []),
-        "aggregate_rankings": state.get("aggregate_rankings", []),
-        "label_map": state.get("label_map", {}),
-        "chairman": state.get("chairman", {}),
-        "perspectives": state.get("perspectives", {}),
-        "optimised_prompt": state.get("optimised_prompt", ""),
-    }
+    return format_pipeline_response(state)
+
+
+@app.post("/api/optimize/stream")
+async def optimize_stream(req: OptimizeRequest):
+    """
+    Run the full pipeline and stream progress events to the frontend.
+    """
+    from pipeline.graph import run_pipeline
+
+    async def event_generator():
+        queue: asyncio.Queue = asyncio.Queue()
+        loop = asyncio.get_running_loop()
+
+        def progress_callback(event: dict):
+            loop.call_soon_threadsafe(queue.put_nowait, {"type": "progress", **event})
+
+        async def run_and_publish():
+            try:
+                state = await asyncio.to_thread(
+                    run_pipeline,
+                    req.raw_query,
+                    req.domain,
+                    req.demo_mode,
+                    progress_callback,
+                )
+                loop.call_soon_threadsafe(
+                    queue.put_nowait,
+                    {"type": "result", "data": format_pipeline_response(state)},
+                )
+            except Exception as exc:
+                loop.call_soon_threadsafe(
+                    queue.put_nowait,
+                    {"type": "error", "message": str(exc)},
+                )
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, {"type": "done"})
+
+        task = asyncio.create_task(run_and_publish())
+        yield f"data: {json.dumps({'type': 'start', 'message': 'Connecting to backend', 'progress': 2})}\n\n"
+
+        while True:
+            event = await queue.get()
+            if event.get("type") == "done":
+                break
+            yield f"data: {json.dumps(event)}\n\n"
+
+        await task
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 @app.post("/api/execute")
@@ -105,42 +198,94 @@ def execute(req: ExecuteRequest):
     return {"response": response}
 
 
+@app.post("/api/safety-check")
+def safety_check(req: SafetyCheckRequest):
+    """
+    Run lightweight pre-execution safety checks for sensitive domains.
+    """
+    return run_safety_checks(
+        final_prompt=req.final_prompt,
+        domain=req.domain,
+        raw_query=req.raw_query,
+        intent=req.intent,
+    )
+
+
 @app.post("/api/feedback")
 def feedback(req: FeedbackRequest):
     """
-    Record user feedback to a local JSON file.
+    Record user feedback and session context to a local JSON file.
     """
-    import json
-    import os
-    from datetime import datetime
-
-    feedback_file = "feedback.json"
-    
-    entry = {
-        "timestamp": datetime.utcnow().isoformat(),
+    feedback_entry = {
         "quality": req.quality,
         "improvement": req.improvement,
         "trust": req.trust,
         "control": req.control,
         "text": req.text,
+        "raw_query": req.raw_query,
+        "domain": req.domain,
+        "optimised_prompt": req.optimised_prompt,
+        "final_prompt": req.final_prompt,
+        "llm_response": req.llm_response,
+        "baseline_response": req.baseline_response,
+        "target_model": req.target_model,
+        "chairman_model": req.chairman_model,
+        "compare_mode": req.compare_mode,
+        "safety_report": req.safety_report,
+        "safety_acknowledged": req.safety_acknowledged,
     }
-
-    data = []
-    if os.path.exists(feedback_file):
-        try:
-            with open(feedback_file, "r") as f:
-                data = json.load(f)
-        except Exception:
-            pass
-            
-    data.append(entry)
-    with open(feedback_file, "w") as f:
-        json.dump(data, f, indent=4)
+    entry = append_feedback_entry(feedback_entry)
+    session_entry = append_session_entry({
+        **feedback_entry,
+        "intent": req.intent,
+        "candidate_a": req.candidate_a,
+        "candidate_b": req.candidate_b,
+        "candidate_c": req.candidate_c,
+        "peer_reviews": req.peer_reviews,
+        "aggregate_rankings": req.aggregate_rankings,
+        "label_map": req.label_map,
+        "perspectives": req.perspectives,
+        "chairman": req.chairman,
+    })
 
     return {
         "status": "recorded_to_json",
         "ratings": entry,
+        "session_id": session_entry["session_id"],
     }
+
+
+@app.get("/api/sessions")
+def sessions():
+    """Return recent stored sessions for inspection."""
+    return {"sessions": list_sessions()}
+
+
+@app.get("/api/sessions/analytics")
+def session_analytics():
+    """Return summary metrics for the homepage analytics panel."""
+    return get_session_analytics()
+
+
+@app.get("/api/sessions/export/json")
+def export_sessions_json():
+    """Download all stored sessions as JSON."""
+    payload = json.dumps(list_sessions(), indent=2, ensure_ascii=True)
+    return Response(
+        content=payload,
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="consensusprompt-sessions.json"'},
+    )
+
+
+@app.get("/api/sessions/export/csv")
+def export_sessions_csv_route():
+    """Download flattened study sessions as CSV."""
+    return Response(
+        content=export_sessions_csv(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="consensusprompt-sessions.csv"'},
+    )
 
 
 if __name__ == "__main__":

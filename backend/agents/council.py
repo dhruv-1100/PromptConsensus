@@ -13,6 +13,7 @@ import re
 import asyncio
 from typing import List, Dict, Any, Tuple
 from langchain_core.messages import HumanMessage, SystemMessage
+from feedback_memory import build_chairman_feedback_context
 
 # ── Demo fixtures ──────────────────────────────────────────────────────────────
 
@@ -133,49 +134,24 @@ Do not add text after the ranking."""
 
 CHAIRMAN_SYSTEM = """You are the chairman of a prompt-evaluation council. Based on peer reviews and aggregate rankings, synthesise the single best prompt by combining the strongest elements from all candidates.
 
+When human preference memory is provided, treat it as evidence about which prompt traits people trusted, approved, or edited toward in prior sessions. Prefer those traits when they fit the current task.
+
 Return ONLY the synthesised prompt, with no preamble or explanation."""
 
 
 # ── Core functions ─────────────────────────────────────────────────────────────
 
 def get_llm(model_name: str, temperature: float = 0.0):
-    """Return a LangChain chat model for the given hint.
-    Includes retry-with-backoff for transient 429 rate limits."""
+    """Return a LangChain chat model for the given hint."""
     import os
-    import time
     from langchain_openai import ChatOpenAI
-
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            llm = ChatOpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
-                model=model_name,
-                temperature=temperature,
-                max_tokens=1000
-            )
-            return llm
-        except Exception:
-            if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
-            else:
-                raise
-
-
-def _invoke_with_retry(llm, messages, max_retries=3):
-    """Invoke an LLM with retry-on-429 backoff."""
-    import time
-    for attempt in range(max_retries):
-        try:
-            return llm.invoke(messages)
-        except Exception as e:
-            if '429' in str(e) and attempt < max_retries - 1:
-                wait = 2 ** (attempt + 1)
-                print(f"[Retry] 429 rate limit hit, waiting {wait}s before retry {attempt + 2}/{max_retries}...")
-                time.sleep(wait)
-            else:
-                raise
+    return ChatOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+        model=model_name,
+        temperature=temperature,
+        max_tokens=1000
+    )
 
 
 def _parse_ranking(text: str) -> List[str]:
@@ -215,7 +191,7 @@ def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, ano
     messages = [
         HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
-    response = _invoke_with_retry(llm, messages)
+    response = llm.invoke(messages)
     text = response.content.strip()
     return {
         "reviewer": reviewer_name,
@@ -306,20 +282,10 @@ def chairman_synthesise(
         return DEMO_OPTIMISED, DEMO_CHAIRMAN
 
     from config import MODELS
-    # Chairman uses gemma-3-1b-it via native Google AI Studio API
-    chairman_model = MODELS["chairman"]
-    if chairman_model.startswith("gemini") or "gemma" in chairman_model.lower():
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        model_id = chairman_model
-        if "gemma" in model_id.lower() and not model_id.startswith("models/"):
-            model_id = f"models/{model_id}"
-        llm = ChatGoogleGenerativeAI(
-            model=model_id,
-            google_api_key=os.getenv("GOOGLE_API_KEY"),
-            temperature=0.7
-        )
-    else:
-        llm = get_llm(chairman_model, temperature=0.7)
+    # Chairman uses a high-competency model like DeepSeek to synthesise
+    # Removed specific handling for gemini/gemma to default to OpenRouter via get_llm
+    llm = get_llm(MODELS["chairman"], temperature=0.7)
+    feedback_memory = build_chairman_feedback_context()
 
     reviews_text = "\n\n".join([
         f"{r['reviewer']}:\n{r['evaluation']}" for r in peer_reviews
@@ -332,6 +298,8 @@ def chairman_synthesise(
     messages = [
         HumanMessage(content=(
             f"{CHAIRMAN_SYSTEM}\n\n"
+            f"{feedback_memory}\n\n" if feedback_memory else f"{CHAIRMAN_SYSTEM}\n\n"
+        ) + (
             f"Original query: {raw_query}\n\n"
             f"Candidate A (Chain-of-Thought):\n{candidate_a}\n\n"
             f"Candidate B (Role-Assignment):\n{candidate_b}\n\n"
@@ -342,7 +310,7 @@ def chairman_synthesise(
         )),
     ]
 
-    response = _invoke_with_retry(llm, messages)
+    response = llm.invoke(messages)
     optimised = response.content.strip()
 
     # Fallback: if the model returned a label/reference instead of an actual prompt,

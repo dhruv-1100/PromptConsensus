@@ -65,19 +65,7 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
         HumanMessage(content=f"{SYSTEM_PROMPT}\n\nAnalyse this query:\n\n{raw_query}"),
     ]
 
-    import time as _time
-    import random as _random
-    for _attempt in range(5):
-        try:
-            response = llm.invoke(messages)
-            break
-        except Exception as _e:
-            if '429' in str(_e) and _attempt < 4:
-                _wait = 15 + _random.uniform(1, 5) * _attempt
-                print(f"[Intent] 429 limit, waiting {round(_wait, 1)}s...")
-                _time.sleep(_wait)
-            else:
-                raise
+    response = llm.invoke(messages)
     content = response.content.strip()
 
     # Strip markdown code fences if present

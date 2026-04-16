@@ -1,0 +1,309 @@
+[
+  {
+    "session_id": "e2405333-a645-4fa0-85fe-73c0a216e1b3",
+    "timestamp": "2026-04-16T22:59:22.261599+00:00",
+    "quality": 4,
+    "improvement": 5,
+    "trust": 4,
+    "control": 5,
+    "text": "demo session export test",
+    "raw_query": "Help me write a discharge summary for a diabetic patient",
+    "domain": "healthcare",
+    "optimised_prompt": "You are a board-certified internist. Use a discharge summary template.",
+    "final_prompt": "You are a board-certified internist. Use a discharge summary template.",
+    "llm_response": "Optimised output",
+    "baseline_response": "Baseline output",
+    "target_model": "gpt-4o",
+    "chairman_model": "gemma-3-1b-it",
+    "compare_mode": true,
+    "intent": {
+      "topic_domain": "healthcare"
+    },
+    "candidate_a": "A",
+    "candidate_b": "B",
+    "candidate_c": "C",
+    "peer_reviews": [],
+    "aggregate_rankings": [
+      {
+        "label": "Response Z",
+        "candidate": "C",
+        "average_rank": 1.0
+      }
+    ],
+    "label_map": {
+      "Response Z": "Candidate C"
+    },
+    "perspectives": {
+      "Candidate C": "Structured Domain Templates"
+    },
+    "chairman": {
+      "model": "gemma-3-1b-it",
+      "rationale": "demo"
+    }
+  },
+  {
+    "session_id": "f92e7b71-7613-4359-a8e1-872a4001c5c9",
+    "timestamp": "2026-04-16T23:10:07.804725+00:00",
+    "quality": 4,
+    "improvement": 4,
+    "trust": 4,
+    "control": 5,
+    "text": "",
+    "raw_query": "Help me write a discharge summary for a diabetic patient who was admitted for hyperglycaemia",
+    "domain": "healthcare",
+    "optimised_prompt": "You are a board-certified internist completing a clinical discharge summary. Work through the following steps systematically, then populate the required template.\n\n**STEP 1:** Identify the primary diagnosis, admission trigger, and key comorbidities.\n**STEP 2:** Chronologically trace the hospital course \u2014 interventions, medication changes, glucose trends.\n**STEP 3:** Confirm all discharge medications and reconcile with admission medications.\n**STEP 4:** Formulate specific, measurable follow-up instructions.\n\n**Then generate the discharge summary using this exact format:**\n\n## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** [ICD-10 + description]\n**Reason for Admission:** [2\u20133 sentences]\n**Hospital Course:** [Narrative with glucose trends, medication adjustments, patient education]\n**Discharge Condition:** Stable / Improved / Guarded\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Frequency | Notes |\n|----------------------------|------|-----------|-------|\n| [Entry] | | | Flag if high-risk |\n\n**Follow-Up:**\n- Endocrinology: within 2 weeks\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80\u2013130 mg/dL fasting\n\n**Constraints:** HIPAA compliant language; patient instructions at Grade 8 reading level; flag high-risk medications.",
+    "final_prompt": "You are a board-certified internist completing a clinical discharge summary. Work through the following steps systematically, then populate the required template.\n\n**STEP 1:** Identify the primary diagnosis, admission trigger, and key comorbidities.\n**STEP 2:** Chronologically trace the hospital course \u2014 interventions, medication changes, glucose trends.\n**STEP 3:** Confirm all discharge medications and reconcile with admission medications.\n**STEP 4:** Formulate specific, measurable follow-up instructions.\n\n**Then generate the discharge summary using this exact format:**\n\n## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** [ICD-10 + description]\n**Reason for Admission:** [2\u20133 sentences]\n**Hospital Course:** [Narrative with glucose trends, medication adjustments, patient education]\n**Discharge Condition:** Stable / Improved / Guarded\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Frequency | Notes |\n|----------------------------|------|-----------|-------|\n| [Entry] | | | Flag if high-risk |\n\n**Follow-Up:**\n- Endocrinology: within 2 weeks\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80\u2013130 mg/dL fasting\n\n**Constraints:** HIPAA compliant language; patient instructions at Grade 8 reading level; flag high-risk medications.",
+    "llm_response": "## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** Type 2 Diabetes Mellitus, Uncontrolled (E11.65)\n**Reason for Admission:** 58-year-old male presented with hyperglycaemia (blood glucose 387 mg/dL), polyuria, and polydipsia x 3 days. HbA1c found to be 9.4% on admission labs.\n\n**Hospital Course:** Patient was admitted and started on an insulin drip with hourly glucose monitoring. Blood glucose normalised to 140-180 mg/dL range within 14 hours. Transitioned to basal-bolus insulin regimen (Glargine 20 units at bedtime; Lispro 6 units with meals). Certified Diabetes Educator conducted two sessions covering self-monitoring of blood glucose, insulin administration technique, carbohydrate counting, and sick-day management. Renal function monitored throughout; Metformin held during admission.\n\n**Discharge Condition:** Stable, Improved\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Route | Frequency | Notes |\n|---|---|---|---|---|\n| Insulin glargine (Lantus) | 20 units | Subcutaneous | At bedtime | High-risk |\n| Insulin lispro (Humalog) | 6 units | Subcutaneous | With each meal | High-risk |\n| Metformin (Glucophage) | 1000 mg | Oral | Twice daily | Resume at discharge |\n\n**Follow-Up Instructions:**\n- Endocrinology: within 10-14 days -- bring glucose log\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80-130 mg/dL before meals; below 180 mg/dL 2 hours after meals\n- **Return to Emergency Department if:** blood glucose exceeds 300 mg/dL, or patient experiences chest pain, severe abdominal pain, or fruity breath\n\n**Patient Education Provided:** Insulin self-administration, Glucose monitoring technique, Carbohydrate counting, Sick-day management rules, Signs of hypoglycaemia/hyperglycaemia\n\n---\n*Discharge summary generated with ConsensusPrompt*",
+    "baseline_response": "The patient was admitted for uncontrolled diabetes with high blood glucose and symptoms of polyuria and polydipsia. He improved after treatment with insulin and monitoring in the hospital.\n\nHe is being discharged in stable condition on insulin therapy and metformin. He should follow up with endocrinology within two weeks and with primary care within one month. He was educated about checking glucose, taking insulin correctly, and returning for care if symptoms worsen.",
+    "target_model": "gpt-4o",
+    "chairman_model": "claude-3-5-sonnet",
+    "compare_mode": true,
+    "intent": {
+      "intent": "Generate a professional clinical discharge summary for a diabetic patient",
+      "topic_domain": "healthcare",
+      "format_domain": "clinical document",
+      "missing_info": [
+        "Patient's age and comorbidities",
+        "Medications at time of discharge",
+        "Follow-up instructions"
+      ],
+      "constraints": [
+        "Must comply with HIPAA language guidelines",
+        "Should be concise yet comprehensive",
+        "Avoid technical jargon where possible"
+      ],
+      "query_quality": "moderate"
+    },
+    "candidate_a": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\n\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\n2. Document all interventions performed during the stay\n3. Record the patient's response to treatment\n4. List all discharge medications with dosage\n5. Provide follow-up instructions\n\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
+    "candidate_b": "You are Dr. Sarah Chen, a board-certified endocrinologist. Here is an example discharge summary:\n\nPatient: [Name], 58 y/o male\nDiagnosis: Type 2 Diabetes Mellitus, uncontrolled\nHospital Course: Insulin drip initiated, transitioned to basal-bolus.\nDischarge Medications: Glargine 20 units\nFollow-up: Endocrinology in 10-14 days\n\nNow, using this expert voice, please write a comprehensive clinical discharge summary for a diabetic patient.",
+    "candidate_c": "Generate a clinical discharge summary. Use this template:\n## DISCHARGE SUMMARY\n**Patient:** [Age/Sex]\n**Reason for Admission:** [Narrative]\n**Discharge Medications:** [Table with columns: Medication | Dose | Route]\n**Constraints:** HIPAA compliant, 8th-grade reading level.",
+    "peer_reviews": [
+      {
+        "reviewer": "Autonomous Engineer A",
+        "model": "gpt-4o",
+        "evaluation": "Response X provides strong step-by-step reasoning scaffolds that guide the model through each section of the discharge summary. However, it lacks explicit output format constraints and does not address HIPAA compliance.\n\nResponse Y assigns a relevant expert persona (board-certified internist) and offers few-shot context, but the reasoning is less structured and could lead to a more free-form response that misses sections.\n\nResponse Z combines structured output requirements with domain constraints (HIPAA, reading level) and step-by-step guidance. It is the most complete, though slightly verbose.\n\nFINAL RANKING:\n1. Response Z\n2. Response X\n3. Response Y",
+        "parsed_ranking": [
+          "Response Z",
+          "Response X",
+          "Response Y"
+        ]
+      },
+      {
+        "reviewer": "Autonomous Engineer B",
+        "model": "claude-3-5-sonnet",
+        "evaluation": "Response X excels at breaking down the task into numbered steps, ensuring no section is missed. The instruction to 'complete each section before proceeding' is effective for structured output. Weakness: no output format template.\n\nResponse Y effectively uses role-assignment (board-certified internist) which grounds the model in clinical expertise. However, the prompt is more open-ended and may produce inconsistent formatting.\n\nResponse Z provides a complete template with table format for medications and explicit constraints (HIPAA, Grade 8 reading level). Combined with step-by-step reasoning, this is the most production-ready prompt.\n\nFINAL RANKING:\n1. Response Z\n2. Response X\n3. Response Y",
+        "parsed_ranking": [
+          "Response Z",
+          "Response X",
+          "Response Y"
+        ]
+      },
+      {
+        "reviewer": "Autonomous Engineer C",
+        "model": "gpt-4o",
+        "evaluation": "Response X: Strong reasoning scaffolds with clear step numbers. Good for ensuring completeness. Lacks format specification \u2014 the model might choose its own layout.\n\nResponse Y: The persona assignment adds domain authority, and the few-shot framing is useful. But without explicit output structure, the result could vary across runs.\n\nResponse Z: Best balance of structure, domain constraints, and reasoning guidance. The medication table template and compliance requirements make it immediately usable in a clinical context. Step-by-step reasoning ensures thoroughness.\n\nFINAL RANKING:\n1. Response Z\n2. Response Y\n3. Response X",
+        "parsed_ranking": [
+          "Response Z",
+          "Response Y",
+          "Response X"
+        ]
+      }
+    ],
+    "aggregate_rankings": [
+      {
+        "label": "Response Z",
+        "candidate": "C",
+        "average_rank": 1,
+        "votes": 3,
+        "ranks": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "label": "Response X",
+        "candidate": "A",
+        "average_rank": 2,
+        "votes": 3,
+        "ranks": [
+          2,
+          2,
+          3
+        ]
+      },
+      {
+        "label": "Response Y",
+        "candidate": "B",
+        "average_rank": 2.67,
+        "votes": 3,
+        "ranks": [
+          3,
+          3,
+          2
+        ]
+      }
+    ],
+    "label_map": {
+      "Response X": "Candidate A",
+      "Response Y": "Candidate B",
+      "Response Z": "Candidate C"
+    },
+    "perspectives": {
+      "Candidate A": "Chain-of-Thought Heuristics",
+      "Candidate B": "Few-Shot Persona Contextualization",
+      "Candidate C": "Rigid Formatting Constraints"
+    },
+    "chairman": {
+      "model": "claude-3-5-sonnet",
+      "rationale": "All three reviewers ranked the structured-template candidate first, citing its complete output format, domain compliance constraints, and combined step-by-step guidance. The synthesis below merges the structural rigor of that candidate with the explicit reasoning scaffolds from the chain-of-thought candidate."
+    }
+  },
+  {
+    "session_id": "3affd124-3bb9-413f-9702-2eea8bc79027",
+    "timestamp": "2026-04-16T23:37:59.027474+00:00",
+    "quality": 5,
+    "improvement": 5,
+    "trust": 5,
+    "control": 5,
+    "text": "",
+    "raw_query": "Help me write a discharge summary for a diabetic patient who was admitted for hyperglycaemia",
+    "domain": "healthcare",
+    "optimised_prompt": "You are a board-certified internist completing a clinical discharge summary. Work through the following steps systematically, then populate the required template.\n\n**STEP 1:** Identify the primary diagnosis, admission trigger, and key comorbidities.\n**STEP 2:** Chronologically trace the hospital course \u2014 interventions, medication changes, glucose trends.\n**STEP 3:** Confirm all discharge medications and reconcile with admission medications.\n**STEP 4:** Formulate specific, measurable follow-up instructions.\n\n**Then generate the discharge summary using this exact format:**\n\n## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** [ICD-10 + description]\n**Reason for Admission:** [2\u20133 sentences]\n**Hospital Course:** [Narrative with glucose trends, medication adjustments, patient education]\n**Discharge Condition:** Stable / Improved / Guarded\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Frequency | Notes |\n|----------------------------|------|-----------|-------|\n| [Entry] | | | Flag if high-risk |\n\n**Follow-Up:**\n- Endocrinology: within 2 weeks\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80\u2013130 mg/dL fasting\n\n**Constraints:** HIPAA compliant language; patient instructions at Grade 8 reading level; flag high-risk medications.",
+    "final_prompt": "You are a board-certified internist completing a clinical discharge summary. Work through the following steps systematically, then populate the required template.\n\n**STEP 1:** Identify the primary diagnosis, admission trigger, and key comorbidities.\n**STEP 2:** Chronologically trace the hospital course \u2014 interventions, medication changes, glucose trends.\n**STEP 3:** Confirm all discharge medications and reconcile with admission medications.\n**STEP 4:** Formulate specific, measurable follow-up instructions.\n\n**Then generate the discharge summary using this exact format:**\n\n## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** [ICD-10 + description]\n**Reason for Admission:** [2\u20133 sentences]\n**Hospital Course:** [Narrative with glucose trends, medication adjustments, patient education]\n**Discharge Condition:** Stable / Improved / Guarded\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Frequency | Notes |\n|----------------------------|------|-----------|-------|\n| [Entry] | | | Flag if high-risk |\n\n**Follow-Up:**\n- Endocrinology: within 2 weeks\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80\u2013130 mg/dL fasting\n\n**Constraints:** HIPAA compliant language; patient instructions at Grade 8 reading level; flag high-risk medications.",
+    "llm_response": "## DISCHARGE SUMMARY\n\n**Primary Diagnosis:** Type 2 Diabetes Mellitus, Uncontrolled (E11.65)\n**Reason for Admission:** 58-year-old male presented with hyperglycaemia (blood glucose 387 mg/dL), polyuria, and polydipsia x 3 days. HbA1c found to be 9.4% on admission labs.\n\n**Hospital Course:** Patient was admitted and started on an insulin drip with hourly glucose monitoring. Blood glucose normalised to 140-180 mg/dL range within 14 hours. Transitioned to basal-bolus insulin regimen (Glargine 20 units at bedtime; Lispro 6 units with meals). Certified Diabetes Educator conducted two sessions covering self-monitoring of blood glucose, insulin administration technique, carbohydrate counting, and sick-day management. Renal function monitored throughout; Metformin held during admission.\n\n**Discharge Condition:** Stable, Improved\n\n**Medications at Discharge:**\n| Medication (Generic/Brand) | Dose | Route | Frequency | Notes |\n|---|---|---|---|---|\n| Insulin glargine (Lantus) | 20 units | Subcutaneous | At bedtime | High-risk |\n| Insulin lispro (Humalog) | 6 units | Subcutaneous | With each meal | High-risk |\n| Metformin (Glucophage) | 1000 mg | Oral | Twice daily | Resume at discharge |\n\n**Follow-Up Instructions:**\n- Endocrinology: within 10-14 days -- bring glucose log\n- Primary Care: within 4 weeks\n- Daily glucose targets: 80-130 mg/dL before meals; below 180 mg/dL 2 hours after meals\n- **Return to Emergency Department if:** blood glucose exceeds 300 mg/dL, or patient experiences chest pain, severe abdominal pain, or fruity breath\n\n**Patient Education Provided:** Insulin self-administration, Glucose monitoring technique, Carbohydrate counting, Sick-day management rules, Signs of hypoglycaemia/hyperglycaemia\n\n---\n*Discharge summary generated with ConsensusPrompt*",
+    "baseline_response": "The patient was admitted for uncontrolled diabetes with high blood glucose and symptoms of polyuria and polydipsia. He improved after treatment with insulin and monitoring in the hospital.\n\nHe is being discharged in stable condition on insulin therapy and metformin. He should follow up with endocrinology within two weeks and with primary care within one month. He was educated about checking glucose, taking insulin correctly, and returning for care if symptoms worsen.",
+    "target_model": "gpt-4o",
+    "chairman_model": "claude-3-5-sonnet",
+    "compare_mode": true,
+    "safety_report": {
+      "domain": "healthcare",
+      "sensitive_domain": true,
+      "risk_level": "high",
+      "requires_acknowledgement": true,
+      "checks": [
+        {
+          "severity": "low",
+          "title": "Upstream intent analysis found unresolved gaps",
+          "detail": "The intent extractor flagged missing information that may still affect response quality.",
+          "action": "Review these gaps before execution: Patient's age and comorbidities, Medications at time of discharge, Follow-up instructions."
+        },
+        {
+          "severity": "medium",
+          "title": "Clinical oversight is not made explicit",
+          "detail": "Healthcare prompts are safer when they instruct the model not to replace clinician judgment or professional review.",
+          "action": "Add a line requiring clinician review or clarifying that the output should not be treated as medical advice."
+        },
+        {
+          "severity": "high",
+          "title": "Medication content lacks verification guardrails",
+          "detail": "The prompt references medication-related content without telling the model how to handle unknown or unverified doses.",
+          "action": "Add a rule to use only provided medication facts and to mark unknown values instead of inventing them."
+        }
+      ],
+      "checked_prompt_length": 158,
+      "raw_query_length": 15
+    },
+    "safety_acknowledged": true,
+    "intent": {
+      "intent": "Generate a professional clinical discharge summary for a diabetic patient",
+      "topic_domain": "healthcare",
+      "format_domain": "clinical document",
+      "missing_info": [
+        "Patient's age and comorbidities",
+        "Medications at time of discharge",
+        "Follow-up instructions"
+      ],
+      "constraints": [
+        "Must comply with HIPAA language guidelines",
+        "Should be concise yet comprehensive",
+        "Avoid technical jargon where possible"
+      ],
+      "query_quality": "moderate"
+    },
+    "candidate_a": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\n\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\n2. Document all interventions performed during the stay\n3. Record the patient's response to treatment\n4. List all discharge medications with dosage\n5. Provide follow-up instructions\n\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
+    "candidate_b": "You are Dr. Sarah Chen, a board-certified endocrinologist. Here is an example discharge summary:\n\nPatient: [Name], 58 y/o male\nDiagnosis: Type 2 Diabetes Mellitus, uncontrolled\nHospital Course: Insulin drip initiated, transitioned to basal-bolus.\nDischarge Medications: Glargine 20 units\nFollow-up: Endocrinology in 10-14 days\n\nNow, using this expert voice, please write a comprehensive clinical discharge summary for a diabetic patient.",
+    "candidate_c": "Generate a clinical discharge summary. Use this template:\n## DISCHARGE SUMMARY\n**Patient:** [Age/Sex]\n**Reason for Admission:** [Narrative]\n**Discharge Medications:** [Table with columns: Medication | Dose | Route]\n**Constraints:** HIPAA compliant, 8th-grade reading level.",
+    "peer_reviews": [
+      {
+        "reviewer": "Autonomous Engineer A",
+        "model": "gpt-4o",
+        "evaluation": "Response X provides strong step-by-step reasoning scaffolds that guide the model through each section of the discharge summary. However, it lacks explicit output format constraints and does not address HIPAA compliance.\n\nResponse Y assigns a relevant expert persona (board-certified internist) and offers few-shot context, but the reasoning is less structured and could lead to a more free-form response that misses sections.\n\nResponse Z combines structured output requirements with domain constraints (HIPAA, reading level) and step-by-step guidance. It is the most complete, though slightly verbose.\n\nFINAL RANKING:\n1. Response Z\n2. Response X\n3. Response Y",
+        "parsed_ranking": [
+          "Response Z",
+          "Response X",
+          "Response Y"
+        ]
+      },
+      {
+        "reviewer": "Autonomous Engineer B",
+        "model": "claude-3-5-sonnet",
+        "evaluation": "Response X excels at breaking down the task into numbered steps, ensuring no section is missed. The instruction to 'complete each section before proceeding' is effective for structured output. Weakness: no output format template.\n\nResponse Y effectively uses role-assignment (board-certified internist) which grounds the model in clinical expertise. However, the prompt is more open-ended and may produce inconsistent formatting.\n\nResponse Z provides a complete template with table format for medications and explicit constraints (HIPAA, Grade 8 reading level). Combined with step-by-step reasoning, this is the most production-ready prompt.\n\nFINAL RANKING:\n1. Response Z\n2. Response X\n3. Response Y",
+        "parsed_ranking": [
+          "Response Z",
+          "Response X",
+          "Response Y"
+        ]
+      },
+      {
+        "reviewer": "Autonomous Engineer C",
+        "model": "gpt-4o",
+        "evaluation": "Response X: Strong reasoning scaffolds with clear step numbers. Good for ensuring completeness. Lacks format specification \u2014 the model might choose its own layout.\n\nResponse Y: The persona assignment adds domain authority, and the few-shot framing is useful. But without explicit output structure, the result could vary across runs.\n\nResponse Z: Best balance of structure, domain constraints, and reasoning guidance. The medication table template and compliance requirements make it immediately usable in a clinical context. Step-by-step reasoning ensures thoroughness.\n\nFINAL RANKING:\n1. Response Z\n2. Response Y\n3. Response X",
+        "parsed_ranking": [
+          "Response Z",
+          "Response Y",
+          "Response X"
+        ]
+      }
+    ],
+    "aggregate_rankings": [
+      {
+        "label": "Response Z",
+        "candidate": "C",
+        "average_rank": 1,
+        "votes": 3,
+        "ranks": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "label": "Response X",
+        "candidate": "A",
+        "average_rank": 2,
+        "votes": 3,
+        "ranks": [
+          2,
+          2,
+          3
+        ]
+      },
+      {
+        "label": "Response Y",
+        "candidate": "B",
+        "average_rank": 2.67,
+        "votes": 3,
+        "ranks": [
+          3,
+          3,
+          2
+        ]
+      }
+    ],
+    "label_map": {
+      "Response X": "Candidate A",
+      "Response Y": "Candidate B",
+      "Response Z": "Candidate C"
+    },
+    "perspectives": {
+      "Candidate A": "Chain-of-Thought Heuristics",
+      "Candidate B": "Few-Shot Persona Contextualization",
+      "Candidate C": "Rigid Formatting Constraints"
+    },
+    "chairman": {
+      "model": "claude-3-5-sonnet",
+      "rationale": "All three reviewers ranked the structured-template candidate first, citing its complete output format, domain compliance constraints, and combined step-by-step guidance. The synthesis below merges the structural rigor of that candidate with the explicit reasoning scaffolds from the chain-of-thought candidate."
+    }
+  }
+]
