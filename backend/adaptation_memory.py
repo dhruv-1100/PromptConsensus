@@ -23,7 +23,7 @@ def _read_sessions() -> List[Dict[str, Any]]:
         return []
 
 
-def build_adaptation_context(limit: int = 8) -> str:
+def build_adaptation_context(limit: int = 8, topic_domain: str | None = None) -> str:
     """
     Summarize recent acceptance vs override behavior so the chairman can learn
     what kinds of consensus humans tend to keep or correct.
@@ -32,13 +32,29 @@ def build_adaptation_context(limit: int = 8) -> str:
     if not sessions:
         return ""
 
+    normalized_domain = (topic_domain or "").strip().lower()
+
     accepted = 0
     refined = 0
     overrode = 0
     accepted_reasons: Dict[str, int] = {}
     override_reasons: Dict[str, int] = {}
 
-    for session in sessions[:limit]:
+    filtered_sessions: List[Dict[str, Any]] = []
+    for session in sessions:
+        session_domain = (
+            session.get("domain")
+            or (session.get("intent") or {}).get("topic_domain")
+            or "general"
+        )
+        session_domain = str(session_domain).strip().lower()
+        if normalized_domain and session_domain != normalized_domain:
+            continue
+        filtered_sessions.append(session)
+        if len(filtered_sessions) >= limit:
+            break
+
+    for session in filtered_sessions:
         insights = session.get("research_insights") or {}
         outcome = (insights.get("consensus_response") or "").strip().lower()
         labels = session.get("intervention_labels") or []
@@ -62,8 +78,9 @@ def build_adaptation_context(limit: int = 8) -> str:
         ordered = sorted(counts.items(), key=lambda item: item[1], reverse=True)[:3]
         return ", ".join(f"{label} ({count})" for label, count in ordered)
 
+    scope = f" for the '{normalized_domain}' domain" if normalized_domain else ""
     return (
-        "Human consensus adaptation memory:\n"
+        f"Human consensus adaptation memory{scope}:\n"
         f"- Accepted without override: {accepted}\n"
         f"- Accepted with refinement: {refined}\n"
         f"- Overrode consensus: {overrode}\n"

@@ -6,8 +6,8 @@ Uses Gemini as the backbone LLM for structured intent analysis.
 import json
 import os
 import os
-from langchain_core.messages import HumanMessage, SystemMessage
-from live_mode_utils import invoke_openrouter_with_fallback, parse_json_response, log_structured_parse_failure
+from langchain_core.messages import HumanMessage
+from live_mode_utils import invoke_openrouter_model, parse_json_response, log_structured_parse_failure
 
 # ---------------------------------------------------------------------------
 # Demo-mode fixtures (used when DEMO_MODE=True in Streamlit session state)
@@ -55,14 +55,17 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
     from config import MODELS
 
     messages = [
-        SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=f"Analyse this query and return only the JSON object:\n\n{raw_query}"),
+        HumanMessage(
+            content=(
+                f"{SYSTEM_PROMPT}\n\n"
+                f"Analyse this query and return only the JSON object:\n\n{raw_query}"
+            )
+        ),
     ]
 
-    content, model_name = invoke_openrouter_with_fallback(
+    content, model_name = invoke_openrouter_model(
         messages,
         MODELS["intent_extractor"],
-        allow_router=False,
         temperature=0.0,
         max_tokens=500,
     )

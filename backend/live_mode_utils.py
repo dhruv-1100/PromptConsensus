@@ -149,71 +149,33 @@ def extract_prompt_and_perspective(
     return content, default_perspective
 
 
-def _is_retryable_openrouter_error(exc: Exception) -> bool:
-    text = str(exc).lower()
-    return any(
-        marker in text
-        for marker in [
-            "429",
-            "rate-limit",
-            "rate limit",
-            "temporarily rate-limited",
-            "provider returned error",
-        ]
-    )
-
-
-def build_model_fallback_chain(preferred_model: str, *, allow_router: bool = False) -> list[str]:
-    from config import TARGET_MODELS
-
-    ordered = [preferred_model, *TARGET_MODELS]
-    seen: set[str] = set()
-    chain: list[str] = []
-    for model in ordered:
-        cleaned = (model or "").strip()
-        if cleaned == "openrouter/free" and not allow_router and cleaned != preferred_model:
-            continue
-        if cleaned and cleaned not in seen:
-            chain.append(cleaned)
-            seen.add(cleaned)
-    return chain
-
-
-def invoke_openrouter_with_fallback(
+def invoke_openrouter_model(
     messages: Sequence[Any],
-    preferred_model: str,
+    model_name: str,
     *,
-    allow_router: bool = False,
     temperature: float = 0.0,
     max_tokens: int = 1000,
 ) -> tuple[str, str]:
     from langchain_openai import ChatOpenAI
 
     api_key = require_openrouter_api_key()
-    errors: list[str] = []
+    resolved_model = (model_name or "").strip()
+    if not resolved_model:
+        raise RuntimeError("No OpenRouter model was configured for this pipeline step.")
 
-    for model_name in build_model_fallback_chain(preferred_model, allow_router=allow_router):
-        llm = ChatOpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=api_key,
-            model=model_name,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        try:
-            response = llm.invoke(list(messages))
-            content = coerce_message_content(response.content)
-            if not content.strip():
-                additional_kwargs = getattr(response, "additional_kwargs", {}) or {}
-                content = coerce_message_content(additional_kwargs)
-            return content.strip(), model_name
-        except Exception as exc:
-            if _is_retryable_openrouter_error(exc):
-                errors.append(f"{model_name}: {exc}")
-                continue
-            raise
-
-    raise RuntimeError(
-        "All configured free OpenRouter models failed. "
-        + " | ".join(errors[-4:])
+    llm = ChatOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+        model=resolved_model,
+        temperature=temperature,
+        max_tokens=max_tokens,
     )
+    try:
+        response = llm.invoke(list(messages))
+        content = coerce_message_content(response.content)
+        if not content.strip():
+            additional_kwargs = getattr(response, "additional_kwargs", {}) or {}
+            content = coerce_message_content(additional_kwargs)
+        return content.strip(), resolved_model
+    except Exception as exc:
+        raise RuntimeError(f"OpenRouter call failed for configured model '{resolved_model}': {exc}") from exc

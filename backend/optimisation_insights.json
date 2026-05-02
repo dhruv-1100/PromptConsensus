@@ -432,5 +432,33 @@
         "format_domain": "general",
         "winning_model": "Response Y",
         "perspective_used": "Structured Domain Templates"
+    },
+    {
+        "timestamp": "2026-05-02T03:40:30.641252",
+        "topic_domain": "research",
+        "format_domain": "essay",
+        "winning_model": "Response Y",
+        "perspective_used": "Decomposition and Ordered Steps: This prompt breaks down the complex task of summarizing a research paper into a series of smaller, manageable steps. Each step focuses on a specific aspect of the paper (finding extraction, methodology analysis, gap identification, synthesis), making the overall task less overwhelming and easier to execute. The ordered steps ensure a logical flow of analysis and a comprehensive summary."
+    },
+    {
+        "timestamp": "2026-05-02T04:06:34.826210",
+        "topic_domain": "research",
+        "format_domain": "essay",
+        "winning_model": "Response Y",
+        "perspective_used": "Decomposition and Structured Reasoning: This approach breaks down the complex task of summarizing a research paper into smaller, manageable steps. Each step includes a specific objective and a set of guiding questions, promoting a systematic and thorough analysis. The reasoning checkpoints ensure that critical evaluation is integrated throughout the process, leading to a more insightful and comprehensive summary."
+    },
+    {
+        "timestamp": "2026-05-02T04:16:25.801472",
+        "topic_domain": "research",
+        "format_domain": "essay",
+        "winning_model": "Response Z",
+        "perspective_used": "Chain-of-Thought Reasoning"
+    },
+    {
+        "timestamp": "2026-05-02T04:26:50.573110",
+        "topic_domain": "research",
+        "format_domain": "essay",
+        "winning_model": "Response X",
+        "perspective_used": "Decomposition and Structured Output. This approach breaks down the summarization task into distinct, manageable components (identifying findings, identifying gaps, and structuring the output).  This ensures a thorough and well-organized summary, addressing the core intent of the query while explicitly handling the need for both key findings and methodological limitations. The structured output (bullet points and paragraphs) directly addresses the implied need for a detailed, not just a brief, summary."
     }
 ]

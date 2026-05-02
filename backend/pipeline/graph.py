@@ -17,7 +17,7 @@ from agents.rewriter_a import rewrite_chain_of_thought
 from agents.rewriter_b import rewrite_role_assignment
 from agents.rewriter_c import rewrite_structured_template
 from agents.council import peer_review, chairman_synthesise
-from live_mode_utils import invoke_openrouter_with_fallback, extract_prompt_and_perspective
+from live_mode_utils import invoke_openrouter_model, extract_prompt_and_perspective
 
 load_dotenv()
 
@@ -61,12 +61,13 @@ def _validate_review_outputs(peer_reviews: list[dict]) -> None:
         reviewer = review.get("reviewer", "Unknown reviewer")
         evaluation = str(review.get("evaluation") or "").strip()
         ranking = review.get("parsed_ranking") or []
-        if not evaluation or len(ranking) == 0:
+        unique_ranking = list(dict.fromkeys(ranking))
+        if not evaluation or len(unique_ranking) != 3:
             incomplete.append(reviewer)
 
     if incomplete:
         raise RuntimeError(
-            "Review process failed because these reviewer roles did not return usable evaluations/rankings: "
+            "Review process failed because these reviewer roles did not return exactly three distinct ranked candidates: "
             + ", ".join(incomplete)
         )
 
@@ -165,6 +166,7 @@ def run_pipeline(
         peer_reviews=reviews,
         aggregate=aggregate,
         label_map=label_map,
+        topic_domain=intent.get("topic_domain", domain),
         demo_mode=demo_mode,
     )
     state["chairman"] = chairman_info
@@ -257,10 +259,9 @@ He is being discharged in stable condition on insulin therapy and metformin. He 
 
     load_dotenv()
 
-    content, _ = invoke_openrouter_with_fallback(
+    content, _ = invoke_openrouter_model(
         [HumanMessage(content=final_prompt)],
         target_model,
-        allow_router=True,
         temperature=0.7,
         max_tokens=1400,
     )

@@ -42,7 +42,7 @@ def append_feedback_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     return stored
 
 
-def build_chairman_feedback_context(limit: int = 3) -> str:
+def build_chairman_feedback_context(limit: int = 3, topic_domain: str | None = None) -> str:
     """
     Build a few-shot style memory block from recent high-signal sessions.
 
@@ -55,10 +55,21 @@ def build_chairman_feedback_context(limit: int = 3) -> str:
         return ""
 
     scored_entries = []
+    normalized_domain = (topic_domain or "").strip().lower()
+
     for entry in entries:
         optimised_prompt = (entry.get("optimised_prompt") or "").strip()
         final_prompt = (entry.get("final_prompt") or "").strip()
         if not optimised_prompt or not final_prompt:
+            continue
+
+        entry_domain = (
+            entry.get("domain")
+            or (entry.get("intent") or {}).get("topic_domain")
+            or "general"
+        )
+        entry_domain = str(entry_domain).strip().lower()
+        if normalized_domain and entry_domain != normalized_domain:
             continue
 
         quality = int(entry.get("quality", 0) or 0)
@@ -112,8 +123,9 @@ def build_chairman_feedback_context(limit: int = 3) -> str:
             parts.append(f"User comment: {comment}")
         examples.append("\n".join(parts))
 
+    scope = f" for the '{normalized_domain}' domain" if normalized_domain else ""
     return (
-        "Human preference memory from prior sessions. Use these examples to prefer "
+        f"Human preference memory from prior sessions{scope}. Use these examples to prefer "
         "prompt structures that users trusted, approved, or explicitly edited toward:\n\n"
         + "\n\n".join(examples)
     )

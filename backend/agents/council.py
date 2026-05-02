@@ -12,10 +12,10 @@ import os
 import re
 import asyncio
 from typing import List, Dict, Any, Tuple
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage
 from feedback_memory import build_chairman_feedback_context
 from adaptation_memory import build_adaptation_context
-from live_mode_utils import invoke_openrouter_with_fallback
+from live_mode_utils import invoke_openrouter_model
 
 # ── Demo fixtures ──────────────────────────────────────────────────────────────
 
@@ -140,6 +140,12 @@ When human preference memory is provided, treat it as evidence about which promp
 
 When adaptation memory is provided, treat it as evidence about when people accepted the council outcome versus overrode it. If a consensus pattern is frequently overridden, correct for it in the synthesis.
 
+Do not turn the synthesized prompt into a request for more user-supplied materials such as PDFs, URLs, DOIs, uploads, or external documents.
+
+Do not introduce strict brevity constraints, single-paragraph requirements, word limits, bullet-count limits, or compressed-summary instructions unless the user explicitly requested them.
+
+When the task involves summarization, prefer structured output with clear sections, headings, or bullets rather than a single paragraph.
+
 Return ONLY the synthesised prompt, with no preamble or explanation."""
 
 
@@ -147,12 +153,36 @@ Return ONLY the synthesised prompt, with no preamble or explanation."""
 
 def _parse_ranking(text: str) -> List[str]:
     """Extract FINAL RANKING section from review text."""
-    if "FINAL RANKING:" in text:
-        section = text.split("FINAL RANKING:")[1]
-        matches = re.findall(r'\d+\.\s*(Response [A-Z])', section)
-        if matches:
-            return matches
-    return re.findall(r'Response [A-Z]', text)
+    def dedupe_preserve_order(labels: List[str]) -> List[str]:
+        unique: List[str] = []
+        seen: set[str] = set()
+        for label in labels:
+            if label not in seen:
+                unique.append(label)
+                seen.add(label)
+        return unique
+
+    numbered_pattern = re.compile(
+        r"(?im)^\s*(?:[#*\-]\s*)?(\d+)\s*[\.\):\-]?\s*(Response [A-Z])\b"
+    )
+    final_ranking_match = re.search(r"(?is)\bfinal\s+ranking\b\s*:?\s*(.+)$", text)
+    if final_ranking_match:
+        section = final_ranking_match.group(1)
+        ordered_labels = [label for _, label in numbered_pattern.findall(section)]
+        unique_labels = dedupe_preserve_order(ordered_labels)
+        if len(unique_labels) == 3:
+            return unique_labels[:3]
+
+    ordered_labels = [label for _, label in numbered_pattern.findall(text)]
+    unique_labels = dedupe_preserve_order(ordered_labels)
+    if len(unique_labels) >= 3:
+        return unique_labels[-3:]
+
+    mentioned_labels = dedupe_preserve_order(re.findall(r"Response [A-Z]", text))
+    if len(mentioned_labels) == 3:
+        return mentioned_labels
+
+    return []
 
 
 def _consensus_diagnostics(peer_reviews: List[Dict], aggregate: List[Dict]) -> Dict[str, Any]:
@@ -255,10 +285,9 @@ def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, ano
     messages = [
         HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
-    text, actual_model = invoke_openrouter_with_fallback(
+    text, actual_model = invoke_openrouter_model(
         messages,
         reviewer_model,
-        allow_router=False,
         temperature=0.0,
         max_tokens=1000,
     )
@@ -354,6 +383,7 @@ def chairman_synthesise(
     raw_query: str,
     candidate_a: str, candidate_b: str, candidate_c: str,
     peer_reviews: List[Dict], aggregate: List[Dict], label_map: Dict[str, str],
+    topic_domain: str = "general",
     demo_mode: bool = False,
 ) -> Tuple[str, Dict]:
     """
@@ -366,8 +396,8 @@ def chairman_synthesise(
     from config import MODELS
     # Chairman uses a high-competency model like DeepSeek to synthesise
     # Removed specific handling for gemini/gemma to default to OpenRouter via get_llm
-    feedback_memory = build_chairman_feedback_context()
-    adaptation_memory = build_adaptation_context()
+    feedback_memory = build_chairman_feedback_context(topic_domain=topic_domain)
+    adaptation_memory = build_adaptation_context(topic_domain=topic_domain)
 
     reviews_text = "\n\n".join([
         f"{r['reviewer']}:\n{r['evaluation']}" for r in peer_reviews
@@ -385,6 +415,7 @@ def chairman_synthesise(
             f"{adaptation_memory}\n\n" if adaptation_memory else ""
         ) + (
             f"Original query: {raw_query}\n\n"
+            f"Topic domain: {topic_domain}\n\n"
             f"Candidate A (Chain-of-Thought):\n{candidate_a}\n\n"
             f"Candidate B (Role-Assignment):\n{candidate_b}\n\n"
             f"Candidate C (Structured Template):\n{candidate_c}\n\n"
@@ -394,10 +425,9 @@ def chairman_synthesise(
         )),
     ]
 
-    optimised, actual_model = invoke_openrouter_with_fallback(
+    optimised, actual_model = invoke_openrouter_model(
         messages,
         MODELS["chairman"],
-        allow_router=False,
         temperature=0.7,
         max_tokens=1000,
     )
