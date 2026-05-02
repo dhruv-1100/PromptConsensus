@@ -144,6 +144,29 @@ FINAL RANKING:
 
 Do not add any text after the ranking."""
 
+# Constitutional principles for each reviewer (grounded in Constitutional AI, Lecture 8)
+CONSTITUTIONAL_PRINCIPLES = {
+    "Autonomous Engineer A": (
+        "Constitutional principle — FAITHFULNESS TO USER INTENT: "
+        "Pay special attention to whether each candidate preserves and serves the user's "
+        "original goal without drifting, expanding scope unnecessarily, or reinterpreting "
+        "the task. Penalise prompts that subtly shift what the user asked for."
+    ),
+    "Autonomous Engineer B": (
+        "Constitutional principle — OUTPUT SAFETY AND BIAS: "
+        "Pay special attention to whether each candidate could produce harmful, biased, "
+        "misleading, or ethically questionable output. Penalise prompts that lack "
+        "appropriate guardrails for sensitive content, omit disclaimers where needed, "
+        "or could amplify stereotypes or misinformation."
+    ),
+    "Autonomous Engineer C": (
+        "Constitutional principle — DOMAIN APPROPRIATENESS: "
+        "Pay special attention to whether each candidate respects domain-specific norms, "
+        "conventions, and constraints. Penalise prompts that apply generic templates to "
+        "specialised fields without adapting terminology, structure, or compliance requirements."
+    ),
+}
+
 CHAIRMAN_SYSTEM = """You are the chairman of a prompt-evaluation council.
 
 Your job is to synthesize the strongest final prompt from the three candidate prompts, the peer reviews, and the aggregate ranking.
@@ -299,9 +322,17 @@ def _anonymise_candidates(
     return "\n\n---\n\n".join(parts), label_map
 
 
-def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, anonymised_text: str) -> Dict:
+def _single_review(
+    reviewer_name: str,
+    reviewer_model: str,
+    user_query: str,
+    anonymised_text: str,
+    constitutional_principle: str = "",
+) -> Dict:
     """Run one cross-examination peer review."""
     system = f"You are '{reviewer_name}', a senior AI Prompt Engineer." + "\n" + REVIEW_SYSTEM
+    if constitutional_principle:
+        system += "\n\n" + constitutional_principle
     messages = [
         HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
@@ -350,7 +381,15 @@ def peer_review(
     reviewer_models = [MODELS["reviewer_a"], MODELS["reviewer_b"], MODELS["reviewer_c"]]
     async def _run():
         tasks = [
-            loop.run_in_executor(None, _single_review, name, model, raw_query, anonymised_text)
+            loop.run_in_executor(
+                None,
+                _single_review,
+                name,
+                model,
+                raw_query,
+                anonymised_text,
+                CONSTITUTIONAL_PRINCIPLES.get(name, ""),
+            )
             for name, model in zip(reviewer_names, reviewer_models)
         ]
         return await asyncio.gather(*tasks)

@@ -126,6 +126,19 @@ interface ResearchInsights {
   response_length_delta_pct?: number | null;
   safety_acknowledged: boolean;
   intervention_labels: string[];
+  // Candidate diversity metrics
+  candidate_pattern_convergence?: string;
+  candidate_token_diversity?: number;
+  candidate_structural_diversity?: number;
+  candidate_style_divergence?: number;
+}
+
+interface PreferenceStats {
+  total_pairs: number;
+  edited_pairs: number;
+  accepted_pairs: number;
+  edit_rate_pct: number;
+  domain_distribution: Record<string, number>;
 }
 
 interface SafetyCheckItem {
@@ -586,6 +599,9 @@ function StageInput({
                     </a>
                     <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
                       CSV
+                    </a>
+                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/preferences`} target="_blank" rel="noreferrer">
+                      JSONL
                     </a>
                   </div>
                 </div>
@@ -1638,6 +1654,17 @@ function StageReview({
           <strong>{researchInsights.rewrite_diversity_pct}%</strong>
           <span>{researchInsights.diversity_label}</span>
         </div>
+        {researchInsights.candidate_pattern_convergence && researchInsights.candidate_pattern_convergence !== "unknown" && (
+          <div className="research-metric">
+            <span className="research-label">Pattern convergence</span>
+            <strong>{researchInsights.candidate_pattern_convergence}</strong>
+            <span>
+              token {researchInsights.candidate_token_diversity?.toFixed(0) ?? 0}%
+              {" / "}
+              struct {researchInsights.candidate_structural_diversity?.toFixed(0) ?? 0}%
+            </span>
+          </div>
+        )}
         <div className="research-metric">
           <span className="research-label">Your intervention</span>
           <strong>{researchInsights.human_edit_shift_pct}%</strong>
@@ -1662,11 +1689,12 @@ function StageReview({
             ? "Your edits currently read like an override rather than a light adjustment, which is especially useful HCAI evidence about where human intent diverged from council consensus."
             : "Your edits are part of the core HCAI evidence here: they show where consensus still needed human correction, tailoring, or domain-specific refinement."}
       </div>
-      {consensus_diagnostics?.needs_human_review && (
+       {consensus_diagnostics?.needs_human_review && (
         <div className="session-inline-note" style={{ marginBottom: 22 }}>
           The council agreement on this run was not especially strong, so your review matters more than usual here. This is the right place to confirm whether the winner preserved your intent or whether a different strategy should have prevailed.
         </div>
       )}
+
 
       <button className="collapsible-header review-collapse" onClick={() => setShowReferences(!showReferences)} style={{ marginBottom: showReferences ? 0 : 18 }}>
         <span>View original prompt and council output</span>
@@ -2113,6 +2141,7 @@ function StageFeedback({
   };
 
   if (submitted) {
+    const wasEdited = optimisedPrompt !== finalPrompt;
     return (
       <div className="success-state">
         <div className="success-icon">{"\u2713"}</div>
@@ -2123,12 +2152,42 @@ function StageFeedback({
             Session ID: {savedSessionId}
           </div>
         )}
+
+        {/* Preference Signal Card (Lecture 8: DPO) */}
+        <div className="preference-card" style={{ textAlign: "left", marginTop: 20, maxWidth: 560, marginLeft: "auto", marginRight: "auto" }}>
+          <div className="preference-card-header">
+            <span className="preference-card-title">Preference Signal Generated</span>
+            <span className="preference-card-badge">{wasEdited ? "Edited pair" : "Accepted"}</span>
+          </div>
+          <div className="preference-card-body">
+            {wasEdited
+              ? "Your edits created a natural (chosen, rejected) preference pair: your final prompt is the chosen output, and the council\u2019s original is the rejected output. This data can be used for Direct Preference Optimization (DPO) alignment."
+              : "You accepted the council output without editing, recording a positive adoption signal. This indicates the council\u2019s output aligned with your intent."}
+          </div>
+          {wasEdited && (
+            <div className="preference-pair-preview">
+              <div>
+                <div className="preference-pair-label chosen">Chosen</div>
+                <div className="preference-pair-text">{finalPrompt.slice(0, 80)}{finalPrompt.length > 80 ? "\u2026" : ""}</div>
+              </div>
+              <div className="preference-pair-arrow">{"\u2192"}</div>
+              <div>
+                <div className="preference-pair-label rejected">Rejected</div>
+                <div className="preference-pair-text">{optimisedPrompt.slice(0, 80)}{optimisedPrompt.length > 80 ? "\u2026" : ""}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div style={{ marginTop: 18, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer">
             Download JSON
           </a>
           <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
             Download CSV
+          </a>
+          <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/preferences`} target="_blank" rel="noreferrer">
+            Download Preferences (JSONL)
           </a>
         </div>
         <div style={{ height: 28 }} />
@@ -2231,10 +2290,10 @@ export default function Home() {
   const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null);
   const [processingRetryToken, setProcessingRetryToken] = useState(0);
   const [targetModels, setTargetModels] = useState<string[]>([
-    "tencent/hy3-preview:free",
-    "inclusionai/ling-2.6-flash:free",
-    "nvidia/nemotron-3-nano-30b-a3b:free",
-    "openrouter/free",
+    "openai/gpt-5.4-nano",
+    "google/gemini-2.5-flash",
+    "deepseek/deepseek-v3.2",
+    "nvidia/nemotron-3-super-120b-a12b",
   ]);
 
   React.useEffect(() => {

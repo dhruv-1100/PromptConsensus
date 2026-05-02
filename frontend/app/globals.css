@@ -2549,3 +2549,287 @@ input:checked + .theme-slider:before {
   transform: translateX(20px);
   background-color: var(--terracotta);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   AI Idiosyncrasy Detection — Lecture 11
+   ══════════════════════════════════════════════════════════════ */
+
+/* Meter container */
+.ai-style-panel {
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-bottom: 22px;
+}
+
+.ai-style-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ai-style-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.ai-style-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.ai-style-badge.score-low {
+  background: var(--success-dim);
+  color: var(--success);
+}
+
+.ai-style-badge.score-moderate {
+  background: rgba(197, 141, 42, 0.14);
+  color: var(--warning);
+}
+
+.ai-style-badge.score-high {
+  background: var(--error-dim);
+  color: var(--error);
+}
+
+/* Meter bar */
+.ai-meter-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-surface2);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.ai-meter-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s var(--ease), background 0.5s var(--ease);
+}
+
+.ai-meter-fill.score-low {
+  background: var(--success);
+}
+
+.ai-meter-fill.score-moderate {
+  background: var(--warning);
+}
+
+.ai-meter-fill.score-high {
+  background: var(--error);
+}
+
+.ai-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  margin-bottom: 14px;
+}
+
+/* Pattern chips */
+.ai-pattern-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ai-pattern-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s var(--ease);
+}
+
+.ai-pattern-chip .chip-category {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-dim);
+}
+
+.ai-pattern-chip .chip-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* Comparison delta */
+.ai-style-delta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ai-style-delta .delta-value {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.ai-style-delta .delta-value.positive {
+  color: var(--success);
+}
+
+.ai-style-delta .delta-value.negative {
+  color: var(--error);
+}
+
+/* Candidate convergence indicator */
+.convergence-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.convergence-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.convergence-dot.high {
+  background: var(--warning);
+}
+
+.convergence-dot.moderate {
+  background: var(--terracotta);
+}
+
+.convergence-dot.diverse {
+  background: var(--success);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DPO Preference Learning — Lecture 8
+   ══════════════════════════════════════════════════════════════ */
+
+.preference-card {
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  border: 1px solid var(--terracotta-mid);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-top: 20px;
+}
+
+.preference-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.preference-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.preference-card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: var(--terracotta-dim);
+  color: var(--terracotta);
+}
+
+.preference-card-body {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.preference-pair-preview {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.preference-pair-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.preference-pair-label.chosen {
+  color: var(--success);
+}
+
+.preference-pair-label.rejected {
+  color: var(--error);
+}
+
+.preference-pair-arrow {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.preference-pair-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  max-width: 280px;
+}
+
+.preference-stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.preference-stat {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.preference-stat strong {
+  font-family: var(--mono);
+  color: var(--terracotta);
+}

@@ -488,5 +488,40 @@
         "format_domain": "summary",
         "winning_model": "Response X",
         "perspective_used": "Decomposition and Structured Reasoning: The prompt is broken down into distinct, manageable stages. Each stage has a clear objective and verification checks to ensure quality. The structured output format guides the model to produce a well-organized and easily digestible response."
+    },
+    {
+        "timestamp": "2026-05-02T05:21:45.823911",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Decomposition and Structured Reasoning: This prompt breaks down the complex task into manageable stages (analysis, comparison, prediction). It explicitly asks for justification and acknowledges uncertainties, leading to a more robust and reliable answer. The structured output format ensures clarity and ease of understanding."
+    },
+    {
+        "timestamp": "2026-05-02T20:48:02.806309",
+        "topic_domain": "general",
+        "format_domain": "summary",
+        "winning_model": "Response X",
+        "perspective_used": "Decomposition & Iterative Refinement: The prompt is broken down into three phases, each with specific tasks and verification points. This allows the model to build the itinerary incrementally, addressing missing information in stages and ensuring quality at each step.  The prompt also acknowledges assumptions and encourages explicit communication of those assumptions."
+    },
+    {
+        "timestamp": "2026-05-02T21:13:38.000459",
+        "topic_domain": "legal",
+        "format_domain": "summary",
+        "winning_model": "Response X",
+        "perspective_used": "Decomposition and Structured Response: The original query is broken down into a series of logical steps, each with a clear purpose.  The use of sections and sub-questions ensures a comprehensive and usable response. The prompt also incorporates a verification checkpoint to ensure the initial steps are considered."
+    },
+    {
+        "timestamp": "2026-05-02T21:28:41.963518",
+        "topic_domain": "research",
+        "format_domain": "report",
+        "winning_model": "Response X",
+        "perspective_used": "Structured Decomposition & Formalization: The prompt is broken down into distinct, numbered steps to guide the model in generating a well-organized and comprehensive proof. The request explicitly asks for a formal mathematical proof with specific sections, ensuring clarity and completeness. The prompt also includes an assumption about the reader's mathematical background to avoid unnecessary explanations."
+    },
+    {
+        "timestamp": "2026-05-02T22:04:15.233960",
+        "topic_domain": "general",
+        "format_domain": "blog post",
+        "winning_model": "Response X",
+        "perspective_used": "Pop Songwriter (radio-friendly, singable mainstream pop tone with clear structure and emotionally resonant, ethics-aware human\u2013AI relationship themes)"
     }
 ]

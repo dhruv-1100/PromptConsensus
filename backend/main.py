@@ -14,6 +14,8 @@ from feedback_memory import append_feedback_entry
 from session_store import append_session_entry, list_sessions, export_sessions_csv, get_session_analytics
 from safety_checks import run_safety_checks
 from request_coordinator import build_request_key, run_deduplicated
+from idiosyncrasy_detector import candidate_diversity_report
+from preference_pairs import export_preferences_jsonl, get_preference_stats
 
 load_dotenv()
 
@@ -324,6 +326,23 @@ def export_sessions_csv_route():
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="consensusprompt-sessions.csv"'},
     )
+
+
+
+@app.get("/api/sessions/export/preferences")
+def export_preferences():
+    """Download DPO-format preference pairs as JSONL."""
+    return Response(
+        content=export_preferences_jsonl(),
+        media_type="application/jsonl",
+        headers={"Content-Disposition": 'attachment; filename="consensusprompt-preferences.jsonl"'},
+    )
+
+
+@app.get("/api/sessions/preference-stats")
+def preference_stats():
+    """Return aggregate statistics about the preference dataset."""
+    return get_preference_stats()
 
 
 if __name__ == "__main__":

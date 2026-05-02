@@ -8,6 +8,10 @@ from itertools import combinations
 from typing import Any, Dict, List
 import re
 
+from idiosyncrasy_detector import (
+    candidate_diversity_report as _candidate_diversity,
+)
+
 
 def _safe_text(value: Any) -> str:
     return value if isinstance(value, str) else ""
@@ -158,6 +162,22 @@ def build_research_insights(session: Dict[str, Any]) -> Dict[str, Any]:
 
     intervention_labels = _normalize_labels(session.get("intervention_labels") or [])
     consensus_response = _classify_consensus_response(human_edit_shift, intervention_labels)
+
+    # ── Candidate diversity (pattern convergence) ──
+    cand_a = _safe_text(session.get("candidate_a"))
+    cand_b = _safe_text(session.get("candidate_b"))
+    cand_c = _safe_text(session.get("candidate_c"))
+    candidate_convergence = "unknown"
+    candidate_token_diversity = 0.0
+    candidate_structural_diversity = 0.0
+    candidate_style_divergence = 0.0
+    if cand_a.strip() and cand_b.strip() and cand_c.strip():
+        diversity_info = _candidate_diversity(cand_a, cand_b, cand_c)
+        candidate_convergence = diversity_info.get("convergence_label", "unknown")
+        candidate_token_diversity = diversity_info.get("avg_token_diversity", 0.0)
+        candidate_structural_diversity = diversity_info.get("avg_structural_diversity", 0.0)
+        candidate_style_divergence = diversity_info.get("avg_style_divergence", 0.0)
+
     return {
         "winner_candidate": winner_candidate or winner_label or None,
         "reviewer_count": reviewer_count,
@@ -179,4 +199,9 @@ def build_research_insights(session: Dict[str, Any]) -> Dict[str, Any]:
         "response_length_delta_pct": round(output_delta * 100, 1) if baseline_response.strip() else None,
         "safety_acknowledged": bool(session.get("safety_acknowledged")),
         "intervention_labels": intervention_labels,
+        # Candidate diversity metrics
+        "candidate_pattern_convergence": candidate_convergence,
+        "candidate_token_diversity": candidate_token_diversity,
+        "candidate_structural_diversity": candidate_structural_diversity,
+        "candidate_style_divergence": candidate_style_divergence,
     }
