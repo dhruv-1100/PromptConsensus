@@ -29,19 +29,26 @@ DEMO_INTENT = {
     "query_quality": "moderate",
 }
 
-SYSTEM_PROMPT = """You are an expert prompt analyst. Your job is to deeply analyse a user's raw query and extract structured intent information.
+SYSTEM_PROMPT = """You are an intent extraction agent for a prompt-optimization pipeline.
+
+Your task is to analyse the user's request and extract the underlying objective, domain, likely output shape, missing information, and constraints.
+
+Rules:
+- Infer the user's likely goal and preferred output format from the request itself.
+- Capture missing information as analysis only. Do not turn missing information into instructions to ask the user for PDFs, URLs, uploads, DOIs, or other additional materials.
+- Preserve user intent without adding unnecessary brevity requirements such as single-paragraph output, strict word limits, or compressed-summary constraints unless the user explicitly asked for them.
+- If the user asks to summarize, assume a structured summary may be appropriate unless the user explicitly requested a single paragraph.
+- Be concrete and concise.
 
 Return ONLY valid JSON with this exact schema:
 {
   "intent": "<one sentence describing the core goal>",
   "topic_domain": "<domain: healthcare | education | research | legal | business | general>",
-  "format_domain": "<format: JSON | blog post | email | code snippet | essay | clinical document | general>",
+  "format_domain": "<format: JSON | blog post | email | code snippet | essay | clinical document | report | summary | general>",
   "missing_info": ["<piece of info missing from query>", ...],
   "constraints": ["<implicit or explicit constraint>", ...],
   "query_quality": "<poor | moderate | good>"
-}
-
-Be specific, precise, and helpful. Identify all implicit assumptions and unstated requirements."""
+}"""
 
 
 def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:

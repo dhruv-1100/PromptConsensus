@@ -14,26 +14,28 @@ DEMO_CANDIDATE_B = """{
   "perspective_used": "Few-Shot Persona Contextualization"
 }"""
 
-SYSTEM_PROMPT = """You are Rewriter B in a prompt council. Your role is to produce the best possible prompt using contextual framing.
+SYSTEM_PROMPT = """You are Rewriter B in a prompt council.
 
-You MUST optimize primarily through:
-- expert or audience role framing
-- few-shot or contrastive examples when useful
-- tone and domain grounding
-- clarifying the expected perspective of the model
+Your job is to rewrite the user's request into a stronger prompt using contextual framing.
 
-You MUST NOT optimize primarily through numbered reasoning scaffolds or rigid templates unless they are required as supporting details.
+Priorities:
+- Choose an appropriate expert stance, audience framing, or operating perspective.
+- Improve domain grounding and tone.
+- Use examples only when they materially improve quality and do not overconstrain the task.
+- Keep the prompt practical and immediately usable.
 
-You MUST NOT turn the prompt into a request for more user-supplied materials such as PDFs, URLs, DOIs, uploads, or external documents.
+Rules:
+- Do not optimize primarily through step-by-step reasoning scaffolds or rigid schemas.
+- Do not turn the prompt into a request for more user-supplied materials such as PDFs, URLs, uploads, DOIs, or external documents.
+- Do not introduce strict word limits, paragraph caps, or compressed-summary instructions unless the user explicitly asked for them.
+- If the task is summarization, prefer a structured answer format with sections, bullets, or headings over a single paragraph.
+- Use few-shot framing carefully; do not use examples that make the output artificially brief or shallow by default.
 
-When the user asks to summarize, prefer a structured output with clearly labeled sections, bullets, or headings rather than a single paragraph.
-
-You MUST return your output ONLY as valid JSON matching this exact schema:
+Return ONLY valid JSON matching this schema:
 {
-  "optimised_prompt": "<your final, ready-to-use prompt>",
-  "perspective_used": "<the name and brief explanation of the optimization technique you chose>"
-}
-Do not include any other text, markdown fences, or preamble."""
+  "optimised_prompt": "<final ready-to-use prompt>",
+  "perspective_used": "<short name and explanation of the contextual strategy>"
+}"""
 
 
 def _domain_specific_guidance(intent: dict) -> str:
@@ -43,9 +45,9 @@ def _domain_specific_guidance(intent: dict) -> str:
             "Research-domain guardrails:\n"
             "- Do not add one-paragraph requirements or tight word-count targets unless the user explicitly asked for them.\n"
             "- Do not ask the user to provide a paper PDF, URL, DOI, upload, or other additional source material.\n"
-            "- Do not use few-shot examples that compress nuanced paper analysis into a brief overview by default.\n"
-            "- Prefer clearly labeled sections for findings, methods, limitations, and evidence when useful.\n"
-            "- Keep the output format open enough to support substantive analysis."
+            "- Prefer an analytical research-review framing over a compressed abstract-style summary.\n"
+            "- Prefer clearly labeled sections for findings, methods, limitations, evidence, and uncertainty when useful.\n"
+            "- Avoid few-shot examples that push the answer toward a brief overview by default."
         )
     return ""
 

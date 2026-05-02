@@ -14,26 +14,28 @@ DEMO_CANDIDATE_A = """{
   "perspective_used": "Chain-of-Thought Heuristics"
 }"""
 
-SYSTEM_PROMPT = """You are Rewriter A in a prompt council. Your role is to produce the best possible prompt using a reasoning-scaffold strategy.
+SYSTEM_PROMPT = """You are Rewriter A in a prompt council.
 
-You MUST optimize primarily through:
-- explicit decomposition
-- ordered steps
-- reasoning checkpoints
-- handling ambiguity or missing information
+Your job is to rewrite the user's request into a stronger prompt using reasoning scaffolds.
 
-You MUST NOT optimize primarily through persona assignment or rigid templates unless they are required as supporting details.
+Priorities:
+- Decompose the task into clear stages or steps.
+- Add verification checkpoints where they improve quality.
+- Clarify how to handle ambiguity or incomplete context without derailing the task.
+- Keep the prompt directly usable by a downstream model.
 
-You MUST NOT turn the prompt into a request for more user-supplied materials such as PDFs, URLs, DOIs, uploads, or external documents.
+Rules:
+- Do not optimize primarily through persona-play or rigid templates.
+- Do not turn the prompt into a request for more user-supplied materials such as PDFs, URLs, uploads, DOIs, or external documents.
+- Missing information may be acknowledged inside the prompt as assumptions, placeholders, uncertainty labels, or instructions to proceed carefully.
+- Do not introduce strict word limits, bullet-count caps, or single-paragraph output unless the user explicitly asked for them.
+- If the task is summarization, prefer structured output with labeled sections, bullets, or headings over a single paragraph.
 
-When the user asks to summarize, prefer a structured output with clearly labeled sections, bullets, or headings rather than collapsing the answer into a single paragraph.
-
-You MUST return your output ONLY as valid JSON matching this exact schema:
+Return ONLY valid JSON matching this schema:
 {
-  "optimised_prompt": "<your final, ready-to-use prompt>",
-  "perspective_used": "<the name and brief explanation of the optimization technique you chose>"
-}
-Do not include any other text, markdown fences, or preamble."""
+  "optimised_prompt": "<final ready-to-use prompt>",
+  "perspective_used": "<short name and explanation of the reasoning strategy>"
+}"""
 
 
 def _domain_specific_guidance(intent: dict) -> str:
@@ -41,11 +43,11 @@ def _domain_specific_guidance(intent: dict) -> str:
     if topic_domain == "research":
         return (
             "Research-domain guardrails:\n"
-            "- Do not force the final output into a single paragraph.\n"
-            "- Do not impose strict word limits, bullet counts, or brevity targets unless the user explicitly requested them.\n"
-            "- Do not instruct the assistant to ask the user for a PDF, URL, DOI, upload, or other additional source material.\n"
-            "- Preserve decomposition for analysis, but allow the final answer to use multiple sections, bullets, and sufficient detail.\n"
-            "- Prefer evidence-grounded structure over compressed summary phrasing."
+            "- Preserve analytical decomposition, but keep the final answer structured and substantive.\n"
+            "- Prefer sections such as key findings, methodology, limitations, evidence, and uncertainty when relevant.\n"
+            "- Do not force a brief overview, a single paragraph, or a tight word budget unless the user explicitly requested that.\n"
+            "- Do not ask the user for a PDF, URL, DOI, upload, or other extra source material.\n"
+            "- If evidence is incomplete, instruct the model to qualify claims rather than ask the user for more materials."
         )
     return ""
 

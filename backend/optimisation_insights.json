@@ -460,5 +460,33 @@
         "format_domain": "essay",
         "winning_model": "Response X",
         "perspective_used": "Decomposition and Structured Output. This approach breaks down the summarization task into distinct, manageable components (identifying findings, identifying gaps, and structuring the output).  This ensures a thorough and well-organized summary, addressing the core intent of the query while explicitly handling the need for both key findings and methodological limitations. The structured output (bullet points and paragraphs) directly addresses the implied need for a detailed, not just a brief, summary."
+    },
+    {
+        "timestamp": "2026-05-02T04:37:20.270259",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T04:38:09.650649",
+        "topic_domain": "research",
+        "format_domain": "summary",
+        "winning_model": "Response X",
+        "perspective_used": "Research analyst summarization \u2013 a structured, critical review aimed at scholars and practitioners"
+    },
+    {
+        "timestamp": "2026-05-02T04:40:09.396448",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response Z",
+        "perspective_used": "Instructional Design: The prompt frames the task as creating a structured learning plan, leveraging the model's ability to organize information into stages with clear objectives and verification steps. This approach directly addresses the time constraint and ensures a logical progression of learning."
+    },
+    {
+        "timestamp": "2026-05-02T04:44:50.652192",
+        "topic_domain": "business",
+        "format_domain": "summary",
+        "winning_model": "Response X",
+        "perspective_used": "Decomposition and Structured Reasoning: The prompt is broken down into distinct, manageable stages. Each stage has a clear objective and verification checks to ensure quality. The structured output format guides the model to produce a well-organized and easily digestible response."
     }
 ]
