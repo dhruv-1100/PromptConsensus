@@ -28,7 +28,7 @@ interface CouncilSceneProps {
   theme?: string;
 }
 
-const CANDIDATE_LABELS = ["X", "Y", "Z"];
+const CANDIDATE_LABELS = ["A", "B", "C"];
 
 export default function CouncilScene({
   peerReviews,
@@ -44,24 +44,25 @@ export default function CouncilScene({
   const topPicks = useMemo(() => {
     return peerReviews.map((r) => {
       const firstPick = r.parsed_ranking[0];
-      const letter = firstPick?.replace("Response ", "");
-      const letterToIdx: Record<string, number> = { X: 0, Y: 1, Z: 2 };
+      const mappedCandidate = labelMap[firstPick] || firstPick;
+      const letter = mappedCandidate?.replace("Candidate ", "");
+      const letterToIdx: Record<string, number> = { A: 0, B: 1, C: 2 };
       return letterToIdx[letter] ?? 0;
     });
-  }, [peerReviews]);
+  }, [peerReviews, labelMap]);
 
   // winnerIndex gives the index [0..2] of the winning candidate
   const winnerIndex = useMemo(() => {
     if (aggregateRankings.length === 0) return 0;
-    const winnerLabel = aggregateRankings[0].label;
-    const letter = winnerLabel?.replace("Response ", "");
-    const letterToIdx: Record<string, number> = { X: 0, Y: 1, Z: 2 };
+    const winnerLetter = aggregateRankings[0].candidate;
+    const letterToIdx: Record<string, number> = { A: 0, B: 1, C: 2 };
+    const letter = winnerLetter?.replace("Candidate ", "");
     return letterToIdx[letter] ?? 0;
   }, [aggregateRankings]);
 
   const candidateAgentNames = useMemo(() => {
     return CANDIDATE_LABELS.map((l) => {
-      const orig = labelMap[`Response ${l}`];
+      const orig = `Candidate ${l}`;
       if (!orig) return `Response ${l}`;
       const p = perspectives?.[orig];
       if (p) {
@@ -69,7 +70,7 @@ export default function CouncilScene({
       }
       return orig;
     });
-  }, [labelMap, perspectives]);
+  }, [perspectives]);
 
   // Layout constants for SVG viewBox="0 0 1000 500"
   const Y_POS = [22, 50, 78]; // HTML percentages

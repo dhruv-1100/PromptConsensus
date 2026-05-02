@@ -42,7 +42,7 @@ class OptimizeRequest(BaseModel):
 
 class ExecuteRequest(BaseModel):
     final_prompt: str
-    target_model: str = "google/gemma-4-31b-it:free"
+    target_model: str = "tencent/hy3-preview:free"
     demo_mode: bool = True
 
 class SafetyCheckRequest(BaseModel):

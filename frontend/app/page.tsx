@@ -493,7 +493,7 @@ function StageInput({
 }) {
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("General");
-  const [model, setModel] = useState(targetModels[0] || "google/gemma-4-31b-it:free");
+  const [model, setModel] = useState(targetModels[0] || "tencent/hy3-preview:free");
   const [demo, setDemo] = useState(true);
   const [compareMode, setCompareMode] = useState(true);
   const [showHow, setShowHow] = useState(false);
@@ -2218,7 +2218,7 @@ export default function Home() {
   const [stage, setStage] = useState<Stage>("input");
   const [rawQuery, setRawQuery] = useState("");
   const [domain, setDomain] = useState("general");
-  const [targetModel, setTargetModel] = useState("google/gemma-4-31b-it:free");
+  const [targetModel, setTargetModel] = useState("tencent/hy3-preview:free");
   const [demoMode, setDemoMode] = useState(true);
   const [compareMode, setCompareMode] = useState(true);
   const [pipelineState, setPipelineState] = useState<PipelineState | null>(null);
@@ -2231,9 +2231,9 @@ export default function Home() {
   const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null);
   const [processingRetryToken, setProcessingRetryToken] = useState(0);
   const [targetModels, setTargetModels] = useState<string[]>([
-    "google/gemma-4-31b-it:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "tencent/hy3-preview:free",
+    "inclusionai/ling-2.6-flash:free",
+    "nvidia/nemotron-3-nano-30b-a3b:free",
     "openrouter/free",
   ]);
 

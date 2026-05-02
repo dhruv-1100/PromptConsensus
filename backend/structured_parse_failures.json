@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2026-05-02T02:17:05.635769",
+    "step": "intent_extractor",
+    "model": "tencent/hy3-preview:free",
+    "error": "Model returned invalid JSON for a structured pipeline step.",
+    "content_preview": ""
+  },
+  {
+    "timestamp": "2026-05-02T02:17:44.984398",
+    "step": "intent_extractor",
+    "model": "tencent/hy3-preview:free",
+    "error": "Model returned invalid JSON for a structured pipeline step.",
+    "content_preview": ""
+  },
+  {
+    "timestamp": "2026-05-02T02:18:03.613984",
+    "step": "intent_extractor",
+    "model": "tencent/hy3-preview:free",
+    "error": "Model returned invalid JSON for a structured pipeline step.",
+    "content_preview": ""
+  },
+  {
+    "timestamp": "2026-05-02T02:18:18.236483",
+    "step": "intent_extractor",
+    "model": "tencent/hy3-preview:free",
+    "error": "Model returned invalid JSON for a structured pipeline step.",
+    "content_preview": ""
+  },
+  {
+    "timestamp": "2026-05-02T03:14:51.508297",
+    "step": "rewriter_c",
+    "model": "unknown",
+    "error": "Model returned invalid JSON for a structured pipeline step.",
+    "content_preview": "```json\n{\n  \"optimised_prompt\": \"You are a research analyst tasked with critically evaluating academic papers. Your output must adhere to the following schema:\\n\\n```json\\n{\\n \\\"paper_title\\\": \\\"[Paper Title]\\\",\\n \\\"key_findings\\\": [\\n  \\\"[Key Finding 1]\\\",\\n  \\\"[Key Finding 2]\\\",\\n  \\\"...\\\"\\n ],\\n \\\"methodology_gaps\\\": [\\n  \\\"[Methodology Gap 1]\\\",\\n  \\\"[Methodology Gap 2]\\\",\\n  \\\"...\\\"\\n ],\\n \\\"source_paper\\\": \\\"My Boyfriend is AI: A Computational Analysis of Human-AI Companionship in Reddit's AI Community\\\"\\n}\\n```\\n\\nBased on the paper \\\"My Boyfriend is AI: A Computational Analysis of Human-AI Companionship in Reddit's AI Community\\\", provide a JSON formatted summary including the key findings and methodology gaps.  The `key_findings` array should contain 3-5 concise bullet points summarizing the main conclusions of the paper. The `methodology_gaps` array should contain 2-4 concise bullet points outlining limitations in the research approach, data analysis, or scope.  Focus on explicitly identifying weaknesses in the research design or data used. Do not include introductory or concluding remarks; only the JSON output is required. Assume the paper is a peer-reviewed academic publication.\",\n  \"perspective_used\": \"Output Schema and Constraints: I optimized by defining a strict JSON schema for the output. This provides a clear structure for the model to follow and allows for easy parsing and verification of the response. Concrete constraints (number of findings/gaps, bullet point format, JSON format) further ensure the output is highly structured and specific.\"\n}\n```",
+    "content_length": 1593
+  }
+]

@@ -335,6 +335,17 @@ def peer_review(
         })
     aggregate.sort(key=lambda x: x["average_rank"])
 
+    if not aggregate:
+        for label, agent_name in label_map.items():
+            candidate_letter = agent_name.replace("Candidate ", "") if agent_name.startswith("Candidate ") else "?"
+            aggregate.append({
+                "label": label,
+                "candidate": candidate_letter,
+                "average_rank": 2.0,
+                "votes": 0,
+                "ranks": [],
+            })
+
     diagnostics = _consensus_diagnostics(peer_reviews, aggregate)
     return peer_reviews, aggregate, label_map, diagnostics
 
@@ -400,9 +411,14 @@ def chairman_synthesise(
         winner_agent = label_map.get(winner_label, "")
         optimised = candidates_by_agent.get(winner_agent, candidate_a)
 
+    if aggregate:
+        rationale = f"Based on council consensus: {aggregate[0]['label']} ranked first with average rank {aggregate[0]['average_rank']}."
+    else:
+        rationale = "Reviewer outputs did not yield a stable ranking, so the synthesis relied on the candidate prompts and qualitative review text."
+
     chairman_info = {
         "model": actual_model,
-        "rationale": f"Based on council consensus: {aggregate[0]['label']} ranked first with average rank {aggregate[0]['average_rank']}.",
+        "rationale": rationale,
     }
 
     return optimised, chairman_info

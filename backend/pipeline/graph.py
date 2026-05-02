@@ -17,7 +17,7 @@ from agents.rewriter_a import rewrite_chain_of_thought
 from agents.rewriter_b import rewrite_role_assignment
 from agents.rewriter_c import rewrite_structured_template
 from agents.council import peer_review, chairman_synthesise
-from live_mode_utils import invoke_openrouter_with_fallback
+from live_mode_utils import invoke_openrouter_with_fallback, extract_prompt_and_perspective
 
 load_dotenv()
 
@@ -34,6 +34,41 @@ async def run_rewriters_async(
     ]
     results = await asyncio.gather(*tasks)
     return results[0], results[1], results[2]
+
+
+def _validate_candidate_outputs(candidate_a: str, candidate_b: str, candidate_c: str) -> None:
+    candidates = {
+        "Candidate A": candidate_a,
+        "Candidate B": candidate_b,
+        "Candidate C": candidate_c,
+    }
+    missing = [name for name, text in candidates.items() if not str(text or "").strip()]
+    if missing:
+        raise RuntimeError(
+            "Prompt generation failed because not all three rewriter roles produced usable output: "
+            + ", ".join(missing)
+        )
+
+
+def _validate_review_outputs(peer_reviews: list[dict]) -> None:
+    if len(peer_reviews) != 3:
+        raise RuntimeError(
+            f"Review process failed because exactly 3 reviewer outputs were expected, but received {len(peer_reviews)}."
+        )
+
+    incomplete = []
+    for review in peer_reviews:
+        reviewer = review.get("reviewer", "Unknown reviewer")
+        evaluation = str(review.get("evaluation") or "").strip()
+        ranking = review.get("parsed_ranking") or []
+        if not evaluation or len(ranking) == 0:
+            incomplete.append(reviewer)
+
+    if incomplete:
+        raise RuntimeError(
+            "Review process failed because these reviewer roles did not return usable evaluations/rankings: "
+            + ", ".join(incomplete)
+        )
 
 
 def run_pipeline(
@@ -79,9 +114,8 @@ def run_pipeline(
     candidate_a, candidate_b, candidate_c = loop.run_until_complete(
         run_rewriters_async(raw_query, intent, demo_mode)
     )
+    _validate_candidate_outputs(candidate_a, candidate_b, candidate_c)
 
-    # Parse JSON structured candidate outputs to isolate the prompt and perspective
-    import json
     DEFAULT_PERSPECTIVES = {
         "A": "Chain-of-Thought Reasoning",
         "B": "Role-Assignment & Few-Shot",
@@ -89,23 +123,11 @@ def run_pipeline(
     }
 
     def parse_cand(cand_text: str, agent_key: str):
-        try:
-            # Strip markdown fences if present
-            clean = cand_text.strip()
-            if clean.startswith("```"):
-                clean = clean.split("```")[1]
-                if clean.startswith("json"):
-                    clean = clean[4:]
-                clean = clean.strip()
-            data = json.loads(clean)
-            perspective = data.get("perspective_used", "") or ""
-            prompt = data.get("optimised_prompt", cand_text)
-            # If perspective is empty or generic, use the default
-            if not perspective.strip() or perspective.strip().lower() == "unknown":
-                perspective = DEFAULT_PERSPECTIVES[agent_key]
-            return prompt, perspective
-        except Exception:
-            return cand_text, DEFAULT_PERSPECTIVES[agent_key]
+        return extract_prompt_and_perspective(
+            cand_text,
+            DEFAULT_PERSPECTIVES[agent_key],
+            step=f"rewriter_{agent_key.lower()}",
+        )
 
     prompt_a, persp_a = parse_cand(candidate_a, "A")
     prompt_b, persp_b = parse_cand(candidate_b, "B")
@@ -130,6 +152,7 @@ def run_pipeline(
     state["aggregate_rankings"] = aggregate
     state["label_map"] = label_map
     state["consensus_diagnostics"] = diagnostics
+    _validate_review_outputs(reviews)
     notify("review_complete", "Council review complete — aggregating rankings", 85)
 
     # S3c: Chairman synthesis
@@ -179,7 +202,7 @@ def run_pipeline(
 
 def execute_prompt(
     final_prompt: str,
-    target_model: str = "google/gemma-4-31b-it:free",
+    target_model: str = "tencent/hy3-preview:free",
     demo_mode: bool = False,
 ) -> str:
     """

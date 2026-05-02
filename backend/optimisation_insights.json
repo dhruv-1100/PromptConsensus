@@ -348,5 +348,89 @@
         "format_domain": "clinical document",
         "winning_model": "Response Z",
         "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T01:14:47.806638",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T01:27:15.833518",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T01:38:42.348467",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T01:44:37.933071",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-02T01:50:13.731622",
+        "topic_domain": "education",
+        "format_domain": "general",
+        "winning_model": "Response Z",
+        "perspective_used": "Chain-of-Thought Reasoning"
+    },
+    {
+        "timestamp": "2026-05-02T02:32:08.930363",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Chain-of-Thought Reasoning"
+    },
+    {
+        "timestamp": "2026-05-02T02:34:14.469047",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Role-Assignment & Few-Shot"
+    },
+    {
+        "timestamp": "2026-05-02T02:42:20.385988",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "OutputSchemaOptimization: leveraging explicit output schema and constraints to shape the prompt"
+    },
+    {
+        "timestamp": "2026-05-02T02:52:04.080105",
+        "topic_domain": "education",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Output Schema Optimization.  The prompt is structured to elicit a specific, predictable output format (Markdown table) with detailed fields for each learning activity.  This allows for easy parsing and verification of the generated plan, ensuring it meets the required constraints and provides a well-organized learning path."
+    },
+    {
+        "timestamp": "2026-05-02T03:02:37.298363",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Decomposition and Ordered Steps. The prompt is broken down into distinct, sequential steps (Define, Brainstorm, Evaluate, Provide Examples) to guide the language model's response and ensure comprehensive coverage. The use of numbered lists and specific output format instructions further structures the response."
+    },
+    {
+        "timestamp": "2026-05-02T03:09:11.962268",
+        "topic_domain": "research",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Output Schema Optimization"
+    },
+    {
+        "timestamp": "2026-05-02T03:15:20.497212",
+        "topic_domain": "research",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Structured Domain Templates"
     }
 ]

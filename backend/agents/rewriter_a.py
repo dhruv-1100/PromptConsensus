@@ -54,7 +54,7 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    content, _ = invoke_openrouter_with_fallback(
+    content, model_name = invoke_openrouter_with_fallback(
         messages,
         MODELS["rewriter_a"],
         allow_router=False,

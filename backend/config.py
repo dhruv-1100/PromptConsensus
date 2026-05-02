@@ -2,22 +2,22 @@ import os
 
 
 DEFAULT_TARGET_MODELS = [
-    "google/gemma-4-31b-it:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "google/gemma-3n-e4b-it:free",
+    "openai/gpt-oss-20b:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
     "openrouter/free",
 ]
 
 
 MODELS = {
-    "intent_extractor": os.getenv("MODEL_INTENT", "google/gemma-4-31b-it:free"),
-    "rewriter_a": os.getenv("MODEL_REWRITER_A", "nvidia/nemotron-3-super-120b-a12b:free"),
-    "rewriter_b": os.getenv("MODEL_REWRITER_B", "google/gemma-4-31b-it:free"),
-    "rewriter_c": os.getenv("MODEL_REWRITER_C", "qwen/qwen3-next-80b-a3b-instruct:free"),
-    "reviewer_a": os.getenv("MODEL_REVIEWER_A", "nvidia/nemotron-3-super-120b-a12b:free"),
-    "reviewer_b": os.getenv("MODEL_REVIEWER_B", "google/gemma-4-31b-it:free"),
-    "reviewer_c": os.getenv("MODEL_REVIEWER_C", "qwen/qwen3-next-80b-a3b-instruct:free"),
-    "chairman": os.getenv("MODEL_CHAIRMAN", "nvidia/nemotron-3-super-120b-a12b:free"),
+    "intent_extractor": os.getenv("MODEL_INTENT", "google/gemma-3n-e4b-it:free"),
+    "rewriter_a": os.getenv("MODEL_REWRITER_A", "google/gemma-3n-e4b-it:free"),
+    "rewriter_b": os.getenv("MODEL_REWRITER_B", "openai/gpt-oss-20b:free"),
+    "rewriter_c": os.getenv("MODEL_REWRITER_C", "meta-llama/llama-3.3-70b-instruct:free"),
+    "reviewer_a": os.getenv("MODEL_REVIEWER_A", "google/gemma-3n-e4b-it:free"),
+    "reviewer_b": os.getenv("MODEL_REVIEWER_B", "openai/gpt-oss-20b:free"),
+    "reviewer_c": os.getenv("MODEL_REVIEWER_C", "meta-llama/llama-3.3-70b-instruct:free"),
+    "chairman": os.getenv("MODEL_CHAIRMAN", "openai/gpt-oss-20b:free"),
 }
 
 

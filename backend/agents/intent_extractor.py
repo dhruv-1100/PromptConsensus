@@ -7,7 +7,7 @@ import json
 import os
 import os
 from langchain_core.messages import HumanMessage, SystemMessage
-from live_mode_utils import invoke_openrouter_with_fallback, parse_json_response
+from live_mode_utils import invoke_openrouter_with_fallback, parse_json_response, log_structured_parse_failure
 
 # ---------------------------------------------------------------------------
 # Demo-mode fixtures (used when DEMO_MODE=True in Streamlit session state)
@@ -55,14 +55,22 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
     from config import MODELS
 
     messages = [
-        HumanMessage(content=f"{SYSTEM_PROMPT}\n\nAnalyse this query:\n\n{raw_query}"),
+        SystemMessage(content=SYSTEM_PROMPT),
+        HumanMessage(content=f"Analyse this query and return only the JSON object:\n\n{raw_query}"),
     ]
 
-    content, _ = invoke_openrouter_with_fallback(
+    content, model_name = invoke_openrouter_with_fallback(
         messages,
         MODELS["intent_extractor"],
         allow_router=False,
         temperature=0.0,
         max_tokens=500,
     )
-    return parse_json_response(content)
+    try:
+        return parse_json_response(content)
+    except Exception as exc:
+        log_structured_parse_failure("intent_extractor", model_name, content, str(exc))
+        raise RuntimeError(
+            f"Intent extraction returned invalid structured output from {model_name}. "
+            "Check backend/structured_parse_failures.json for the raw response."
+        )
