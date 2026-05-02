@@ -4,7 +4,7 @@ import os
 DEFAULT_TARGET_MODELS = [
     "google/gemma-3n-e4b-it:free",
     "openai/gpt-oss-20b:free",
-    "meta-llama/llama-3.3-70b-instruct",
+    "meta-llama/llama-3.3-70b-instruct:free",
     "openrouter/free",
 ]
 
@@ -13,10 +13,10 @@ MODELS = {
     "intent_extractor": os.getenv("MODEL_INTENT", "google/gemma-3n-e4b-it:free"),
     "rewriter_a": os.getenv("MODEL_REWRITER_A", "google/gemma-3n-e4b-it:free"),
     "rewriter_b": os.getenv("MODEL_REWRITER_B", "openai/gpt-oss-20b:free"),
-    "rewriter_c": os.getenv("MODEL_REWRITER_C", "meta-llama/llama-3.3-70b-instruct"),
+    "rewriter_c": os.getenv("MODEL_REWRITER_C", "meta-llama/llama-3.3-70b-instruct:free"),
     "reviewer_a": os.getenv("MODEL_REVIEWER_A", "google/gemma-3n-e4b-it:free"),
     "reviewer_b": os.getenv("MODEL_REVIEWER_B", "openai/gpt-oss-20b:free"),
-    "reviewer_c": os.getenv("MODEL_REVIEWER_C", "meta-llama/llama-3.3-70b-instruct"),
+    "reviewer_c": os.getenv("MODEL_REVIEWER_C", "meta-llama/llama-3.3-70b-instruct:free"),
     "chairman": os.getenv("MODEL_CHAIRMAN", "openai/gpt-oss-20b:free"),
 }
 
