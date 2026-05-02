@@ -6,16 +6,23 @@ Uses Gemini.
 """
 import os
 import os
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from live_mode_utils import invoke_openrouter_with_fallback
 
 DEMO_CANDIDATE_C = """{
   "optimised_prompt": "Generate a clinical discharge summary. Use this template:\\n## DISCHARGE SUMMARY\\n**Patient:** [Age/Sex]\\n**Reason for Admission:** [Narrative]\\n**Discharge Medications:** [Table with columns: Medication | Dose | Route]\\n**Constraints:** HIPAA compliant, 8th-grade reading level.",
   "perspective_used": "Rigid Formatting Constraints"
 }"""
 
-SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
-Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
+SYSTEM_PROMPT = """You are Rewriter C in a prompt council. Your role is to produce the best possible prompt using explicit structure and constraints.
+
+You MUST optimize primarily through:
+- output schemas or templates
+- concrete constraints and quality checks
+- domain-specific formatting requirements
+- completion criteria the target model can verify while writing
+
+You MUST NOT optimize primarily through persona assignment or step-by-step reasoning unless they are required as supporting details.
 
 You MUST return your output ONLY as valid JSON matching this exact schema:
 {
@@ -34,13 +41,6 @@ def rewrite_structured_template(raw_query: str, intent: dict, demo_mode: bool = 
         return DEMO_CANDIDATE_C
 
     from config import MODELS
-    llm = ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        model=MODELS["rewriter_c"],
-        temperature=0.7,
-        max_tokens=1000,
-    )
 
     context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
 Format Domain: {intent.get('format_domain', 'general')}
@@ -54,5 +54,11 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    response = llm.invoke(messages)
-    return response.content.strip()
+    content, _ = invoke_openrouter_with_fallback(
+        messages,
+        MODELS["rewriter_c"],
+        allow_router=False,
+        temperature=0.7,
+        max_tokens=1000,
+    )
+    return content

@@ -6,16 +6,23 @@ Uses Gemini.
 """
 import os
 import os
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from live_mode_utils import invoke_openrouter_with_fallback
 
 DEMO_CANDIDATE_A = """{
   "optimised_prompt": "Let's approach this systematically. First, establish the patient context by gathering all relevant medical history and current admission details. Then, step-by-step:\\n\\n1. Summarise the reason for admission and primary diagnosis (Type 2 Diabetes Mellitus with HbA1c of [X]%)\\n2. Document all interventions performed during the stay\\n3. Record the patient's response to treatment\\n4. List all discharge medications with dosage\\n5. Provide follow-up instructions\\n\\nNow generate a professional clinical discharge summary following these steps for a diabetic patient, ensuring each section is complete before proceeding.",
   "perspective_used": "Chain-of-Thought Heuristics"
 }"""
 
-SYSTEM_PROMPT = """You are an expert Prompt Engineer. Your job is to improve the user's raw query into a highly effective, robust, and detailed prompt.
-Analyze the user's core intent, topic domain, and format domain, and dynamically choose the ABSOLUTE BEST prompt optimization technique (e.g., Chain-of-Thought, Few-Shot, Role-Assignment, Structured Templates, Meta-Prompting). 
+SYSTEM_PROMPT = """You are Rewriter A in a prompt council. Your role is to produce the best possible prompt using a reasoning-scaffold strategy.
+
+You MUST optimize primarily through:
+- explicit decomposition
+- ordered steps
+- reasoning checkpoints
+- handling ambiguity or missing information
+
+You MUST NOT optimize primarily through persona assignment or rigid templates unless they are required as supporting details.
 
 You MUST return your output ONLY as valid JSON matching this exact schema:
 {
@@ -34,13 +41,6 @@ def rewrite_chain_of_thought(raw_query: str, intent: dict, demo_mode: bool = Fal
         return DEMO_CANDIDATE_A
 
     from config import MODELS
-    llm = ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        model=MODELS["rewriter_a"],
-        temperature=0.7,
-        max_tokens=1000,
-    )
 
     context = f"""Topic Domain: {intent.get('topic_domain', 'general')}
 Format Domain: {intent.get('format_domain', 'general')}
@@ -54,5 +54,11 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    response = llm.invoke(messages)
-    return response.content.strip()
+    content, _ = invoke_openrouter_with_fallback(
+        messages,
+        MODELS["rewriter_a"],
+        allow_router=False,
+        temperature=0.7,
+        max_tokens=1000,
+    )
+    return content

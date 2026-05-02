@@ -313,5 +313,40 @@
         "format_domain": "clinical document",
         "winning_model": "Response Z",
         "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-20T18:38:32.106424",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-30T00:06:55.958628",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-30T00:23:38.405773",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-04-30T01:07:21.291058",
+        "topic_domain": "research",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Chain-of-Thought Reasoning"
+    },
+    {
+        "timestamp": "2026-04-30T01:17:08.979139",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
     }
 ]

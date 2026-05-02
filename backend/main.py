@@ -5,7 +5,7 @@ Exposes the multi-agent prompt optimisation pipeline as REST endpoints.
 import os
 import json
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from feedback_memory import append_feedback_entry
 from session_store import append_session_entry, list_sessions, export_sessions_csv, get_session_analytics
 from safety_checks import run_safety_checks
+from request_coordinator import build_request_key, run_deduplicated
 
 load_dotenv()
 
@@ -41,7 +42,7 @@ class OptimizeRequest(BaseModel):
 
 class ExecuteRequest(BaseModel):
     final_prompt: str
-    target_model: str = "gpt-4o"
+    target_model: str = "google/gemma-4-31b-it:free"
     demo_mode: bool = True
 
 class SafetyCheckRequest(BaseModel):
@@ -67,6 +68,7 @@ class FeedbackRequest(BaseModel):
     compare_mode: bool = False
     safety_report: dict = {}
     safety_acknowledged: bool = False
+    intervention_labels: list[str] = []
     intent: dict = {}
     candidate_a: str = ""
     candidate_b: str = ""
@@ -74,6 +76,7 @@ class FeedbackRequest(BaseModel):
     peer_reviews: list = []
     aggregate_rankings: list = []
     label_map: dict = {}
+    consensus_diagnostics: dict = {}
     perspectives: dict = {}
     chairman: dict = {}
 
@@ -89,6 +92,7 @@ def format_pipeline_response(state: dict) -> dict:
         "peer_reviews": state.get("peer_reviews", []),
         "aggregate_rankings": state.get("aggregate_rankings", []),
         "label_map": state.get("label_map", {}),
+        "consensus_diagnostics": state.get("consensus_diagnostics", {}),
         "chairman": state.get("chairman", {}),
         "perspectives": state.get("perspectives", {}),
         "optimised_prompt": state.get("optimised_prompt", ""),
@@ -104,8 +108,8 @@ def health():
 
 @app.get("/api/config")
 def get_config():
-    from config import MODELS
-    return {"models": MODELS}
+    from config import MODELS, TARGET_MODELS
+    return {"models": MODELS, "target_models": TARGET_MODELS}
 
 @app.post("/api/optimize")
 def optimize(req: OptimizeRequest):
@@ -116,13 +120,19 @@ def optimize(req: OptimizeRequest):
     """
     from pipeline.graph import run_pipeline
 
-    state = run_pipeline(
-        raw_query=req.raw_query,
-        domain=req.domain,
-        demo_mode=req.demo_mode,
-    )
-
-    return format_pipeline_response(state)
+    try:
+        request_key = build_request_key(req.raw_query, req.domain, req.demo_mode)
+        state, _ = run_deduplicated(
+            request_key,
+            lambda: run_pipeline(
+                raw_query=req.raw_query,
+                domain=req.domain,
+                demo_mode=req.demo_mode,
+            ),
+        )
+        return format_pipeline_response(state)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @app.post("/api/optimize/stream")
@@ -141,13 +151,37 @@ async def optimize_stream(req: OptimizeRequest):
 
         async def run_and_publish():
             try:
-                state = await asyncio.to_thread(
-                    run_pipeline,
-                    req.raw_query,
-                    req.domain,
-                    req.demo_mode,
-                    progress_callback,
+                request_key = build_request_key(req.raw_query, req.domain, req.demo_mode)
+                state, source = await asyncio.to_thread(
+                    run_deduplicated,
+                    request_key,
+                    lambda: run_pipeline(
+                        req.raw_query,
+                        req.domain,
+                        req.demo_mode,
+                        progress_callback,
+                    ),
                 )
+                if source == "joined":
+                    loop.call_soon_threadsafe(
+                        queue.put_nowait,
+                        {
+                            "type": "progress",
+                            "stage": "review_complete",
+                            "message": "Rejoined an identical in-flight run",
+                            "progress": 92,
+                        },
+                    )
+                elif source == "cached":
+                    loop.call_soon_threadsafe(
+                        queue.put_nowait,
+                        {
+                            "type": "progress",
+                            "stage": "complete",
+                            "message": "Reused the most recent identical result",
+                            "progress": 98,
+                        },
+                    )
                 loop.call_soon_threadsafe(
                     queue.put_nowait,
                     {"type": "result", "data": format_pipeline_response(state)},
@@ -189,13 +223,15 @@ def execute(req: ExecuteRequest):
     """
     from pipeline.graph import execute_prompt
 
-    response = execute_prompt(
-        final_prompt=req.final_prompt,
-        target_model=req.target_model,
-        demo_mode=req.demo_mode,
-    )
-
-    return {"response": response}
+    try:
+        response = execute_prompt(
+            final_prompt=req.final_prompt,
+            target_model=req.target_model,
+            demo_mode=req.demo_mode,
+        )
+        return {"response": response}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @app.post("/api/safety-check")
@@ -233,6 +269,7 @@ def feedback(req: FeedbackRequest):
         "compare_mode": req.compare_mode,
         "safety_report": req.safety_report,
         "safety_acknowledged": req.safety_acknowledged,
+        "intervention_labels": req.intervention_labels,
     }
     entry = append_feedback_entry(feedback_entry)
     session_entry = append_session_entry({
@@ -244,6 +281,7 @@ def feedback(req: FeedbackRequest):
         "peer_reviews": req.peer_reviews,
         "aggregate_rankings": req.aggregate_rankings,
         "label_map": req.label_map,
+        "consensus_diagnostics": req.consensus_diagnostics,
         "perspectives": req.perspectives,
         "chairman": req.chairman,
     })

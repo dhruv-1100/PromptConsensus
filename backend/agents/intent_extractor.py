@@ -6,8 +6,8 @@ Uses Gemini as the backbone LLM for structured intent analysis.
 import json
 import os
 import os
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from live_mode_utils import invoke_openrouter_with_fallback, parse_json_response
 
 # ---------------------------------------------------------------------------
 # Demo-mode fixtures (used when DEMO_MODE=True in Streamlit session state)
@@ -53,26 +53,16 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
         return DEMO_INTENT
 
     from config import MODELS
-    llm = ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        model=MODELS["intent_extractor"],
-        temperature=0.0,
-        max_tokens=500,
-    )
 
     messages = [
         HumanMessage(content=f"{SYSTEM_PROMPT}\n\nAnalyse this query:\n\n{raw_query}"),
     ]
 
-    response = llm.invoke(messages)
-    content = response.content.strip()
-
-    # Strip markdown code fences if present
-    if content.startswith("```"):
-        content = content.split("```")[1]
-        if content.startswith("json"):
-            content = content[4:]
-        content = content.strip()
-
-    return json.loads(content)
+    content, _ = invoke_openrouter_with_fallback(
+        messages,
+        MODELS["intent_extractor"],
+        allow_router=False,
+        temperature=0.0,
+        max_tokens=500,
+    )
+    return parse_json_response(content)

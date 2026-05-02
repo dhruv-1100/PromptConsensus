@@ -11,6 +11,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
+from research_insights import build_research_insights
 
 
 SESSIONS_FILE = os.path.join(os.path.dirname(__file__), "sessions.json")
@@ -37,6 +38,7 @@ def append_session_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         **entry,
     }
+    stored["research_insights"] = build_research_insights(stored)
     sessions.append(stored)
 
     with open(SESSIONS_FILE, "w", encoding="utf-8") as f:
@@ -47,7 +49,11 @@ def append_session_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
 def list_sessions(limit: int | None = None) -> List[Dict[str, Any]]:
     """Return recent sessions, newest first."""
-    sessions = list(reversed(_read_sessions()))
+    sessions = []
+    for session in reversed(_read_sessions()):
+        hydrated = dict(session)
+        hydrated["research_insights"] = build_research_insights(hydrated)
+        sessions.append(hydrated)
     return sessions[:limit] if limit else sessions
 
 
@@ -67,6 +73,10 @@ def get_session_analytics() -> Dict[str, Any]:
             "compare_mode_rate": 0,
             "top_domain": None,
             "top_winner": None,
+            "avg_consensus_strength": 0,
+            "avg_rewrite_diversity": 0,
+            "avg_human_intervention": 0,
+            "acceptance_rate": 0,
         }
 
     def avg(field: str) -> float:
@@ -77,6 +87,10 @@ def get_session_analytics() -> Dict[str, Any]:
     compare_count = 0
     domain_counts: Dict[str, int] = {}
     winner_counts: Dict[str, int] = {}
+    consensus_total = 0.0
+    diversity_total = 0.0
+    intervention_total = 0.0
+    accepted_without_edit = 0
 
     for session in sessions:
         if (session.get("optimised_prompt") or "").strip() != (session.get("final_prompt") or "").strip():
@@ -93,6 +107,13 @@ def get_session_analytics() -> Dict[str, Any]:
         if winner_key:
             winner_counts[winner_key] = winner_counts.get(winner_key, 0) + 1
 
+        insights = session.get("research_insights") or build_research_insights(session)
+        consensus_total += float(insights.get("consensus_strength_pct", 0) or 0)
+        diversity_total += float(insights.get("rewrite_diversity_pct", 0) or 0)
+        intervention_total += float(insights.get("human_edit_shift_pct", 0) or 0)
+        if insights.get("accepted_without_edit"):
+            accepted_without_edit += 1
+
     top_domain = max(domain_counts.items(), key=lambda item: item[1])[0] if domain_counts else None
     top_winner = max(winner_counts.items(), key=lambda item: item[1])[0] if winner_counts else None
 
@@ -106,6 +127,10 @@ def get_session_analytics() -> Dict[str, Any]:
         "compare_mode_rate": round((compare_count / total) * 100, 1),
         "top_domain": top_domain,
         "top_winner": top_winner,
+        "avg_consensus_strength": round(consensus_total / total, 1),
+        "avg_rewrite_diversity": round(diversity_total / total, 1),
+        "avg_human_intervention": round(intervention_total / total, 1),
+        "acceptance_rate": round((accepted_without_edit / total) * 100, 1),
     }
 
 
@@ -137,7 +162,19 @@ def export_sessions_csv() -> str:
             "winner_label",
             "winner_candidate",
             "winner_average_rank",
+            "consensus_label",
             "user_edited_prompt",
+            "intervention_labels",
+            "consensus_strength_pct",
+            "reviewer_agreement_pct",
+            "winner_first_place_support_pct",
+            "rewrite_diversity_pct",
+            "optimization_shift_pct",
+            "human_edit_shift_pct",
+            "human_edit_level",
+            "consensus_response",
+            "accepted_without_edit",
+            "response_length_delta_pct",
             "comment",
         ],
     )
@@ -150,6 +187,7 @@ def export_sessions_csv() -> str:
         final_prompt = session.get("final_prompt", "")
         safety_report = session.get("safety_report") or {}
         safety_checks = safety_report.get("checks") or []
+        insights = session.get("research_insights") or build_research_insights(session)
 
         writer.writerow(
             {
@@ -174,7 +212,19 @@ def export_sessions_csv() -> str:
                 "winner_label": winner.get("label", ""),
                 "winner_candidate": winner.get("candidate", ""),
                 "winner_average_rank": winner.get("average_rank", ""),
+                "consensus_label": insights.get("consensus_label", ""),
                 "user_edited_prompt": optimised_prompt != final_prompt,
+                "intervention_labels": " | ".join(session.get("intervention_labels") or []),
+                "consensus_strength_pct": insights.get("consensus_strength_pct", ""),
+                "reviewer_agreement_pct": insights.get("reviewer_agreement_pct", ""),
+                "winner_first_place_support_pct": insights.get("winner_first_place_support_pct", ""),
+                "rewrite_diversity_pct": insights.get("rewrite_diversity_pct", ""),
+                "optimization_shift_pct": insights.get("optimization_shift_pct", ""),
+                "human_edit_shift_pct": insights.get("human_edit_shift_pct", ""),
+                "human_edit_level": insights.get("human_edit_level", ""),
+                "consensus_response": insights.get("consensus_response", ""),
+                "accepted_without_edit": insights.get("accepted_without_edit", ""),
+                "response_length_delta_pct": insights.get("response_length_delta_pct", ""),
                 "comment": session.get("text", ""),
             }
         )

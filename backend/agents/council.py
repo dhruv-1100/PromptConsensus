@@ -14,6 +14,8 @@ import asyncio
 from typing import List, Dict, Any, Tuple
 from langchain_core.messages import HumanMessage, SystemMessage
 from feedback_memory import build_chairman_feedback_context
+from adaptation_memory import build_adaptation_context
+from live_mode_utils import invoke_openrouter_with_fallback
 
 # ── Demo fixtures ──────────────────────────────────────────────────────────────
 
@@ -136,23 +138,12 @@ CHAIRMAN_SYSTEM = """You are the chairman of a prompt-evaluation council. Based 
 
 When human preference memory is provided, treat it as evidence about which prompt traits people trusted, approved, or edited toward in prior sessions. Prefer those traits when they fit the current task.
 
+When adaptation memory is provided, treat it as evidence about when people accepted the council outcome versus overrode it. If a consensus pattern is frequently overridden, correct for it in the synthesis.
+
 Return ONLY the synthesised prompt, with no preamble or explanation."""
 
 
 # ── Core functions ─────────────────────────────────────────────────────────────
-
-def get_llm(model_name: str, temperature: float = 0.0):
-    """Return a LangChain chat model for the given hint."""
-    import os
-    from langchain_openai import ChatOpenAI
-    return ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        model=model_name,
-        temperature=temperature,
-        max_tokens=1000
-    )
-
 
 def _parse_ranking(text: str) -> List[str]:
     """Extract FINAL RANKING section from review text."""
@@ -162,6 +153,80 @@ def _parse_ranking(text: str) -> List[str]:
         if matches:
             return matches
     return re.findall(r'Response [A-Z]', text)
+
+
+def _consensus_diagnostics(peer_reviews: List[Dict], aggregate: List[Dict]) -> Dict[str, Any]:
+    """
+    Measure how strong the council agreement actually was.
+    """
+    if not aggregate:
+        return {
+            "winner_label": None,
+            "winner_candidate": None,
+            "winner_average_rank": None,
+            "winner_margin": 0.0,
+            "first_place_support_pct": 0.0,
+            "reviewer_agreement_pct": 0.0,
+            "consensus_strength_pct": 0.0,
+            "consensus_label": "unknown",
+            "is_unanimous_winner": False,
+            "needs_human_review": True,
+        }
+
+    winner = aggregate[0]
+    reviewer_count = len(peer_reviews)
+    first_place_votes = sum(
+        1 for review in peer_reviews if (review.get("parsed_ranking") or [None])[0] == winner.get("label")
+    )
+    first_place_support = (first_place_votes / reviewer_count) if reviewer_count else 0.0
+
+    def ranking_similarity(left: List[str], right: List[str]) -> float:
+        items = [item for item in left if item in right]
+        if len(items) < 2:
+            return 1.0
+        position_right = {item: idx for idx, item in enumerate(right)}
+        concordant = 0
+        total = 0
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                total += 1
+                if position_right[items[i]] < position_right[items[j]]:
+                    concordant += 1
+        return concordant / total if total else 1.0
+
+    similarities = []
+    for i in range(len(peer_reviews)):
+        for j in range(i + 1, len(peer_reviews)):
+            similarities.append(
+                ranking_similarity(
+                    peer_reviews[i].get("parsed_ranking") or [],
+                    peer_reviews[j].get("parsed_ranking") or [],
+                )
+            )
+    reviewer_agreement = sum(similarities) / len(similarities) if similarities else (1.0 if reviewer_count else 0.0)
+    consensus_strength = (first_place_support + reviewer_agreement) / 2 if reviewer_count else 0.0
+
+    if consensus_strength >= 0.8:
+        label = "high"
+    elif consensus_strength >= 0.55:
+        label = "moderate"
+    else:
+        label = "weak"
+
+    runner_up = aggregate[1] if len(aggregate) > 1 else {}
+    winner_margin = round(float(runner_up.get("average_rank", 0) or 0) - float(winner.get("average_rank", 0) or 0), 2)
+    return {
+        "winner_label": winner.get("label"),
+        "winner_candidate": winner.get("candidate"),
+        "winner_average_rank": winner.get("average_rank"),
+        "winner_margin": winner_margin,
+        "first_place_support_pct": round(first_place_support * 100, 1),
+        "reviewer_agreement_pct": round(reviewer_agreement * 100, 1),
+        "consensus_strength_pct": round(consensus_strength * 100, 1),
+        "consensus_label": label,
+        "is_unanimous_winner": first_place_votes == reviewer_count and reviewer_count > 0,
+        "needs_human_review": label != "high",
+    }
 
 
 def _anonymise_candidates(
@@ -186,16 +251,20 @@ def _anonymise_candidates(
 
 def _single_review(reviewer_name: str, reviewer_model: str, user_query: str, anonymised_text: str) -> Dict:
     """Run one cross-examination peer review."""
-    llm = get_llm(reviewer_model)
     system = f"You are '{reviewer_name}', a senior AI Prompt Engineer." + "\n" + REVIEW_SYSTEM
     messages = [
         HumanMessage(content=f"{system}\n\nOriginal user query: {user_query}\n\n{anonymised_text}"),
     ]
-    response = llm.invoke(messages)
-    text = response.content.strip()
+    text, actual_model = invoke_openrouter_with_fallback(
+        messages,
+        reviewer_model,
+        allow_router=False,
+        temperature=0.0,
+        max_tokens=1000,
+    )
     return {
         "reviewer": reviewer_name,
-        "model": reviewer_model,
+        "model": actual_model,
         "evaluation": text,
         "parsed_ranking": _parse_ranking(text),
     }
@@ -205,13 +274,14 @@ def peer_review(
     raw_query: str,
     candidate_a: str, candidate_b: str, candidate_c: str,
     demo_mode: bool = False,
-) -> Tuple[List[Dict], List[Dict], Dict[str, str]]:
+) -> Tuple[List[Dict], List[Dict], Dict[str, str], Dict[str, Any]]:
     """
     S3a+S3b: Anonymised peer review + aggregate ranking.
     Returns (peer_reviews, aggregate_rankings, label_map).
     """
     if demo_mode:
-        return DEMO_PEER_REVIEWS, DEMO_AGGREGATE, DEMO_LABEL_MAP
+        diagnostics = _consensus_diagnostics(DEMO_PEER_REVIEWS, DEMO_AGGREGATE)
+        return DEMO_PEER_REVIEWS, DEMO_AGGREGATE, DEMO_LABEL_MAP, diagnostics
 
     anonymised_text, label_map = _anonymise_candidates(candidate_a, candidate_b, candidate_c)
 
@@ -265,7 +335,8 @@ def peer_review(
         })
     aggregate.sort(key=lambda x: x["average_rank"])
 
-    return peer_reviews, aggregate, label_map
+    diagnostics = _consensus_diagnostics(peer_reviews, aggregate)
+    return peer_reviews, aggregate, label_map, diagnostics
 
 
 def chairman_synthesise(
@@ -284,8 +355,8 @@ def chairman_synthesise(
     from config import MODELS
     # Chairman uses a high-competency model like DeepSeek to synthesise
     # Removed specific handling for gemini/gemma to default to OpenRouter via get_llm
-    llm = get_llm(MODELS["chairman"], temperature=0.7)
     feedback_memory = build_chairman_feedback_context()
+    adaptation_memory = build_adaptation_context()
 
     reviews_text = "\n\n".join([
         f"{r['reviewer']}:\n{r['evaluation']}" for r in peer_reviews
@@ -300,6 +371,8 @@ def chairman_synthesise(
             f"{CHAIRMAN_SYSTEM}\n\n"
             f"{feedback_memory}\n\n" if feedback_memory else f"{CHAIRMAN_SYSTEM}\n\n"
         ) + (
+            f"{adaptation_memory}\n\n" if adaptation_memory else ""
+        ) + (
             f"Original query: {raw_query}\n\n"
             f"Candidate A (Chain-of-Thought):\n{candidate_a}\n\n"
             f"Candidate B (Role-Assignment):\n{candidate_b}\n\n"
@@ -310,8 +383,13 @@ def chairman_synthesise(
         )),
     ]
 
-    response = llm.invoke(messages)
-    optimised = response.content.strip()
+    optimised, actual_model = invoke_openrouter_with_fallback(
+        messages,
+        MODELS["chairman"],
+        allow_router=False,
+        temperature=0.7,
+        max_tokens=1000,
+    )
 
     # Fallback: if the model returned a label/reference instead of an actual prompt,
     # use the winning candidate's real prompt text
@@ -323,7 +401,7 @@ def chairman_synthesise(
         optimised = candidates_by_agent.get(winner_agent, candidate_a)
 
     chairman_info = {
-        "model": MODELS["chairman"],
+        "model": actual_model,
         "rationale": f"Based on council consensus: {aggregate[0]['label']} ranked first with average rank {aggregate[0]['average_rank']}.",
     }
 

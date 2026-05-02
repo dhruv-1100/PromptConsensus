@@ -25,6 +25,7 @@ class ConsensusState(TypedDict, total=False):
 
     # S3b — Aggregate rankings
     aggregate_rankings: list  # [{label, candidate, average_rank, votes, ranks}, ...]
+    consensus_diagnostics: dict  # {consensus_strength_pct, reviewer_agreement_pct, ...}
 
     # S3c — Chairman synthesis
     chairman: dict           # {model, rationale}

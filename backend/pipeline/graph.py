@@ -9,6 +9,7 @@ import datetime
 import asyncio
 from typing import Any
 from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
 
 from pipeline.state import ConsensusState
 from agents.intent_extractor import extract_intent
@@ -16,6 +17,7 @@ from agents.rewriter_a import rewrite_chain_of_thought
 from agents.rewriter_b import rewrite_role_assignment
 from agents.rewriter_c import rewrite_structured_template
 from agents.council import peer_review, chairman_synthesise
+from live_mode_utils import invoke_openrouter_with_fallback
 
 load_dotenv()
 
@@ -117,7 +119,7 @@ def run_pipeline(
 
     # S3a + S3b: Council peer review + aggregate ranking
     notify("review", "Council: anonymised peer review in progress", 65)
-    reviews, aggregate, label_map = peer_review(
+    reviews, aggregate, label_map, diagnostics = peer_review(
         raw_query=raw_query,
         candidate_a=prompt_a,
         candidate_b=prompt_b,
@@ -127,6 +129,7 @@ def run_pipeline(
     state["peer_reviews"] = reviews
     state["aggregate_rankings"] = aggregate
     state["label_map"] = label_map
+    state["consensus_diagnostics"] = diagnostics
     notify("review_complete", "Council review complete — aggregating rankings", 85)
 
     # S3c: Chairman synthesis
@@ -174,7 +177,11 @@ def run_pipeline(
     return state
 
 
-def execute_prompt(final_prompt: str, target_model: str = "gpt-4o", demo_mode: bool = False) -> str:
+def execute_prompt(
+    final_prompt: str,
+    target_model: str = "google/gemma-4-31b-it:free",
+    demo_mode: bool = False,
+) -> str:
     """
     S5: Execute the approved final prompt against the chosen target LLM.
     """
@@ -227,13 +234,11 @@ He is being discharged in stable condition on insulin therapy and metformin. He 
 
     load_dotenv()
 
-    from langchain_google_genai import ChatGoogleGenerativeAI
-    llm = ChatGoogleGenerativeAI(
-        model="gemma-3-1b-it",
+    content, _ = invoke_openrouter_with_fallback(
+        [HumanMessage(content=final_prompt)],
+        target_model,
+        allow_router=True,
         temperature=0.7,
-        google_api_key=os.environ.get("GOOGLE_API_KEY"),
+        max_tokens=1400,
     )
-
-    from langchain_core.messages import HumanMessage
-    response = llm.invoke([HumanMessage(content=final_prompt)])
-    return response.content
+    return content

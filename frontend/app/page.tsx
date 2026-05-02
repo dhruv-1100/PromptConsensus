@@ -23,6 +23,19 @@ interface AggregateRank {
   ranks: number[];
 }
 
+interface ConsensusDiagnostics {
+  winner_label?: string | null;
+  winner_candidate?: string | null;
+  winner_average_rank?: number | null;
+  winner_margin?: number;
+  first_place_support_pct?: number;
+  reviewer_agreement_pct?: number;
+  consensus_strength_pct?: number;
+  consensus_label?: string;
+  is_unanimous_winner?: boolean;
+  needs_human_review?: boolean;
+}
+
 interface PipelineState {
   raw_query: string;
   intent: Record<string, any>;
@@ -32,6 +45,7 @@ interface PipelineState {
   peer_reviews: PeerReview[];
   aggregate_rankings: AggregateRank[];
   label_map: Record<string, string>;
+  consensus_diagnostics?: ConsensusDiagnostics;
   chairman: { model: string; rationale: string };
   perspectives?: Record<string, string>;
   optimised_prompt: string;
@@ -68,8 +82,11 @@ interface SessionSummary {
   peer_reviews?: PeerReview[];
   aggregate_rankings?: AggregateRank[];
   label_map?: Record<string, string>;
+  consensus_diagnostics?: ConsensusDiagnostics;
   perspectives?: Record<string, string>;
   chairman?: { model?: string; rationale?: string };
+  research_insights?: ResearchInsights;
+  intervention_labels?: string[];
 }
 
 interface SessionAnalytics {
@@ -82,6 +99,33 @@ interface SessionAnalytics {
   compare_mode_rate: number;
   top_domain: string | null;
   top_winner: string | null;
+  avg_consensus_strength: number;
+  avg_rewrite_diversity: number;
+  avg_human_intervention: number;
+  acceptance_rate: number;
+}
+
+interface ResearchInsights {
+  winner_candidate?: string | null;
+  reviewer_count: number;
+  winner_first_place_support_pct: number;
+  reviewer_agreement_pct: number;
+  consensus_strength_pct: number;
+  consensus_label: string;
+  winner_margin: number;
+  rewrite_diversity_pct: number;
+  diversity_label: string;
+  optimization_shift_pct: number;
+  human_edit_shift_pct: number;
+  human_edit_level: string;
+  accepted_without_edit: boolean;
+  consensus_response?: string;
+  accepted_with_refinement?: boolean;
+  overrode_consensus?: boolean;
+  compare_mode: boolean;
+  response_length_delta_pct?: number | null;
+  safety_acknowledged: boolean;
+  intervention_labels: string[];
 }
 
 interface SafetyCheckItem {
@@ -204,6 +248,197 @@ function safeSnippet(text?: string, fallback = "No content recorded.") {
   return value || fallback;
 }
 
+function getConsensusReasons(peerReviews: PeerReview[], chairmanRationale = "") {
+  const buckets = [
+    {
+      label: "Clearer output structure",
+      keywords: ["structure", "structured", "template", "format", "sections", "table", "layout"],
+    },
+    {
+      label: "Stronger constraints",
+      keywords: ["constraint", "constraints", "requirement", "requirements", "compliance", "guardrail", "specific"],
+    },
+    {
+      label: "More complete coverage",
+      keywords: ["complete", "completeness", "thorough", "coverage", "comprehensive"],
+    },
+    {
+      label: "Better reasoning guidance",
+      keywords: ["reasoning", "step-by-step", "scaffold", "systematic", "guidance"],
+    },
+    {
+      label: "Better domain alignment",
+      keywords: ["domain", "clinical", "legal", "education", "fit", "usable", "context"],
+    },
+    {
+      label: "Stronger expert framing",
+      keywords: ["persona", "role", "expert", "authority"],
+    },
+  ];
+
+  const corpus = `${peerReviews.map((review) => review.evaluation).join(" ")} ${chairmanRationale}`.toLowerCase();
+  const ranked = buckets
+    .map((bucket) => ({
+      label: bucket.label,
+      score: bucket.keywords.reduce((count, keyword) => count + (corpus.includes(keyword) ? 1 : 0), 0),
+    }))
+    .filter((bucket) => bucket.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map((bucket) => bucket.label);
+
+  return ranked.length ? ranked : ["Balanced structure and clarity", "More explicit instructions", "Stronger prompt reliability"];
+}
+
+function getPromptImprovements(rawQuery: string, optimisedPrompt: string, intent: Record<string, any>) {
+  const raw = rawQuery.toLowerCase();
+  const optimised = optimisedPrompt.toLowerCase();
+  const improvements: string[] = [];
+
+  const maybeAdd = (condition: boolean, label: string) => {
+    if (condition && !improvements.includes(label)) improvements.push(label);
+  };
+
+  maybeAdd(
+    ["format", "section", "sections", "table", "json", "bullet", "heading", "template"].some((term) => optimised.includes(term) && !raw.includes(term)),
+    "Added explicit output structure",
+  );
+  maybeAdd(
+    ["you are", "act as", "role", "expert"].some((term) => optimised.includes(term) && !raw.includes(term)),
+    "Introduced clearer model framing",
+  );
+  maybeAdd(
+    ["constraint", "must", "do not", "only use", "requirements", "follow these"].some((term) => optimised.includes(term) && !raw.includes(term)),
+    "Added stronger constraints",
+  );
+  maybeAdd(
+    ["step 1", "step-by-step", "reason through", "first,", "then,"].some((term) => optimised.includes(term) && !raw.includes(term)),
+    "Improved reasoning scaffolding",
+  );
+  maybeAdd(
+    ["follow-up", "return", "next steps", "questions", "assumption"].some((term) => optimised.includes(term) && !raw.includes(term)),
+    "Made missing-information handling explicit",
+  );
+  maybeAdd(
+    Boolean(intent?.topic_domain || intent?.format_domain),
+    `Aligned the prompt to ${[intent?.topic_domain, intent?.format_domain].filter(Boolean).join(" / ")}`,
+  );
+
+  return improvements.slice(0, 6);
+}
+
+function similarityScore(orderA: string[], orderB: string[]) {
+  const items = orderA.filter((item) => orderB.includes(item));
+  if (items.length < 2) return 1;
+  const positionB = Object.fromEntries(orderB.map((item, index) => [item, index]));
+  let concordant = 0;
+  let total = 0;
+  for (let i = 0; i < items.length; i += 1) {
+    for (let j = i + 1; j < items.length; j += 1) {
+      total += 1;
+      if ((positionB[items[i]] ?? 0) < (positionB[items[j]] ?? 0)) concordant += 1;
+    }
+  }
+  return total ? concordant / total : 1;
+}
+
+function tokenDistance(a: string, b: string) {
+  const aTokens = new Set((a.toLowerCase().match(/[a-z0-9]+/g) || []));
+  const bTokens = new Set((b.toLowerCase().match(/[a-z0-9]+/g) || []));
+  const union = new Set(Array.from(aTokens).concat(Array.from(bTokens)));
+  if (union.size === 0) return 0;
+  const overlap = Array.from(aTokens).filter((token) => bTokens.has(token)).length;
+  return 1 - overlap / union.size;
+}
+
+function changeRatio(before: string, after: string) {
+  const diff = buildLineDiff(before, after);
+  const summary = summarizeDiff(diff);
+  const total = diff.length || 1;
+  return (summary.added + summary.removed) / total;
+}
+
+function bucketLevel(value: number, high: number, medium: number) {
+  if (value >= high) return "high";
+  if (value >= medium) return "moderate";
+  return "mixed";
+}
+
+function getLiveResearchInsights(
+  pipelineState: PipelineState,
+  rawQuery: string,
+  optimisedPrompt: string,
+  finalPrompt: string,
+): ResearchInsights {
+  const peerReviews = pipelineState.peer_reviews || [];
+  const aggregateRankings = pipelineState.aggregate_rankings || [];
+  const diagnostics = pipelineState.consensus_diagnostics || {};
+  const winner = aggregateRankings[0];
+  const winnerLabel = winner?.label || "";
+  const reviewerCount = peerReviews.length;
+  const firstPlaceSupport = reviewerCount
+    ? peerReviews.filter((review) => review.parsed_ranking?.[0] === winnerLabel).length / reviewerCount
+    : 0;
+
+  const similarities: number[] = [];
+  for (let i = 0; i < peerReviews.length; i += 1) {
+    for (let j = i + 1; j < peerReviews.length; j += 1) {
+      similarities.push(similarityScore(peerReviews[i].parsed_ranking || [], peerReviews[j].parsed_ranking || []));
+    }
+  }
+  const reviewerAgreement = similarities.length
+    ? similarities.reduce((sum, value) => sum + value, 0) / similarities.length
+    : reviewerCount ? 1 : 0;
+  const consensusStrength = reviewerCount ? (firstPlaceSupport + reviewerAgreement) / 2 : 0;
+
+  const candidates = [pipelineState.candidate_a, pipelineState.candidate_b, pipelineState.candidate_c].filter(Boolean);
+  const diversityScores: number[] = [];
+  for (let i = 0; i < candidates.length; i += 1) {
+    for (let j = i + 1; j < candidates.length; j += 1) {
+      diversityScores.push(tokenDistance(candidates[i], candidates[j]));
+    }
+  }
+  const rewriteDiversity = diversityScores.length
+    ? diversityScores.reduce((sum, value) => sum + value, 0) / diversityScores.length
+    : 0;
+  const humanEditShift = changeRatio(optimisedPrompt, finalPrompt);
+  const consensusResponse =
+    humanEditShift === 0
+      ? "accepted"
+      : humanEditShift >= 0.35
+        ? "overrode"
+        : "refined";
+  return {
+    winner_candidate: winner?.candidate || winnerLabel || null,
+    reviewer_count: reviewerCount,
+    winner_first_place_support_pct: diagnostics.first_place_support_pct ?? Number((firstPlaceSupport * 100).toFixed(1)),
+    reviewer_agreement_pct: diagnostics.reviewer_agreement_pct ?? Number((reviewerAgreement * 100).toFixed(1)),
+    consensus_strength_pct: diagnostics.consensus_strength_pct ?? Number((consensusStrength * 100).toFixed(1)),
+    consensus_label: diagnostics.consensus_label ?? bucketLevel(consensusStrength, 0.8, 0.55),
+    winner_margin: diagnostics.winner_margin ?? Number((((aggregateRankings[1]?.average_rank || 0) - (winner?.average_rank || 0))).toFixed(2)),
+    rewrite_diversity_pct: Number((rewriteDiversity * 100).toFixed(1)),
+    diversity_label: bucketLevel(rewriteDiversity, 0.6, 0.35),
+    optimization_shift_pct: Number((changeRatio(rawQuery, optimisedPrompt) * 100).toFixed(1)),
+    human_edit_shift_pct: Number((humanEditShift * 100).toFixed(1)),
+    human_edit_level: humanEditShift === 0 ? "none" : humanEditShift < 0.2 ? "light" : "substantial",
+    accepted_without_edit: consensusResponse === "accepted" && humanEditShift === 0,
+    consensus_response: consensusResponse,
+    accepted_with_refinement: consensusResponse === "refined",
+    overrode_consensus: consensusResponse === "overrode",
+    compare_mode: false,
+    response_length_delta_pct: null,
+    safety_acknowledged: false,
+    intervention_labels: [],
+  };
+}
+
+function describeConsensusResponse(response?: string): string {
+  if (response === "accepted") return "Accepted";
+  if (response === "refined") return "Refined";
+  if (response === "overrode") return "Overrode";
+  return "Pending";
+}
+
 /* ── Header ── */
 function Header({ theme, toggleTheme }: { theme: string; toggleTheme: () => void }) {
   return (
@@ -249,30 +484,36 @@ function StageInput({
   onSubmit,
   recentSessions,
   analytics,
+  targetModels,
 }: {
   onSubmit: (q: string, domain: string, model: string, demo: boolean, compare: boolean) => void;
   recentSessions: SessionSummary[];
   analytics: SessionAnalytics | null;
+  targetModels: string[];
 }) {
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("General");
-  const [model, setModel] = useState("gpt-4o");
+  const [model, setModel] = useState(targetModels[0] || "google/gemma-4-31b-it:free");
   const [demo, setDemo] = useState(true);
   const [compareMode, setCompareMode] = useState(true);
   const [showHow, setShowHow] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(recentSessions[0]?.session_id || null);
+  const [showOptions, setShowOptions] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   React.useEffect(() => {
-    if (!recentSessions.length) {
-      setSelectedSessionId(null);
-      return;
-    }
     setSelectedSessionId((current) => (
       current && recentSessions.some((session) => session.session_id === current)
         ? current
-        : recentSessions[0].session_id
+        : null
     ));
   }, [recentSessions]);
+
+  React.useEffect(() => {
+    if (targetModels.length > 0 && !targetModels.includes(model)) {
+      setModel(targetModels[0]);
+    }
+  }, [targetModels, model]);
 
   const loadExample = (ex: typeof EXAMPLE_QUERIES[number]) => { setQuery(ex.query); setDomain(ex.domain); };
   const selectedSession = recentSessions.find((session) => session.session_id === selectedSessionId) || null;
@@ -281,384 +522,506 @@ function StageInput({
     ? buildLineDiff(selectedSession.optimised_prompt || "", selectedSession.final_prompt || "")
     : [];
   const selectedDiffSummary = summarizeDiff(selectedDiff);
+  const selectedInsights = selectedSession?.research_insights || null;
 
   return (
-    <>
-      <h1 className="page-title">Enter your <span className="accent">prompt</span></h1>
-      <p className="page-subtitle">
-        Write what you need in plain language. The system rewrites it using three independent strategies,
-        a council of models reviews and ranks them anonymously, then synthesises the strongest version
-        for your review.
-      </p>
-
-      <button className="collapsible-header" onClick={() => setShowHow(!showHow)} style={{ marginBottom: showHow ? 0 : 20 }}>
-        <span>How does this work?</span>
-        <span style={{ transition: "transform 0.2s", transform: showHow ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
-      </button>
-      {showHow && (
-        <div style={{ marginBottom: 28 }}>
-          <div className="how-steps" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
-            <div className="how-step">
-              <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--terracotta)" }}>01</div>
-              <div className="how-step-title">Write naturally</div>
-              <div className="how-step-desc">Describe what you need in your own words. No prompt-engineering knowledge required.</div>
-            </div>
-            <div className="how-step">
-              <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--terracotta)" }}>02</div>
-              <div className="how-step-title">Agents rewrite</div>
-              <div className="how-step-desc">Three agents independently restructure your prompt using different strategies.</div>
-            </div>
-            <div className="how-step">
-              <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--terracotta)" }}>03</div>
-              <div className="how-step-title">Council reviews</div>
-              <div className="how-step-desc">Each model reviews the others anonymously, preventing bias. Rankings are aggregated and the best is synthesised.</div>
-            </div>
-            <div className="how-step">
-              <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--terracotta)" }}>04</div>
-              <div className="how-step-title">You decide</div>
-              <div className="how-step-desc">Compare original vs optimised side-by-side. Edit, approve, or reject before execution.</div>
-            </div>
-          </div>
-          <div className="trust-banner">
-            No prompt is dispatched without your explicit approval. You retain full control at every step.
-          </div>
-        </div>
-      )}
-
-      {demo && (
-        <div className="info-banner" style={{ marginBottom: 24 }}>
-          Running in demo mode — responses use fixture data. Toggle off and provide API keys for live inference.
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 28 }}>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <label className="field-label">Your Query</label>
-            <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
-              {query.length > 0 ? `${query.split(/\s+/).filter(Boolean).length} words` : ""}
-            </span>
-          </div>
-          <textarea className="textarea-field" value={query} onChange={(e) => setQuery(e.target.value)}
-            placeholder="Describe what you need — the agents handle the rest." rows={6} />
-        </div>
-        <div>
-          <label className="field-label">Domain</label>
-          <select className="select-field" value={domain} onChange={(e) => setDomain(e.target.value)}>
-            {["General", "Healthcare", "Education", "Legal", "Research", "Business", "Technology"].map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-          <div style={{ height: 14 }} />
-          <label className="field-label">Target Model</label>
-          <select className="select-field" value={model} onChange={(e) => setModel(e.target.value)}>
-            {["gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"].map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-          <div style={{ height: 14 }} />
-          <label className="field-label">Mode</label>
-          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13, color: "var(--text-secondary)" }}>
-            <input type="checkbox" checked={demo} onChange={() => setDemo(!demo)} style={{ accentColor: "var(--terracotta)" }} />
-            Demo mode
-          </label>
-          <div style={{ height: 14 }} />
-          <label className="field-label">Study Tools</label>
-          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-            <input type="checkbox" checked={compareMode} onChange={() => setCompareMode(!compareMode)} style={{ accentColor: "var(--terracotta)" }} />
-            Run direct baseline comparison
-          </label>
-          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 8, lineHeight: 1.5 }}>
-            Sends the raw query and the approved optimised prompt to the same target model so you can compare both outputs side by side.
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 20 }}>
-        <div className="section-label">Example Queries</div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {EXAMPLE_QUERIES.map((ex) => (
-            <button key={ex.label} className="btn btn-secondary" style={{ fontSize: 12, padding: "7px 14px" }}
-              onClick={() => loadExample(ex)}>{ex.label}</button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
-        <button className="btn btn-primary" disabled={!query.trim()}
-          onClick={() => onSubmit(query.trim(), domain.toLowerCase(), model, demo, compareMode)}>
-          Optimise prompt
-        </button>
-      </div>
-
-      <div style={{ marginTop: 36 }}>
-        <div className="section-label">Study Analytics</div>
-        <div className="analytics-grid">
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics?.total_sessions ?? 0}</div>
-            <div className="analytics-label">Saved Sessions</div>
-          </div>
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics?.avg_quality?.toFixed(1) ?? "0.0"}</div>
-            <div className="analytics-label">Avg Quality</div>
-          </div>
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics?.avg_trust?.toFixed(1) ?? "0.0"}</div>
-            <div className="analytics-label">Avg Trust</div>
-          </div>
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics ? `${analytics.edit_rate}%` : "0%"}</div>
-            <div className="analytics-label">Edit Rate</div>
-          </div>
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics ? `${analytics.compare_mode_rate}%` : "0%"}</div>
-            <div className="analytics-label">Comparison Use</div>
-          </div>
-          <div className="analytics-card">
-            <div className="analytics-value">{analytics?.top_winner || "-"}</div>
-            <div className="analytics-label">Most Common Winner</div>
-          </div>
-        </div>
-        <div className="analytics-footnote">
-          Top domain: {analytics?.top_domain || "n/a"} • Avg improvement: {analytics?.avg_improvement?.toFixed(1) ?? "0.0"} • Avg control: {analytics?.avg_control?.toFixed(1) ?? "0.0"}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 36 }}>
-        <div className="section-label">Recent Sessions</div>
-        <div className="session-panel">
-          <div className="session-panel-header">
-            <div>
-              <div className="session-panel-title">Study Runs</div>
-              <div className="session-panel-subtitle">Recent saved sessions from this workspace.</div>
-            </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer">
-                Export JSON
-              </a>
-              <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
-                Export CSV
-              </a>
-            </div>
-          </div>
-          {recentSessions.length === 0 ? (
-            <div className="session-empty">No saved sessions yet. Complete a run and submit feedback to build your study log.</div>
-          ) : (
-            <div className="session-list">
-              {recentSessions.slice(0, 5).map((session) => {
-                const winner = session.aggregate_rankings?.[0];
-                return (
-                  <button
-                    key={session.session_id}
-                    type="button"
-                    className={`session-row ${selectedSessionId === session.session_id ? "session-row-active" : ""}`}
-                    onClick={() => setSelectedSessionId(session.session_id)}
-                  >
-                    <div className="session-main">
-                      <div className="session-query">{session.raw_query || "Untitled session"}</div>
-                      <div className="session-meta-line">
-                        <span>{formatSessionTime(session.timestamp)}</span>
-                        <span>{session.domain || "general"}</span>
-                        <span>{session.compare_mode ? "comparison" : "single condition"}</span>
-                        {winner && <span>winner {winner.candidate}</span>}
-                      </div>
-                    </div>
-                    <div className="session-side">
-                      <span className="session-score">Q {session.quality ?? "-"}</span>
-                      <span className="session-score">T {session.trust ?? "-"}</span>
-                    </div>
-                  </button>
-                );
-              })}
+    <div className={`input-workspace sidebar-${sidebarOpen ? "open" : "closed"}`}>
+      <aside className={`input-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+        <div className="sidebar-rail">
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-label={sidebarOpen ? "Collapse study sidebar" : "Expand study sidebar"}
+            title={sidebarOpen ? "Collapse study sidebar" : "Expand study sidebar"}
+          >
+            {sidebarOpen ? "\u2039" : "\u203A"}
+          </button>
+          {!sidebarOpen && (
+            <div className="sidebar-rail-meta">
+              <span className="sidebar-rail-count">{recentSessions.length}</span>
+              <span className="sidebar-rail-label">Runs</span>
             </div>
           )}
+        </div>
 
-          {selectedSession && (
-            <div className="session-detail-panel">
-              <div className="session-detail-header">
-                <div>
-                  <div className="session-detail-kicker">Session Details</div>
-                  <div className="session-detail-title">{selectedSession.raw_query || "Untitled session"}</div>
-                  <div className="session-meta-line">
-                    <span>{formatSessionTime(selectedSession.timestamp)}</span>
-                    <span>{selectedSession.domain || "general"}</span>
-                    <span>{selectedSession.compare_mode ? "comparison mode" : "single condition"}</span>
-                    <span>{selectedSession.target_model || "unknown model"}</span>
-                    {selectedSession.safety_report?.risk_level && selectedSession.safety_report.risk_level !== "none" && (
-                      <span>
-                        safety {selectedSession.safety_report.risk_level}
-                        {selectedSession.safety_acknowledged ? " · acknowledged" : ""}
-                      </span>
-                    )}
+        {sidebarOpen && (
+          <div className="input-sidebar-inner">
+            <div className="sidebar-panel">
+              <div className="section-label">Study Analytics</div>
+              <div className="sidebar-metrics">
+                <div className="sidebar-metric-row">
+                  <span>Saved sessions</span>
+                  <strong>{analytics?.total_sessions ?? 0}</strong>
+                </div>
+                <div className="sidebar-metric-row">
+                  <span>Avg quality</span>
+                  <strong>{analytics?.avg_quality?.toFixed(1) ?? "0.0"}</strong>
+                </div>
+                <div className="sidebar-metric-row">
+                  <span>Avg trust</span>
+                  <strong>{analytics?.avg_trust?.toFixed(1) ?? "0.0"}</strong>
+                </div>
+                <div className="sidebar-metric-row">
+                  <span>Accepted as-is</span>
+                  <strong>{analytics ? `${analytics.acceptance_rate}%` : "0%"}</strong>
+                </div>
+              </div>
+              <div className="analytics-footnote" style={{ marginBottom: 0 }}>
+                Consensus {analytics?.avg_consensus_strength?.toFixed(1) ?? "0.0"}% • Acceptance {analytics ? `${analytics.acceptance_rate}%` : "0%"} • Top domain {analytics?.top_domain || "n/a"}
+              </div>
+            </div>
+
+            <div className="sidebar-panel sidebar-panel-history">
+              <div className="section-label">Session History</div>
+              <div className="session-panel">
+                <div className="session-panel-header">
+                  <div>
+                    <div className="session-panel-title">Study Runs</div>
+                    <div className="session-panel-subtitle">Open a saved run to inspect its consensus process in the main panel.</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer">
+                      JSON
+                    </a>
+                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
+                      CSV
+                    </a>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      const restoredDomain = selectedSession.domain
-                        ? selectedSession.domain.charAt(0).toUpperCase() + selectedSession.domain.slice(1)
-                        : "General";
-                      setQuery(selectedSession.raw_query || "");
-                      setDomain(restoredDomain);
-                      if (selectedSession.target_model) setModel(selectedSession.target_model);
-                      setCompareMode(Boolean(selectedSession.compare_mode));
-                    }}
-                  >
-                    Reuse query
-                  </button>
+                {recentSessions.length === 0 ? (
+                  <div className="session-empty">No saved sessions yet. Complete a run and submit feedback to build your study log.</div>
+                ) : (
+                  <div className="session-list">
+                    {recentSessions.slice(0, 10).map((session) => {
+                      const winner = session.aggregate_rankings?.[0];
+                      return (
+                        <button
+                          key={session.session_id}
+                          type="button"
+                          className={`session-row ${selectedSessionId === session.session_id ? "session-row-active" : ""}`}
+                          onClick={() => setSelectedSessionId(session.session_id)}
+                        >
+                          <div className="session-main">
+                            <div className="session-query">{session.raw_query || "Untitled session"}</div>
+                            <div className="session-meta-line">
+                              <span>{formatSessionTime(session.timestamp)}</span>
+                              <span>{session.domain || "general"}</span>
+                              <span>{session.compare_mode ? "comparison" : "single condition"}</span>
+                              {winner && <span>winner {winner.candidate}</span>}
+                            </div>
+                          </div>
+                          <div className="session-side">
+                            <span className="session-score">Q {session.quality ?? "-"}</span>
+                            <span className="session-score">T {session.trust ?? "-"}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      <div className="input-main">
+        {selectedSession ? (
+          <>
+            <div className="main-panel-header">
+              <div>
+                <div className="section-label">Session Details</div>
+                <h1 className="page-title" style={{ marginBottom: 8 }}>{selectedSession.raw_query || "Untitled session"}</h1>
+                <div className="session-meta-line">
+                  <span>{formatSessionTime(selectedSession.timestamp)}</span>
+                  <span>{selectedSession.domain || "general"}</span>
+                  <span>{selectedSession.compare_mode ? "comparison mode" : "single condition"}</span>
+                  <span>{selectedSession.target_model || "unknown model"}</span>
+                  {selectedSession.safety_report?.risk_level && selectedSession.safety_report.risk_level !== "none" && (
+                    <span>
+                      safety {selectedSession.safety_report.risk_level}
+                      {selectedSession.safety_acknowledged ? " · acknowledged" : ""}
+                    </span>
+                  )}
                 </div>
               </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setSelectedSessionId(null)}>
+                  New prompt
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const restoredDomain = selectedSession.domain
+                      ? selectedSession.domain.charAt(0).toUpperCase() + selectedSession.domain.slice(1)
+                      : "General";
+                    setQuery(selectedSession.raw_query || "");
+                    setDomain(restoredDomain);
+                    if (selectedSession.target_model) setModel(selectedSession.target_model);
+                    setCompareMode(Boolean(selectedSession.compare_mode));
+                    setSelectedSessionId(null);
+                  }}
+                >
+                  Reuse query
+                </button>
+              </div>
+            </div>
 
-              <div className="session-detail-grid">
-                <div className="analytics-card">
-                  <div className="analytics-value">{selectedSession.quality ?? "-"}</div>
-                  <div className="analytics-label">Quality</div>
+            <div className="session-detail-grid">
+              <div className="session-stat">
+                <span className="session-stat-label">Quality</span>
+                <span className="session-stat-value">{selectedSession.quality ?? "-"}</span>
+              </div>
+              <div className="session-stat">
+                <span className="session-stat-label">Trust</span>
+                <span className="session-stat-value">{selectedSession.trust ?? "-"}</span>
+              </div>
+              <div className="session-stat">
+                <span className="session-stat-label">Improvement</span>
+                <span className="session-stat-value">{selectedSession.improvement ?? "-"}</span>
+              </div>
+              <div className="session-stat">
+                <span className="session-stat-label">Control</span>
+                <span className="session-stat-value">{selectedSession.control ?? "-"}</span>
+              </div>
+            </div>
+
+            {selectedInsights && (
+              <div className="research-strip" style={{ marginTop: 18 }}>
+                <div className="research-metric">
+                  <span className="research-label">Consensus strength</span>
+                  <strong>{selectedInsights.consensus_strength_pct}%</strong>
+                  <span>{selectedInsights.consensus_label}</span>
                 </div>
-                <div className="analytics-card">
-                  <div className="analytics-value">{selectedSession.trust ?? "-"}</div>
-                  <div className="analytics-label">Trust</div>
+                <div className="research-metric">
+                  <span className="research-label">Reviewer agreement</span>
+                  <strong>{selectedInsights.reviewer_agreement_pct}%</strong>
+                  <span>{selectedInsights.winner_first_place_support_pct}% first-place support</span>
                 </div>
-                <div className="analytics-card">
-                  <div className="analytics-value">{selectedSession.improvement ?? "-"}</div>
-                  <div className="analytics-label">Improvement</div>
+                <div className="research-metric">
+                  <span className="research-label">Rewrite diversity</span>
+                  <strong>{selectedInsights.rewrite_diversity_pct}%</strong>
+                  <span>{selectedInsights.diversity_label}</span>
                 </div>
-                <div className="analytics-card">
-                  <div className="analytics-value">{selectedSession.control ?? "-"}</div>
-                  <div className="analytics-label">Control</div>
+                <div className="research-metric">
+                  <span className="research-label">Human intervention</span>
+                  <strong>{selectedInsights.human_edit_shift_pct}%</strong>
+                  <span>{selectedInsights.human_edit_level}</span>
+                </div>
+                <div className="research-metric">
+                  <span className="research-label">Human response</span>
+                  <strong>{describeConsensusResponse(selectedInsights.consensus_response)}</strong>
+                  <span>
+                    {selectedInsights.accepted_without_edit
+                      ? "accepted directly"
+                      : selectedInsights.overrode_consensus
+                        ? "consensus replaced"
+                        : "consensus refined"}
+                  </span>
                 </div>
               </div>
+            )}
 
-              {selectedSession.safety_report && selectedSession.safety_report.risk_level !== "none" && (
-                <div className={`safety-panel risk-${selectedSession.safety_report.risk_level}`} style={{ marginTop: 18 }}>
-                  <div className="safety-panel-header">
-                    <div>
-                      <div className="safety-panel-kicker">Saved Safety Record</div>
-                      <div className="safety-panel-title">
-                        {selectedSession.safety_report.risk_level === "high"
-                          ? "This run triggered a higher-risk execution condition"
-                          : "This run included safety checks before execution"}
-                      </div>
+            {selectedSession.safety_report && selectedSession.safety_report.risk_level !== "none" && (
+              <div className={`safety-panel risk-${selectedSession.safety_report.risk_level}`} style={{ marginTop: 18 }}>
+                <div className="safety-panel-header">
+                  <div>
+                    <div className="safety-panel-kicker">Saved Safety Record</div>
+                    <div className="safety-panel-title">
+                      {selectedSession.safety_report.risk_level === "high"
+                        ? "This run triggered a higher-risk execution condition"
+                        : "This run included safety checks before execution"}
                     </div>
-                    <span className={`safety-badge risk-${selectedSession.safety_report.risk_level}`}>
-                      {selectedSession.safety_report.domain} · {selectedSession.safety_report.risk_level}
+                  </div>
+                  <span className={`safety-badge risk-${selectedSession.safety_report.risk_level}`}>
+                    {selectedSession.safety_report.domain} · {selectedSession.safety_report.risk_level}
+                  </span>
+                </div>
+                <div className="safety-check-list">
+                  {selectedSession.safety_report.checks.slice(0, 3).map((check, index) => (
+                    <div key={`${check.title}-${index}`} className="safety-check-item">
+                      <div className="safety-check-head">
+                        <span className={`safety-pill risk-${check.severity}`}>{check.severity}</span>
+                        <span>{check.title}</span>
+                      </div>
+                      <div className="safety-check-action">{check.action}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-muted)" }}>
+                  {selectedSession.safety_acknowledged
+                    ? "The participant explicitly acknowledged the warning before execution."
+                    : "No explicit acknowledgement was required for this run."}
+                </div>
+              </div>
+            )}
+
+            <div className="section-label" style={{ marginTop: 24 }}>Prompt History</div>
+            <div className="session-history-list">
+              <div className="session-history-item">
+                <div className="session-history-marker">01</div>
+                <div className="session-history-content">
+                  <div className="session-history-header">
+                    <span className="session-history-title">Raw Query</span>
+                  </div>
+                  <div className="session-history-body">{safeSnippet(selectedSession.raw_query)}</div>
+                </div>
+              </div>
+              <div className="session-history-item session-history-item-active">
+                <div className="session-history-marker">02</div>
+                <div className="session-history-content">
+                  <div className="session-history-header">
+                    <span className="session-history-title">Council Output</span>
+                    <span className="session-history-note">{selectedWinner?.candidate || "No winner recorded"}</span>
+                  </div>
+                  <div className="session-history-body">{safeSnippet(selectedSession.optimised_prompt)}</div>
+                </div>
+              </div>
+              <div className={`session-history-item ${selectedSession.optimised_prompt !== selectedSession.final_prompt ? "session-history-item-human" : ""}`}>
+                <div className="session-history-marker">03</div>
+                <div className="session-history-content">
+                  <div className="session-history-header">
+                    <span className="session-history-title">Final Prompt</span>
+                    <span className="session-history-note">
+                      {selectedDiffSummary.added || selectedDiffSummary.removed
+                        ? `+${selectedDiffSummary.added} / -${selectedDiffSummary.removed} lines`
+                        : "No user edits"}
                     </span>
                   </div>
-                  <div className="safety-check-list">
-                    {selectedSession.safety_report.checks.slice(0, 3).map((check, index) => (
-                      <div key={`${check.title}-${index}`} className="safety-check-item">
-                        <div className="safety-check-head">
-                          <span className={`safety-pill risk-${check.severity}`}>{check.severity}</span>
-                          <span>{check.title}</span>
+                  <div className="session-history-body">{safeSnippet(selectedSession.final_prompt)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="session-detail-sections">
+              <div className="session-detail-section">
+                <div className="section-label">Council Summary</div>
+                <div className="rationale-box session-inline-note" style={{ marginBottom: 14 }}>
+                  {selectedWinner
+                    ? `${selectedWinner.candidate || selectedWinner.label} won with average rank ${selectedWinner.average_rank} across ${selectedWinner.votes} reviews.`
+                    : "No aggregate ranking recorded for this run."}
+                </div>
+                {selectedSession.consensus_diagnostics && (
+                  <div className="consensus-signal-strip">
+                    <div className={`consensus-signal consensus-${selectedSession.consensus_diagnostics.consensus_label || "unknown"}`}>
+                      <span className="consensus-signal-label">Council confidence</span>
+                      <strong>{selectedSession.consensus_diagnostics.consensus_label || "unknown"}</strong>
+                      <span>{selectedSession.consensus_diagnostics.consensus_strength_pct ?? 0}% strength</span>
+                    </div>
+                    <div className="consensus-signal">
+                      <span className="consensus-signal-label">Reviewer agreement</span>
+                      <strong>{selectedSession.consensus_diagnostics.reviewer_agreement_pct ?? 0}%</strong>
+                      <span>{selectedSession.consensus_diagnostics.first_place_support_pct ?? 0}% first-place support</span>
+                    </div>
+                    <div className="consensus-signal">
+                      <span className="consensus-signal-label">Human outcome</span>
+                      <strong>{describeConsensusResponse(selectedInsights?.consensus_response)}</strong>
+                      <span>
+                        {selectedSession.consensus_diagnostics.needs_human_review
+                          ? "review was especially important here"
+                          : "council outcome was comparatively stable"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {selectedSession.chairman?.rationale && (
+                  <div className="session-detail-textblock">
+                    {selectedSession.chairman.rationale}
+                  </div>
+                )}
+                {selectedInsights && (
+                  <div className="session-inline-note" style={{ marginTop: 14 }}>
+                    {selectedInsights.accepted_without_edit
+                      ? "The participant approved the council output without editing it, which is a direct trust-and-adoption signal."
+                      : selectedInsights.overrode_consensus
+                        ? "The participant overrode the council outcome, which is especially valuable evidence about where model consensus diverged from human intent."
+                        : `The participant refined the council output at a ${selectedInsights.human_edit_level} level, which preserves the consensus trace while showing where human tailoring still mattered.`}
+                  </div>
+                )}
+                {!!selectedSession.peer_reviews?.length && (
+                  <div className="session-review-list">
+                    {selectedSession.peer_reviews.slice(0, 3).map((review, idx) => (
+                      <div className="session-review-item" key={`${review.reviewer}-${idx}`}>
+                        <div className="session-review-head">
+                          <span>{review.reviewer}</span>
+                          <span>{review.parsed_ranking?.join(" > ") || "No ranking"}</span>
                         </div>
-                        <div className="safety-check-action">{check.action}</div>
+                        <div className="session-review-body">{safeSnippet(review.evaluation)}</div>
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-muted)" }}>
-                    {selectedSession.safety_acknowledged
-                      ? "The participant explicitly acknowledged the warning before execution."
-                      : "No explicit acknowledgement was required for this run."}
-                  </div>
-                </div>
-              )}
-
-              <div className="history-grid" style={{ marginTop: 18 }}>
-                <div className="history-card">
-                  <div className="history-step">Step 1</div>
-                  <div className="history-title">Raw Query</div>
-                  <div className="history-desc">{safeSnippet(selectedSession.raw_query)}</div>
-                </div>
-                <div className="history-card history-card-active">
-                  <div className="history-step">Step 2</div>
-                  <div className="history-title">Council Output</div>
-                  <div className="history-meta">{selectedWinner?.candidate || "No winner recorded"}</div>
-                  <div className="history-desc">{safeSnippet(selectedSession.optimised_prompt)}</div>
-                </div>
-                <div className={`history-card ${selectedSession.optimised_prompt !== selectedSession.final_prompt ? "history-card-user" : ""}`}>
-                  <div className="history-step">Step 3</div>
-                  <div className="history-title">Final Prompt</div>
-                  <div className="history-meta">
-                    {selectedDiffSummary.added || selectedDiffSummary.removed
-                      ? `+${selectedDiffSummary.added} / -${selectedDiffSummary.removed} lines`
-                      : "No user edits"}
-                  </div>
-                  <div className="history-desc">{safeSnippet(selectedSession.final_prompt)}</div>
-                </div>
+                )}
               </div>
 
-              <div className="session-detail-sections">
-                <div className="session-detail-section">
-                  <div className="section-label">Council Summary</div>
-                  <div className="rationale-box" style={{ marginBottom: 14 }}>
-                    {selectedWinner
-                      ? `${selectedWinner.candidate || selectedWinner.label} won with average rank ${selectedWinner.average_rank} across ${selectedWinner.votes} reviews.`
-                      : "No aggregate ranking recorded for this run."}
-                  </div>
-                  {selectedSession.chairman?.rationale && (
-                    <div className="session-detail-textblock">
-                      {selectedSession.chairman.rationale}
-                    </div>
-                  )}
-                  {!!selectedSession.peer_reviews?.length && (
-                    <div className="session-review-list">
-                      {selectedSession.peer_reviews.slice(0, 3).map((review, idx) => (
-                        <div className="session-review-item" key={`${review.reviewer}-${idx}`}>
-                          <div className="session-review-head">
-                            <span>{review.reviewer}</span>
-                            <span>{review.parsed_ranking?.join(" > ") || "No ranking"}</span>
-                          </div>
-                          <div className="session-review-body">{safeSnippet(review.evaluation)}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="session-detail-section">
-                  <div className="section-label">Outputs</div>
-                  <div className="comparison-grid" style={{ marginBottom: 0 }}>
-                    {selectedSession.compare_mode && (
-                      <div className="cmp-card">
-                        <div className="cmp-card-header">
-                          <span className="badge badge-original">Baseline</span>
-                          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Raw query response</span>
-                        </div>
-                        <div className="cmp-card-body">{safeSnippet(selectedSession.baseline_response)}</div>
-                      </div>
-                    )}
-                    <div className={`cmp-card ${selectedSession.compare_mode ? "optimised" : ""}`}>
+              <div className="session-detail-section">
+                <div className="section-label">Outputs</div>
+                <div className="session-output-stack">
+                  {selectedSession.compare_mode && (
+                    <div className="cmp-card session-output-card">
                       <div className="cmp-card-header">
-                        <span className="badge badge-optimised">Optimised</span>
-                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Approved prompt response</span>
+                        <span className="badge badge-original">Baseline</span>
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Raw query response</span>
                       </div>
-                      <div className="cmp-card-body">{safeSnippet(selectedSession.llm_response)}</div>
+                      <div className="cmp-card-body">{safeSnippet(selectedSession.baseline_response)}</div>
                     </div>
+                  )}
+                  <div className={`cmp-card session-output-card ${selectedSession.compare_mode ? "optimised" : ""}`}>
+                    <div className="cmp-card-header">
+                      <span className="badge badge-optimised">Optimised</span>
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Approved prompt response</span>
+                    </div>
+                    <div className="cmp-card-body">{safeSnippet(selectedSession.llm_response)}</div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {!!selectedSession.text && (
-                <div style={{ marginTop: 18 }}>
-                  <div className="section-label">Participant Comment</div>
-                  <div className="session-detail-textblock">{selectedSession.text}</div>
+            {!!selectedSession.text && (
+              <div style={{ marginTop: 18 }}>
+                <div className="section-label">Participant Comment</div>
+                <div className="session-detail-textblock">{selectedSession.text}</div>
+              </div>
+            )}
+
+            {!!selectedSession.intervention_labels?.length && (
+              <div style={{ marginTop: 18 }}>
+                <div className="section-label">Intervention Notes</div>
+                <div className="consensus-reasons">
+                  {selectedSession.intervention_labels.map((label) => (
+                    <span key={label} className="consensus-reason-chip">{label}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="composer-hero">
+              <div className="section-label">Human-Centred Prompt Optimisation</div>
+              <h1 className="page-title">Write naturally. Let the <span className="accent">council</span> optimize. You stay in control.</h1>
+              <p className="page-subtitle">
+                ConsensusPrompt rewrites your prompt through three independent strategies, asks a council to rank them anonymously,
+                and returns the strongest version for human review before anything is executed.
+              </p>
+            </div>
+
+            <div className="composer-shell">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                <label className="field-label">Your Query</label>
+                <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
+                  {query.length > 0 ? `${query.split(/\s+/).filter(Boolean).length} words` : ""}
+                </span>
+              </div>
+              <textarea className="textarea-field composer-textarea" value={query} onChange={(e) => setQuery(e.target.value)}
+                placeholder="Describe what you need in plain language. The system will optimize structure, constraints, and domain framing for you." rows={8} />
+
+              <div className="composer-actions">
+                <button className="btn btn-primary" disabled={!query.trim()}
+                  onClick={() => onSubmit(query.trim(), domain.toLowerCase(), model, demo, compareMode)}>
+                  Optimise prompt
+                </button>
+                <button className="btn btn-secondary" onClick={() => setShowOptions(!showOptions)}>
+                  {showOptions ? "Hide options" : "Options"}
+                </button>
+              </div>
+
+              {showOptions && (
+                <div className="composer-options">
+                  <div>
+                    <label className="field-label">Domain</label>
+                    <select className="select-field" value={domain} onChange={(e) => setDomain(e.target.value)}>
+                      {["General", "Healthcare", "Education", "Legal", "Research", "Business", "Technology"].map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label">Target Model</label>
+                    <select className="select-field" value={model} onChange={(e) => setModel(e.target.value)}>
+                      {targetModels.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <label className="option-toggle">
+                    <input type="checkbox" checked={demo} onChange={() => setDemo(!demo)} style={{ accentColor: "var(--accent)" }} />
+                    <span>Demo mode</span>
+                    <small>Use fixture data instead of live inference.</small>
+                  </label>
+                  <label className="option-toggle">
+                    <input type="checkbox" checked={compareMode} onChange={() => setCompareMode(!compareMode)} style={{ accentColor: "var(--accent)" }} />
+                    <span>Baseline comparison</span>
+                    <small>Compare the raw query response against the optimized-prompt response.</small>
+                  </label>
                 </div>
               )}
             </div>
-          )}
-        </div>
+
+            <div style={{ marginTop: 20 }}>
+              <div className="section-label">Example Queries</div>
+              <div className="example-pill-row">
+                {EXAMPLE_QUERIES.map((ex) => (
+                  <button key={ex.label} className="example-pill" onClick={() => loadExample(ex)}>{ex.label}</button>
+                ))}
+              </div>
+            </div>
+
+            <button className="collapsible-header composer-collapsible" onClick={() => setShowHow(!showHow)} style={{ marginBottom: showHow ? 0 : 20 }}>
+              <span>How does this work?</span>
+              <span style={{ transition: "transform 0.2s", transform: showHow ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+            </button>
+            {showHow && (
+              <div style={{ marginBottom: 28 }}>
+                <div className="how-steps" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
+                  <div className="how-step">
+                    <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>01</div>
+                    <div className="how-step-title">Write naturally</div>
+                    <div className="how-step-desc">Describe what you need in your own words. No prompt-engineering knowledge required.</div>
+                  </div>
+                  <div className="how-step">
+                    <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>02</div>
+                    <div className="how-step-title">Agents rewrite</div>
+                    <div className="how-step-desc">Three agents independently restructure your prompt using different strategies.</div>
+                  </div>
+                  <div className="how-step">
+                    <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>03</div>
+                    <div className="how-step-title">Council reviews</div>
+                    <div className="how-step-desc">Each model reviews the others anonymously, preventing bias. Rankings are aggregated and the best is synthesised.</div>
+                  </div>
+                  <div className="how-step">
+                    <div className="how-step-icon" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>04</div>
+                    <div className="how-step-title">You decide</div>
+                    <div className="how-step-desc">Compare original vs optimised side-by-side. Edit, approve, or reject before execution.</div>
+                  </div>
+                </div>
+                <div className="trust-banner">
+                  No prompt is dispatched without your explicit approval. You retain full control at every step.
+                </div>
+              </div>
+            )}
+
+            {demo && (
+              <div className="info-banner" style={{ marginBottom: 24 }}>
+                Running in demo mode — responses use fixture data. Toggle off and provide API keys for live inference.
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 
 /* ── Stage 2 — Processing ── */
 function StageProcessing({
-  rawQuery, onComplete, domain, demoMode,
+  rawQuery, onComplete, domain, demoMode, retryToken, onRetry,
 }: {
   rawQuery: string; domain: string; demoMode: boolean;
+  retryToken: number;
   onComplete: (state: PipelineState) => void;
+  onRetry: () => void;
 }) {
   const [progress, setProgress] = useState(0);
   const [statusMsg, setStatusMsg] = useState("Initialising pipeline");
@@ -808,7 +1171,8 @@ function StageProcessing({
         }
 
         if (!hasCompleted) {
-          setError("The live progress connection was interrupted after work started. Retry this run to avoid double-submitting the pipeline.");
+          const detail = err?.message || "The live progress connection was interrupted after work started.";
+          setError(detail);
           setStatusMsg("Streaming interrupted");
         }
       }
@@ -816,7 +1180,7 @@ function StageProcessing({
 
     streamPipeline();
     return () => controller.abort();
-  }, [rawQuery, domain, demoMode, onComplete]);
+  }, [rawQuery, domain, demoMode, onComplete, retryToken]);
 
   return (
     <>
@@ -841,7 +1205,12 @@ function StageProcessing({
           background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)",
           borderRadius: "var(--radius)", padding: "14px 18px", marginBottom: 20,
           fontSize: 13, color: "#ef4444", lineHeight: 1.6,
-        }}>{error}</div>
+        }}>
+          <div style={{ marginBottom: 12 }}>{error}</div>
+          <button className="btn btn-secondary" onClick={onRetry}>
+            Retry safely
+          </button>
+        </div>
       )}
 
       <div className="glass-card">
@@ -873,13 +1242,14 @@ function StageCouncil({
   theme: string;
   onContinue: () => void;
 }) {
-  const { peer_reviews, aggregate_rankings, label_map, chairman, candidate_a, candidate_b, candidate_c, perspectives } = pipelineState;
+  const { peer_reviews, aggregate_rankings, label_map, chairman, candidate_a, candidate_b, candidate_c, perspectives, consensus_diagnostics } = pipelineState;
   const [revealedReviewers, setRevealedReviewers] = useState(0);
-  const [showRankings, setShowRankings] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [activeReview, setActiveReview] = useState(-1);
   const [activeTab, setActiveTab] = useState<string>("a");
   const [showScores, setShowScores] = useState(false);
+  const [showPeerReviews, setShowPeerReviews] = useState(false);
+  const [showRankings, setShowRankings] = useState(false);
   const [councilPhase, setCouncilPhase] = useState<CouncilPhase>("idle");
 
   // Animate reveal of reviewers one by one + sync 3D phase
@@ -922,6 +1292,10 @@ function StageCouncil({
   if (winnerAgent && perspectives && perspectives[winnerAgent]) {
     winnerAgent = `${winnerAgent} (${perspectives[winnerAgent]})`;
   }
+  const consensusReasons = React.useMemo(
+    () => getConsensusReasons(peer_reviews, chairman.rationale || ""),
+    [peer_reviews, chairman.rationale],
+  );
 
   // Map candidate letter to text
   const candidateText: Record<string, string> = { A: candidate_a, B: candidate_b, C: candidate_c };
@@ -945,89 +1319,11 @@ function StageCouncil({
         theme={theme}
       />
 
-      {/* Peer review cards — animate in */}
-      <div className="section-label">Peer Reviews</div>
-      <div className="council-grid">
-        {peer_reviews.slice(0, revealedReviewers).map((review, i) => (
-          <div
-            key={i}
-            className={`council-card ${i === activeReview ? "council-card-active" : ""}`}
-            onClick={() => setActiveReview(activeReview === i ? -1 : i)}
-            style={{ animationDelay: `${i * 0.1}s`, cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
-          >
-            <div className="council-card-header">
-              <span className="council-card-title">{review.reviewer}</span>
-              <span className="council-card-model">{review.model}</span>
-            </div>
-            <div className="council-card-ranking">
-              {review.parsed_ranking.map((label, pos) => (
-                <div key={label} className={`council-rank-item ${pos === 0 ? "council-rank-first" : ""}`}>
-                  <span className="council-rank-pos">#{pos + 1}</span>
-                  <span className="council-rank-label">{label_map[label] || label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Selected reviewer's full evaluation */}
-      {revealedReviewers > 0 && activeReview !== -1 && (
-        <div style={{ marginTop: 16, marginBottom: 28, animation: "fadeIn 0.2s" }}>
-          <div className="section-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span>{peer_reviews[activeReview]?.reviewer} — Full Evaluation</span>
-            <span style={{ color: "var(--terracotta)", background: "var(--bg-surface)", padding: "4px 10px", borderRadius: 4, fontSize: 13, textTransform: "none", fontWeight: 500 }}>
-              Top Pick: {peer_reviews[activeReview]?.parsed_ranking[0]} = {label_map[peer_reviews[activeReview]?.parsed_ranking[0]] || peer_reviews[activeReview]?.parsed_ranking[0]}
-            </span>
-          </div>
-          <div style={{
-            fontFamily: "var(--mono)", fontSize: 13, lineHeight: 1.8,
-            color: "var(--text-secondary)", whiteSpace: "pre-wrap",
-            background: "var(--bg-surface)", border: "1px solid var(--border)",
-            borderRadius: "var(--radius)", padding: "18px 22px",
-          }}>
-            {peer_reviews[activeReview]?.evaluation}
-          </div>
-        </div>
-      )}
-
-      {/* Agent candidates */}
-      {revealedReviewers > 0 && (
-        <>
-          <button className="collapsible-header" onClick={() => setShowScores(!showScores)}
-            style={{ marginBottom: showScores ? 0 : 28 }}>
-            <span>View individual agent candidates</span>
-            <span style={{ transition: "transform 0.2s", transform: showScores ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
-          </button>
-          {showScores && (
-            <div className="glass-card" style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, marginBottom: 28 }}>
-              <div className="tabs-header">
-                <button className={`tab-btn ${activeTab === "a" ? "active" : ""}`} onClick={() => setActiveTab("a")}>
-                  A: {perspectives?.["Candidate A"] ? (perspectives["Candidate A"].length > 25 ? perspectives["Candidate A"].slice(0, 25) + "..." : perspectives["Candidate A"]) : "Dynamic Strategy A"}
-                </button>
-                <button className={`tab-btn ${activeTab === "b" ? "active" : ""}`} onClick={() => setActiveTab("b")}>
-                  B: {perspectives?.["Candidate B"] ? (perspectives["Candidate B"].length > 25 ? perspectives["Candidate B"].slice(0, 25) + "..." : perspectives["Candidate B"]) : "Dynamic Strategy B"}
-                </button>
-                <button className={`tab-btn ${activeTab === "c" ? "active" : ""}`} onClick={() => setActiveTab("c")}>
-                  C: {perspectives?.["Candidate C"] ? (perspectives["Candidate C"].length > 25 ? perspectives["Candidate C"].slice(0, 25) + "..." : perspectives["Candidate C"]) : "Dynamic Strategy C"}
-                </button>
-              </div>
-              <div style={{
-                fontFamily: "var(--mono)", fontSize: 12, lineHeight: 1.8,
-                color: "var(--text-secondary)", whiteSpace: "pre-wrap", padding: "12px 0",
-              }}>
-                {activeTab === "a" ? candidate_a : activeTab === "b" ? candidate_b : candidate_c}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
       {/* Aggregate rankings with animated bars */}
       {showRankings && (
         <div style={{ marginBottom: 28 }} className="council-fade-in">
           <div className="section-label">Aggregate Consensus</div>
-          <div className="glass-card">
+          <div className="council-rankings-shell">
             {aggregate_rankings.map((rank, i) => {
               const barWidth = Math.max(10, 100 - (rank.average_rank - 1) * 30);
               const isWinner = i === 0;
@@ -1064,7 +1360,36 @@ function StageCouncil({
           <div className="council-winner-badge">Consensus Winner</div>
           <div className="council-winner-label">{winnerAgent}</div>
           <div className="council-winner-stats">
-            Average rank: {winner.average_rank} across {winner.votes} reviewers — unanimous first place
+            Average rank: {winner.average_rank} across {winner.votes} reviewers
+            {consensus_diagnostics?.is_unanimous_winner ? " — unanimous first place" : ""}
+          </div>
+          {consensus_diagnostics && (
+            <div className="consensus-signal-strip">
+              <div className={`consensus-signal consensus-${consensus_diagnostics.consensus_label || "unknown"}`}>
+                <span className="consensus-signal-label">Consensus strength</span>
+                <strong>{consensus_diagnostics.consensus_strength_pct ?? 0}%</strong>
+                <span>{consensus_diagnostics.consensus_label || "unknown"}</span>
+              </div>
+              <div className="consensus-signal">
+                <span className="consensus-signal-label">Reviewer agreement</span>
+                <strong>{consensus_diagnostics.reviewer_agreement_pct ?? 0}%</strong>
+                <span>{consensus_diagnostics.first_place_support_pct ?? 0}% first-place support</span>
+              </div>
+              <div className={`consensus-signal ${consensus_diagnostics.needs_human_review ? "consensus-review-needed" : ""}`}>
+                <span className="consensus-signal-label">Human review</span>
+                <strong>{consensus_diagnostics.needs_human_review ? "Recommended" : "Routine"}</strong>
+                <span>
+                  {consensus_diagnostics.needs_human_review
+                    ? "the council was not fully aligned"
+                    : "the council outcome was relatively stable"}
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="consensus-reasons">
+            {consensusReasons.map((reason) => (
+              <span key={reason} className="consensus-reason-chip">{reason}</span>
+            ))}
           </div>
           {chairman.rationale && (
             <div className="council-winner-rationale">
@@ -1072,6 +1397,81 @@ function StageCouncil({
             </div>
           )}
         </div>
+      )}
+
+      {revealedReviewers > 0 && (
+        <>
+          <button className="collapsible-header council-collapse" onClick={() => setShowPeerReviews(!showPeerReviews)}
+            style={{ marginBottom: showPeerReviews ? 0 : 20 }}>
+            <span>Peer reviews</span>
+            <span style={{ transition: "transform 0.2s", transform: showPeerReviews ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+          </button>
+          {showPeerReviews && (
+            <div className="council-detail-block">
+              <div className="council-grid">
+                {peer_reviews.slice(0, revealedReviewers).map((review, i) => (
+                  <div
+                    key={i}
+                    className={`council-card ${i === activeReview ? "council-card-active" : ""}`}
+                    onClick={() => setActiveReview(activeReview === i ? -1 : i)}
+                    style={{ animationDelay: `${i * 0.1}s`, cursor: "pointer", display: "flex", flexDirection: "column" }}
+                  >
+                    <div className="council-card-header">
+                      <span className="council-card-title">{review.reviewer}</span>
+                      <span className="council-card-model">{review.model}</span>
+                    </div>
+                    <div className="council-card-ranking">
+                      {review.parsed_ranking.map((label, pos) => (
+                        <div key={label} className={`council-rank-item ${pos === 0 ? "council-rank-first" : ""}`}>
+                          <span className="council-rank-pos">#{pos + 1}</span>
+                          <span className="council-rank-label">{label_map[label] || label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {activeReview !== -1 && (
+                <div className="council-review-detail">
+                  <div className="section-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span>{peer_reviews[activeReview]?.reviewer} — Full Evaluation</span>
+                    <span className="council-inline-kicker">
+                      Top Pick: {peer_reviews[activeReview]?.parsed_ranking[0]} = {label_map[peer_reviews[activeReview]?.parsed_ranking[0]] || peer_reviews[activeReview]?.parsed_ranking[0]}
+                    </span>
+                  </div>
+                  <div className="council-review-body">
+                    {peer_reviews[activeReview]?.evaluation}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button className="collapsible-header council-collapse" onClick={() => setShowScores(!showScores)}
+            style={{ marginBottom: showScores ? 0 : 28 }}>
+            <span>Candidate prompts</span>
+            <span style={{ transition: "transform 0.2s", transform: showScores ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+          </button>
+          {showScores && (
+            <div className="council-detail-block council-detail-block-last">
+              <div className="tabs-header">
+                <button className={`tab-btn ${activeTab === "a" ? "active" : ""}`} onClick={() => setActiveTab("a")}>
+                  A: {perspectives?.["Candidate A"] ? (perspectives["Candidate A"].length > 25 ? `${perspectives["Candidate A"].slice(0, 25)}...` : perspectives["Candidate A"]) : "Dynamic Strategy A"}
+                </button>
+                <button className={`tab-btn ${activeTab === "b" ? "active" : ""}`} onClick={() => setActiveTab("b")}>
+                  B: {perspectives?.["Candidate B"] ? (perspectives["Candidate B"].length > 25 ? `${perspectives["Candidate B"].slice(0, 25)}...` : perspectives["Candidate B"]) : "Dynamic Strategy B"}
+                </button>
+                <button className={`tab-btn ${activeTab === "c" ? "active" : ""}`} onClick={() => setActiveTab("c")}>
+                  C: {perspectives?.["Candidate C"] ? (perspectives["Candidate C"].length > 25 ? `${perspectives["Candidate C"].slice(0, 25)}...` : perspectives["Candidate C"]) : "Dynamic Strategy C"}
+                </button>
+              </div>
+              <div className="candidate-text-panel">
+                {activeTab === "a" ? candidate_a : activeTab === "b" ? candidate_b : candidate_c}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {showWinner && (
@@ -1093,10 +1493,11 @@ function StageReview({
   onApprove: (finalPrompt: string) => void;
   onStartOver: () => void;
 }) {
-  const { raw_query, intent, optimised_prompt, candidate_a, candidate_b, candidate_c,
-    aggregate_rankings, label_map, chairman, perspectives } = pipelineState;
+  const { raw_query, intent, optimised_prompt, aggregate_rankings, label_map, chairman, perspectives, consensus_diagnostics } = pipelineState;
   const [editedPrompt, setEditedPrompt] = useState(optimised_prompt);
   const [copied, setCopied] = useState(false);
+  const [showReferences, setShowReferences] = useState(false);
+  const [showDiffs, setShowDiffs] = useState(false);
 
   const handleCopy = async () => {
     const ok = await copyToClipboard(editedPrompt);
@@ -1111,6 +1512,18 @@ function StageReview({
   const rawToOptimisedSummary = React.useMemo(() => summarizeDiff(rawToOptimisedDiff), [rawToOptimisedDiff]);
   const optimisedToFinalSummary = React.useMemo(() => summarizeDiff(optimisedToFinalDiff), [optimisedToFinalDiff]);
   const hasUserEdits = editedPrompt !== optimised_prompt;
+  const promptImprovements = React.useMemo(
+    () => getPromptImprovements(raw_query, optimised_prompt, intent || {}),
+    [raw_query, optimised_prompt, intent],
+  );
+  const consensusReasons = React.useMemo(
+    () => getConsensusReasons(pipelineState.peer_reviews || [], chairman.rationale || ""),
+    [pipelineState.peer_reviews, chairman.rationale],
+  );
+  const researchInsights = React.useMemo(
+    () => getLiveResearchInsights(pipelineState, raw_query, optimised_prompt, editedPrompt),
+    [pipelineState, raw_query, optimised_prompt, editedPrompt],
+  );
 
   return (
     <>
@@ -1141,6 +1554,11 @@ function StageReview({
               Chairman: {chairman.model}
             </span>
           )}
+          {consensus_diagnostics?.consensus_label && (
+            <span className={`badge badge-original consensus-badge consensus-${consensus_diagnostics.consensus_label}`} style={{ fontSize: 11 }}>
+              Consensus {consensus_diagnostics.consensus_label} · {consensus_diagnostics.consensus_strength_pct ?? 0}%
+            </span>
+          )}
         </div>
       )}
 
@@ -1158,111 +1576,201 @@ function StageReview({
         </div>
       )}
 
-      {/* Side-by-side */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <div className="section-label">Prompt Comparison</div>
-        <span style={{ fontSize: 11, fontFamily: "var(--mono)", color: "var(--text-dim)" }}>
-          {origWords} words {"\u2192"} {optWords} words (+{Math.round(((optWords - origWords) / Math.max(origWords, 1)) * 100)}%)
-        </span>
-      </div>
-      <div className="comparison-grid">
-        <div className="cmp-card">
-          <div className="cmp-card-header"><span className="badge badge-original">Original</span></div>
-          <div className="cmp-card-body">{raw_query}</div>
+      <div className="review-editor-shell">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8 }}>
+          <div className="section-label">Final Prompt</div>
+          <button onClick={handleCopy} className="btn btn-secondary" style={{ fontSize: 11, padding: "4px 12px" }}>
+            {copied ? "Copied" : "Copy to clipboard"}
+          </button>
         </div>
-        <div className="cmp-card optimised">
-          <div className="cmp-card-header"><span className="badge badge-optimised">Optimised</span></div>
-          <div className="cmp-card-body">{optimised_prompt}</div>
+        <textarea className="textarea-field review-editor" value={editedPrompt} onChange={(e) => setEditedPrompt(e.target.value)} rows={11} />
+        <div className="review-editor-meta">
+          <span>{editedPrompt.split(/\s+/).filter(Boolean).length} words</span>
+          <span>{hasUserEdits ? `Edited: +${optimisedToFinalSummary.added} / -${optimisedToFinalSummary.removed} lines` : "No user edits yet"}</span>
         </div>
       </div>
 
-      <div className="section-label">Prompt History</div>
-      <div className="history-grid">
-        <div className="history-card">
-          <div className="history-step">Step 1</div>
-          <div className="history-title">Raw Query</div>
-          <div className="history-meta">{origWords} words</div>
-          <div className="history-desc">Your original natural-language request before any agent intervention.</div>
-        </div>
-        <div className="history-card history-card-active">
-          <div className="history-step">Step 2</div>
-          <div className="history-title">Council Output</div>
-          <div className="history-meta">{optWords} words</div>
-          <div className="history-desc">
-            Synthesised by the chairman after peer review.
-            {rawToOptimisedSummary.added > 0 || rawToOptimisedSummary.removed > 0
-              ? ` ${rawToOptimisedSummary.added} lines added, ${rawToOptimisedSummary.removed} lines replaced or removed.`
-              : " No structural change detected."}
-          </div>
-        </div>
-        <div className={`history-card ${hasUserEdits ? "history-card-user" : ""}`}>
-          <div className="history-step">Step 3</div>
-          <div className="history-title">Your Final Prompt</div>
-          <div className="history-meta">{editedPrompt.split(/\s+/).filter(Boolean).length} words</div>
-          <div className="history-desc">
-            {hasUserEdits
-              ? `You edited the council output before approval. ${optimisedToFinalSummary.added} lines added, ${optimisedToFinalSummary.removed} lines removed or replaced.`
-              : "No user edits yet. If you approve now, the council output will be sent as-is."}
-          </div>
-        </div>
-      </div>
-
-      <div className="section-label">What Changed</div>
-      <div className="comparison-grid" style={{ marginBottom: 20 }}>
-        <div className="cmp-card">
-          <div className="cmp-card-header" style={{ justifyContent: "space-between" }}>
-            <span className="badge badge-original">Raw → Council Output</span>
-            <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
-              +{rawToOptimisedSummary.added} / -{rawToOptimisedSummary.removed} lines
-            </span>
-          </div>
-          <div className="diff-card-body">
-            {rawToOptimisedDiff.map((line, index) => (
-              <div key={`raw-opt-${index}`} className={`diff-line diff-${line.type}`}>
-                <span className="diff-marker">
-                  {line.type === "added" ? "+" : line.type === "removed" ? "-" : " "}
-                </span>
-                <span>{line.text || " "}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="cmp-card optimised">
-          <div className="cmp-card-header" style={{ justifyContent: "space-between" }}>
-            <span className="badge badge-optimised">Council Output → Final Prompt</span>
-            <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
-              +{optimisedToFinalSummary.added} / -{optimisedToFinalSummary.removed} lines
-            </span>
-          </div>
-          <div className="diff-card-body">
-            {optimisedToFinalDiff.map((line, index) => (
-              <div key={`opt-final-${index}`} className={`diff-line diff-${line.type}`}>
-                <span className="diff-marker">
-                  {line.type === "added" ? "+" : line.type === "removed" ? "-" : " "}
-                </span>
-                <span>{line.text || " "}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Edit field */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 16 }}>
-        <div className="section-label">Final prompt (editable)</div>
-        <button onClick={handleCopy} className="btn btn-secondary" style={{ fontSize: 11, padding: "4px 12px" }}>
-          {copied ? "Copied" : "Copy to clipboard"}
-        </button>
-      </div>
-      <textarea className="textarea-field" value={editedPrompt} onChange={(e) => setEditedPrompt(e.target.value)} rows={8} />
-      <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)", marginTop: 6, marginBottom: 8 }}>
-        {editedPrompt.split(/\s+/).filter(Boolean).length} words
-      </div>
-
-      <div style={{ marginTop: 12, display: "flex", gap: 12 }}>
+      <div className="review-actions">
         <button className="btn btn-primary" onClick={() => onApprove(editedPrompt)}>Approve and execute</button>
         <button className="btn btn-danger" onClick={onStartOver}>Discard and start over</button>
       </div>
+
+      <div className="section-label">Optimization Summary</div>
+      <div className="summary-grid">
+        <div className="summary-block">
+          <div className="summary-title">What the optimization added</div>
+          <div className="summary-list">
+            {promptImprovements.map((item) => (
+              <div key={item} className="summary-item">
+                <span className="summary-dot" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="summary-block summary-block-human">
+          <div className="summary-title">Why the council selected it</div>
+          <div className="summary-list">
+            {consensusReasons.map((item) => (
+              <div key={item} className="summary-item">
+                <span className="summary-dot" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="section-label">Research Lens</div>
+      <div className="research-strip" style={{ marginBottom: 22 }}>
+        <div className="research-metric">
+          <span className="research-label">Consensus strength</span>
+          <strong>{researchInsights.consensus_strength_pct}%</strong>
+          <span>{researchInsights.consensus_label}</span>
+        </div>
+        <div className="research-metric">
+          <span className="research-label">Reviewer agreement</span>
+          <strong>{researchInsights.reviewer_agreement_pct}%</strong>
+          <span>{researchInsights.winner_first_place_support_pct}% first-place support</span>
+        </div>
+        <div className="research-metric">
+          <span className="research-label">Rewrite diversity</span>
+          <strong>{researchInsights.rewrite_diversity_pct}%</strong>
+          <span>{researchInsights.diversity_label}</span>
+        </div>
+        <div className="research-metric">
+          <span className="research-label">Your intervention</span>
+          <strong>{researchInsights.human_edit_shift_pct}%</strong>
+          <span>{researchInsights.human_edit_level}</span>
+        </div>
+        <div className="research-metric">
+          <span className="research-label">Consensus response</span>
+          <strong>{describeConsensusResponse(researchInsights.consensus_response)}</strong>
+          <span>
+            {researchInsights.accepted_without_edit
+              ? "direct adoption"
+              : researchInsights.overrode_consensus
+                ? "human override"
+                : "human refinement"}
+          </span>
+        </div>
+      </div>
+      <div className="session-inline-note" style={{ marginBottom: 22 }}>
+        {researchInsights.accepted_without_edit
+          ? "If you approve this prompt as-is, the session records a pure council adoption signal: consensus formed and the human accepted it without revision."
+          : researchInsights.overrode_consensus
+            ? "Your edits currently read like an override rather than a light adjustment, which is especially useful HCAI evidence about where human intent diverged from council consensus."
+            : "Your edits are part of the core HCAI evidence here: they show where consensus still needed human correction, tailoring, or domain-specific refinement."}
+      </div>
+      {consensus_diagnostics?.needs_human_review && (
+        <div className="session-inline-note" style={{ marginBottom: 22 }}>
+          The council agreement on this run was not especially strong, so your review matters more than usual here. This is the right place to confirm whether the winner preserved your intent or whether a different strategy should have prevailed.
+        </div>
+      )}
+
+      <button className="collapsible-header review-collapse" onClick={() => setShowReferences(!showReferences)} style={{ marginBottom: showReferences ? 0 : 18 }}>
+        <span>View original prompt and council output</span>
+        <span style={{ transition: "transform 0.2s", transform: showReferences ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+      </button>
+      {showReferences && (
+        <div className="review-reference-block">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <div className="section-label">Prompt Comparison</div>
+            <span style={{ fontSize: 11, fontFamily: "var(--mono)", color: "var(--text-dim)" }}>
+              {origWords} words {"\u2192"} {optWords} words (+{Math.round(((optWords - origWords) / Math.max(origWords, 1)) * 100)}%)
+            </span>
+          </div>
+          <div className="comparison-grid review-reference-grid">
+            <div className="cmp-card">
+              <div className="cmp-card-header"><span className="badge badge-original">Original</span></div>
+              <div className="cmp-card-body">{raw_query}</div>
+            </div>
+            <div className="cmp-card optimised">
+              <div className="cmp-card-header"><span className="badge badge-optimised">Council Output</span></div>
+              <div className="cmp-card-body">{optimised_prompt}</div>
+            </div>
+          </div>
+
+          <div className="section-label">Prompt History</div>
+          <div className="history-grid">
+            <div className="history-card">
+              <div className="history-step">Step 1</div>
+              <div className="history-title">Raw Query</div>
+              <div className="history-meta">{origWords} words</div>
+              <div className="history-desc">Your original natural-language request before any agent intervention.</div>
+            </div>
+            <div className="history-card history-card-active">
+              <div className="history-step">Step 2</div>
+              <div className="history-title">Council Output</div>
+              <div className="history-meta">{optWords} words</div>
+              <div className="history-desc">
+                Synthesised by the chairman after peer review.
+                {rawToOptimisedSummary.added > 0 || rawToOptimisedSummary.removed > 0
+                  ? ` ${rawToOptimisedSummary.added} lines added, ${rawToOptimisedSummary.removed} lines replaced or removed.`
+                  : " No structural change detected."}
+              </div>
+            </div>
+            <div className={`history-card ${hasUserEdits ? "history-card-user" : ""}`}>
+              <div className="history-step">Step 3</div>
+              <div className="history-title">Your Final Prompt</div>
+              <div className="history-meta">{editedPrompt.split(/\s+/).filter(Boolean).length} words</div>
+              <div className="history-desc">
+                {hasUserEdits
+                  ? `You edited the council output before approval. ${optimisedToFinalSummary.added} lines added, ${optimisedToFinalSummary.removed} lines removed or replaced.`
+                  : "No user edits yet. If you approve now, the council output will be sent as-is."}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <button className="collapsible-header review-collapse" onClick={() => setShowDiffs(!showDiffs)} style={{ marginBottom: showDiffs ? 0 : 20 }}>
+        <span>Inspect detailed diffs</span>
+        <span style={{ transition: "transform 0.2s", transform: showDiffs ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+      </button>
+      {showDiffs && (
+        <div className="review-reference-block">
+          <div className="section-label">What Changed</div>
+          <div className="comparison-grid review-reference-grid" style={{ marginBottom: 0 }}>
+            <div className="cmp-card">
+              <div className="cmp-card-header" style={{ justifyContent: "space-between" }}>
+                <span className="badge badge-original">Raw → Council Output</span>
+                <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
+                  +{rawToOptimisedSummary.added} / -{rawToOptimisedSummary.removed} lines
+                </span>
+              </div>
+              <div className="diff-card-body">
+                {rawToOptimisedDiff.map((line, index) => (
+                  <div key={`raw-opt-${index}`} className={`diff-line diff-${line.type}`}>
+                    <span className="diff-marker">
+                      {line.type === "added" ? "+" : line.type === "removed" ? "-" : " "}
+                    </span>
+                    <span>{line.text || " "}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="cmp-card optimised">
+              <div className="cmp-card-header" style={{ justifyContent: "space-between" }}>
+                <span className="badge badge-optimised">Council Output → Final Prompt</span>
+                <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
+                  +{optimisedToFinalSummary.added} / -{optimisedToFinalSummary.removed} lines
+                </span>
+              </div>
+              <div className="diff-card-body">
+                {optimisedToFinalDiff.map((line, index) => (
+                  <div key={`opt-final-${index}`} className={`diff-line diff-${line.type}`}>
+                    <span className="diff-marker">
+                      {line.type === "added" ? "+" : line.type === "removed" ? "-" : " "}
+                    </span>
+                    <span>{line.text || " "}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -1302,7 +1810,18 @@ function StageExecute({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ final_prompt: prompt, target_model: targetModel, demo_mode: demoMode }),
       });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
+      if (!res.ok) {
+        let detail = `Status ${res.status}`;
+        try {
+          const data = await res.json();
+          detail = data?.detail || data?.message || detail;
+        } catch {
+          try {
+            detail = await res.text();
+          } catch {}
+        }
+        throw new Error(detail);
+      }
       const data = await res.json();
       return data.response as string;
     };
@@ -1315,8 +1834,8 @@ function StageExecute({
       ]);
       setOptimisedResponse(optimised);
       setBaselineResponse(compareMode ? baseline : null);
-    } catch {
-      const errorText = "Could not reach the backend. Verify the server is running on port 8000.";
+    } catch (err: any) {
+      const errorText = err?.message || "Could not reach the backend. Verify the server is running on port 8000.";
       setOptimisedResponse(errorText);
       setBaselineResponse(compareMode ? errorText : null);
     }
@@ -1539,7 +2058,16 @@ function StageFeedback({
   const [trust, setTrust] = useState(4);
   const [control, setControl] = useState(5);
   const [comment, setComment] = useState("");
+  const [interventionLabels, setInterventionLabels] = useState<string[]>([]);
   const labels: Record<number, string> = { 1: "Poor", 2: "Fair", 3: "Neutral", 4: "Good", 5: "Excellent" };
+  const interventionOptions = [
+    "Accepted council output as-is",
+    "Edited for clarity or structure",
+    "Edited for domain specificity",
+    "Edited to restore my original intent",
+    "Edited for caution or safety",
+    "Preferred the baseline/raw condition more",
+  ];
 
   const handleSubmit = async () => {
     try {
@@ -1562,6 +2090,7 @@ function StageFeedback({
           compare_mode: compareMode,
           safety_report: safetyReport,
           safety_acknowledged: safetyAcknowledged,
+          intervention_labels: interventionLabels,
           intent: pipelineState?.intent || {},
           candidate_a: pipelineState?.candidate_a || "",
           candidate_b: pipelineState?.candidate_b || "",
@@ -1569,6 +2098,7 @@ function StageFeedback({
           peer_reviews: pipelineState?.peer_reviews || [],
           aggregate_rankings: pipelineState?.aggregate_rankings || [],
           label_map: pipelineState?.label_map || {},
+          consensus_diagnostics: pipelineState?.consensus_diagnostics || {},
           perspectives: pipelineState?.perspectives || {},
           chairman: pipelineState?.chairman || {},
         }),
@@ -1635,6 +2165,26 @@ function StageFeedback({
         </div>
       </div>
       <label className="field-label" style={{ marginTop: 12 }}>Additional comments</label>
+      <div className="section-label" style={{ marginTop: 18 }}>Intervention Notes</div>
+      <div className="consensus-reasons" style={{ marginBottom: 14 }}>
+        {interventionOptions.map((option) => {
+          const active = interventionLabels.includes(option);
+          return (
+            <button
+              key={option}
+              type="button"
+              className={`consensus-reason-chip ${active ? "active" : ""}`}
+              onClick={() => setInterventionLabels((current) => (
+                current.includes(option)
+                  ? current.filter((item) => item !== option)
+                  : [...current, option]
+              ))}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
       <textarea className="textarea-field" value={comment} onChange={(e) => setComment(e.target.value)}
         placeholder="Optional — note anything that worked well or could be improved." rows={3} />
       <div style={{ marginTop: 16 }}>
@@ -1668,7 +2218,7 @@ export default function Home() {
   const [stage, setStage] = useState<Stage>("input");
   const [rawQuery, setRawQuery] = useState("");
   const [domain, setDomain] = useState("general");
-  const [targetModel, setTargetModel] = useState("gpt-4o");
+  const [targetModel, setTargetModel] = useState("google/gemma-4-31b-it:free");
   const [demoMode, setDemoMode] = useState(true);
   const [compareMode, setCompareMode] = useState(true);
   const [pipelineState, setPipelineState] = useState<PipelineState | null>(null);
@@ -1679,6 +2229,13 @@ export default function Home() {
   const [safetyAcknowledged, setSafetyAcknowledged] = useState(false);
   const [recentSessions, setRecentSessions] = useState<SessionSummary[]>([]);
   const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null);
+  const [processingRetryToken, setProcessingRetryToken] = useState(0);
+  const [targetModels, setTargetModels] = useState<string[]>([
+    "google/gemma-4-31b-it:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "openrouter/free",
+  ]);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -1711,8 +2268,21 @@ export default function Home() {
     loadAnalytics();
   }, [loadRecentSessions, loadAnalytics]);
 
+  React.useEffect(() => {
+    fetch(`${API_URL}/api/config`)
+      .then((r) => r.json())
+      .then((data) => {
+        const models = data?.target_models;
+        if (Array.isArray(models) && models.length > 0) {
+          setTargetModels(models);
+          setTargetModel((current) => (models.includes(current) ? current : models[0]));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleInputSubmit = (q: string, d: string, m: string, demo: boolean, compare: boolean) => {
-    setRawQuery(q); setDomain(d); setTargetModel(m); setDemoMode(demo); setCompareMode(compare); setStage("processing");
+    setRawQuery(q); setDomain(d); setTargetModel(m); setDemoMode(demo); setCompareMode(compare); setProcessingRetryToken(0); setStage("processing");
   };
 
   const handleProcessingComplete = React.useCallback((state: PipelineState) => {
@@ -1731,9 +2301,23 @@ export default function Home() {
     <div className="app-shell">
       <Header theme={theme} toggleTheme={() => setTheme(t => t === "dark" ? "light" : "dark")} />
       <StageNav current={stage} />
-      {stage === "input" && <StageInput onSubmit={handleInputSubmit} recentSessions={recentSessions} analytics={analytics} />}
+      {stage === "input" && (
+        <StageInput
+          onSubmit={handleInputSubmit}
+          recentSessions={recentSessions}
+          analytics={analytics}
+          targetModels={targetModels}
+        />
+      )}
       {stage === "processing" && (
-        <StageProcessing rawQuery={rawQuery} domain={domain} demoMode={demoMode} onComplete={handleProcessingComplete} />
+        <StageProcessing
+          rawQuery={rawQuery}
+          domain={domain}
+          demoMode={demoMode}
+          retryToken={processingRetryToken}
+          onRetry={() => setProcessingRetryToken((current) => current + 1)}
+          onComplete={handleProcessingComplete}
+        />
       )}
       {stage === "council" && pipelineState && (
         <StageCouncil pipelineState={pipelineState} theme={theme} onContinue={() => setStage("review")} />
