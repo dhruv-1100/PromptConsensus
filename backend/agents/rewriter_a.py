@@ -86,6 +86,6 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         messages,
         MODELS["rewriter_a"],
         temperature=0.7,
-        max_tokens=1000,
+        max_tokens=4096,
     )
     return content

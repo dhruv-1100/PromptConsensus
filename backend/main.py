@@ -81,6 +81,7 @@ class FeedbackRequest(BaseModel):
     consensus_diagnostics: dict = {}
     perspectives: dict = {}
     chairman: dict = {}
+    demo_mode: bool = True
 
 
 def format_pipeline_response(state: dict) -> dict:
@@ -253,7 +254,16 @@ def safety_check(req: SafetyCheckRequest):
 def feedback(req: FeedbackRequest):
     """
     Record user feedback and session context to a local JSON file.
+    Demo-mode runs are NOT persisted — only live runs are stored.
     """
+    # Skip persistence for demo runs
+    if req.demo_mode:
+        return {
+            "status": "demo_mode_skipped",
+            "ratings": {"quality": req.quality, "improvement": req.improvement, "trust": req.trust, "control": req.control},
+            "session_id": "",
+        }
+
     feedback_entry = {
         "quality": req.quality,
         "improvement": req.improvement,

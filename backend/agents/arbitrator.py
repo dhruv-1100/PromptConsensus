@@ -114,7 +114,7 @@ def arbitrate(
     llm = ChatGoogleGenerativeAI(
         model="gemma-3-1b-it",
         temperature=0.2,
-        max_tokens=2048,
+        max_tokens=4096,
         google_api_key=os.environ.get("GOOGLE_API_KEY"),
     )
 

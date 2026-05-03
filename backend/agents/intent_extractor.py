@@ -70,16 +70,16 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
         ),
     ]
 
-    content, model_name = invoke_openrouter_model(
+    intent_text, actual_model = invoke_openrouter_model(
         messages,
         MODELS["intent_extractor"],
         temperature=0.0,
-        max_tokens=500,
+        max_tokens=4096,
     )
     try:
-        return parse_json_response(content)
+        return parse_json_response(intent_text)
     except Exception as exc:
-        log_structured_parse_failure("intent_extractor", model_name, content, str(exc))
+        log_structured_parse_failure("intent_extractor", actual_model, intent_text, str(exc))
         raise RuntimeError(
             f"Intent extraction returned invalid structured output from {model_name}. "
             "Check backend/structured_parse_failures.json for the raw response."

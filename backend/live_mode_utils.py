@@ -154,7 +154,7 @@ def invoke_openrouter_model(
     model_name: str,
     *,
     temperature: float = 0.0,
-    max_tokens: int = 1000,
+    max_tokens: int = 4096,
 ) -> tuple[str, str]:
     from langchain_openai import ChatOpenAI
 
@@ -169,6 +169,7 @@ def invoke_openrouter_model(
         model=resolved_model,
         temperature=temperature,
         max_tokens=max_tokens,
+        request_timeout=120,
     )
     try:
         response = llm.invoke(list(messages))

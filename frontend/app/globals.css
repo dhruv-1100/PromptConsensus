@@ -2733,6 +2733,54 @@ input:checked + .theme-slider:before {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   Download Dropdown
+   ══════════════════════════════════════════════════════════════ */
+
+.download-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 100;
+  min-width: 210px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  padding: 6px;
+  animation: dropdownFadeIn 0.18s var(--ease);
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.download-dropdown-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background 0.15s var(--ease);
+}
+
+.download-dropdown-menu a:hover {
+  background: var(--bg-surface2);
+}
+
+.download-icon {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-dim);
+  width: 20px;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════
    DPO Preference Learning — Lecture 8
    ══════════════════════════════════════════════════════════════ */
 

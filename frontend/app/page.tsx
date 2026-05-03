@@ -492,6 +492,47 @@ function StageNav({ current }: { current: Stage }) {
   );
 }
 
+/* ── Download Dropdown ── */
+function DownloadDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
+      <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={() => setOpen((o) => !o)}
+        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+      >
+        {"\u2913"} Download
+        <span style={{ fontSize: 10, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0)" }}>{"\u25BE"}</span>
+      </button>
+      {open && (
+        <div className="download-dropdown-menu">
+          <a href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+            <span className="download-icon">{"\u007B\u007D"}</span> JSON
+          </a>
+          <a href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+            <span className="download-icon">{"\u2637"}</span> CSV
+          </a>
+          <a href={`${API_URL}/api/sessions/export/preferences`} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+            <span className="download-icon">{"\u2261"}</span> Preferences (JSONL)
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Stage 1 — Input ── */
 function StageInput({
   onSubmit,
@@ -594,15 +635,7 @@ function StageInput({
                     <div className="session-panel-subtitle">Open a saved run to inspect its consensus process in the main panel.</div>
                   </div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer">
-                      JSON
-                    </a>
-                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
-                      CSV
-                    </a>
-                    <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/preferences`} target="_blank" rel="noreferrer">
-                      JSONL
-                    </a>
+                    <DownloadDropdown />
                   </div>
                 </div>
                 {recentSessions.length === 0 ? (
@@ -2063,6 +2096,7 @@ function StageFeedback({
   safetyAcknowledged,
   pipelineState,
   onSessionSaved,
+  demoMode,
 }: {
   onReset: () => void;
   rawQuery: string;
@@ -2078,6 +2112,7 @@ function StageFeedback({
   safetyAcknowledged: boolean;
   pipelineState: PipelineState | null;
   onSessionSaved: () => void;
+  demoMode: boolean;
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [savedSessionId, setSavedSessionId] = useState("");
@@ -2129,12 +2164,13 @@ function StageFeedback({
           consensus_diagnostics: pipelineState?.consensus_diagnostics || {},
           perspectives: pipelineState?.perspectives || {},
           chairman: pipelineState?.chairman || {},
+          demo_mode: demoMode,
         }),
       });
       if (res.ok) {
         const data = await res.json();
         setSavedSessionId(data.session_id || "");
-        onSessionSaved();
+        if (!demoMode) onSessionSaved();
       }
     } catch {}
     setSubmitted(true);
@@ -2179,17 +2215,6 @@ function StageFeedback({
           )}
         </div>
 
-        <div style={{ marginTop: 18, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/json`} target="_blank" rel="noreferrer">
-            Download JSON
-          </a>
-          <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/csv`} target="_blank" rel="noreferrer">
-            Download CSV
-          </a>
-          <a className="btn btn-secondary" href={`${API_URL}/api/sessions/export/preferences`} target="_blank" rel="noreferrer">
-            Download Preferences (JSONL)
-          </a>
-        </div>
         <div style={{ height: 28 }} />
         <button className="btn btn-secondary" onClick={onReset}>New query</button>
       </div>
@@ -2418,6 +2443,7 @@ export default function Home() {
           safetyReport={safetyReport}
           safetyAcknowledged={safetyAcknowledged}
           pipelineState={pipelineState}
+          demoMode={demoMode}
           onSessionSaved={() => {
             loadRecentSessions();
             loadAnalytics();

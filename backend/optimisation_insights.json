@@ -523,5 +523,54 @@
         "format_domain": "blog post",
         "winning_model": "Response X",
         "perspective_used": "Pop Songwriter (radio-friendly, singable mainstream pop tone with clear structure and emotionally resonant, ethics-aware human\u2013AI relationship themes)"
+    },
+    {
+        "timestamp": "2026-05-03T19:19:24.865602",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T19:27:58.905434",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response Z",
+        "perspective_used": "Schema-Driven Template: Used a structured, placeholder-based template schema with mandatory sections (Header, Paragraphs 1-3) and a guided content framework (like STAR method & Leadership Principle integration) to ensure completeness, professional tone, and ease of personalization while maintaining a reusable, non-brittle format."
+    },
+    {
+        "timestamp": "2026-05-03T19:29:19.310899",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T19:34:39.776069",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Template-Constraint Hybrid: Combines structured template format with explicit content requirements and customization guidance to ensure completeness while maintaining flexibility for individual adaptation."
+    },
+    {
+        "timestamp": "2026-05-03T19:37:20.414559",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T19:50:35.734460",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Beginner-first financial coach perspective: frame advice around immediate, practical steps after a first paycheck, using tailored but approachable guidance and a small set of diagnostic questions to adapt risk, horizon, and country/tax considerations."
+    },
+    {
+        "timestamp": "2026-05-03T21:00:43.382461",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Practical personal-finance coach\u2014focus on beginner-safe near-term planning, starting with liquidity/debt, then mapping investments to goals and risk."
     }
 ]

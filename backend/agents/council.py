@@ -340,7 +340,7 @@ def _single_review(
         messages,
         reviewer_model,
         temperature=0.0,
-        max_tokens=1000,
+        max_tokens=4096,
     )
     return {
         "reviewer": reviewer_name,
@@ -488,7 +488,7 @@ def chairman_synthesise(
         messages,
         MODELS["chairman"],
         temperature=0.7,
-        max_tokens=1000,
+        max_tokens=4096,
     )
 
     # Fallback: if the model returned a label/reference instead of an actual prompt,

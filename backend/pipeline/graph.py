@@ -103,18 +103,14 @@ def run_pipeline(
 
     # S2: Parallel Agent Rewriting
     notify("rewriters", "Rewriting with three parallel strategies", 30)
+    # Use a fresh event loop to avoid conflicts when called from asyncio.to_thread()
+    loop = asyncio.new_event_loop()
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_closed():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    candidate_a, candidate_b, candidate_c = loop.run_until_complete(
-        run_rewriters_async(raw_query, intent, demo_mode)
-    )
+        candidate_a, candidate_b, candidate_c = loop.run_until_complete(
+            run_rewriters_async(raw_query, intent, demo_mode)
+        )
+    finally:
+        loop.close()
     _validate_candidate_outputs(candidate_a, candidate_b, candidate_c)
 
     DEFAULT_PERSPECTIVES = {
@@ -263,6 +259,6 @@ He is being discharged in stable condition on insulin therapy and metformin. He 
         [HumanMessage(content=final_prompt)],
         target_model,
         temperature=0.7,
-        max_tokens=1400,
+        max_tokens=4096,
     )
     return content

@@ -82,10 +82,10 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
         ),
     ]
 
-    content, _ = invoke_openrouter_model(
+    content, actual_model = invoke_openrouter_model(
         messages,
         MODELS["rewriter_c"],
         temperature=0.7,
-        max_tokens=1000,
+        max_tokens=4096,
     )
     return content
