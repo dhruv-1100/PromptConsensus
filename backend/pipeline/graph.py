@@ -259,6 +259,6 @@ He is being discharged in stable condition on insulin therapy and metformin. He 
         [HumanMessage(content=final_prompt)],
         target_model,
         temperature=0.7,
-        max_tokens=4096,
+        max_tokens=None,
     )
     return content

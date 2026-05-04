@@ -198,6 +198,9 @@ async def optimize_stream(req: OptimizeRequest):
                 loop.call_soon_threadsafe(queue.put_nowait, {"type": "done"})
 
         task = asyncio.create_task(run_and_publish())
+        
+        # Send 2KB of padding to bypass Nginx/Vercel/browser initial buffering
+        yield f": {' ' * 2048}\n\n"
         yield f"data: {json.dumps({'type': 'start', 'message': 'Connecting to backend', 'progress': 2})}\n\n"
 
         while True:
@@ -214,6 +217,7 @@ async def optimize_stream(req: OptimizeRequest):
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
         },
     )
 

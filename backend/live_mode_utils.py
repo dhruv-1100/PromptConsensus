@@ -154,7 +154,7 @@ def invoke_openrouter_model(
     model_name: str,
     *,
     temperature: float = 0.0,
-    max_tokens: int = 4096,
+    max_tokens: int | None = None,
 ) -> tuple[str, str]:
     from langchain_openai import ChatOpenAI
 
@@ -163,14 +163,17 @@ def invoke_openrouter_model(
     if not resolved_model:
         raise RuntimeError("No OpenRouter model was configured for this pipeline step.")
 
-    llm = ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-        model=resolved_model,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        request_timeout=120,
-    )
+    llm_kwargs = {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": api_key,
+        "model": resolved_model,
+        "temperature": temperature,
+        "request_timeout": 120,
+    }
+    if max_tokens is not None:
+        llm_kwargs["max_tokens"] = max_tokens
+        
+    llm = ChatOpenAI(**llm_kwargs)
     try:
         response = llm.invoke(list(messages))
         content = coerce_message_content(response.content)

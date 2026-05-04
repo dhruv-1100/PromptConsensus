@@ -177,6 +177,7 @@ Synthesis priorities:
 - prefer clarity, structure, and domain fit
 - combine the strongest compatible elements across candidates
 - remove unnecessary restrictions that degrade output quality
+- naturally decide the appropriate length and level of detail for the final prompt based on the task's complexity. Do not arbitrarily compress or summarize the candidates if detail is beneficial.
 
 Use memory carefully:
 - When human preference memory is provided, treat it as evidence about traits users trusted, approved, or edited toward in similar prior sessions.

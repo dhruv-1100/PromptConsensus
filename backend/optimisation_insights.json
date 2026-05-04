@@ -572,5 +572,131 @@
         "format_domain": "general",
         "winning_model": "Response X",
         "perspective_used": "Practical personal-finance coach\u2014focus on beginner-safe near-term planning, starting with liquidity/debt, then mapping investments to goals and risk."
+    },
+    {
+        "timestamp": "2026-05-03T21:09:40.111591",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Scientific Resolution Framework - Structures the response as a biological explanation with clear definitions, evolutionary timeline, and paradox resolution sections to transform a philosophical question into a scientifically answerable inquiry."
+    },
+    {
+        "timestamp": "2026-05-03T21:19:41.429138",
+        "topic_domain": "research",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Scenario-based theoretical analysis \u2014 Structures the response around clarifying assumptions, evaluating plausibility under known physics, identifying constraints, and explicitly separating established theory from speculation."
+    },
+    {
+        "timestamp": "2026-05-03T21:22:19.337373",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T21:25:31.912060",
+        "topic_domain": "research",
+        "format_domain": "general",
+        "winning_model": "Response Z",
+        "perspective_used": "Theoretical consistency reviewer \u2014 a GR/compact-object specialist framing the question as a definitional + physical feasibility check, separating mathematical singularities from observable predictions and focusing on horizon physics, stability, and potential observational signatures without requiring external sources."
+    },
+    {
+        "timestamp": "2026-05-03T21:51:11.909205",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T21:56:06.035063",
+        "topic_domain": "education",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Structured Pedagogical Framework - Using explicit sections (Principles, Framework, Heuristics, Library, Verification) to provide a complete, actionable, and self-contained guide that teaches methodology through templates, examples, and checklists, avoiding vagueness while remaining broadly applicable."
+    },
+    {
+        "timestamp": "2026-05-03T22:02:15.192604",
+        "topic_domain": "education",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Structured Output Blueprint: Imposes a strict, multi-section output schema (Principles, Task Table, Framework, Protocol, Tips) that ensures completeness and direct applicability. Each section has a defined format (e.g., table, checklist) to enforce actionable, verifiable advice without unnecessary verbosity."
+    },
+    {
+        "timestamp": "2026-05-03T22:09:16.036344",
+        "topic_domain": "education",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Template-Driven Scaffolding: Provides a clear, three-part output structure (Principles, Templates, Diagnostics) that directly mirrors the user's need for both 'how to structure' and 'what to ask.' It uses constrained, fill-in-the-blank templates to ensure actionability and a diagnostic checklist for self-correction, avoiding vague advice."
+    },
+    {
+        "timestamp": "2026-05-03T22:48:05.737331",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response Z",
+        "perspective_used": "Structured Template with Instructional Placeholders - This strategy defines a strict output schema for the document while replacing vague gaps with explicit, instructive placeholders. This ensures completeness, guides effective personalization, and embeds best-practice advice directly into the template's structure."
+    },
+    {
+        "timestamp": "2026-05-03T22:54:39.256321",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T22:59:47.040078",
+        "topic_domain": "education",
+        "format_domain": "report",
+        "winning_model": "Response Z",
+        "perspective_used": "Structured Specification Framework - Uses hierarchical categorization, priority tagging, and verification criteria to transform an ambiguous request into a actionable design document with clear boundaries and academic constraints."
+    },
+    {
+        "timestamp": "2026-05-03T23:08:14.096399",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-03T23:17:21.312163",
+        "topic_domain": "general",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Gujarati wedding catering expert\u2014frames the recipe for authentic festival flavors, crowd-ready execution, and practical serve-with guidance while making reasonable assumptions about \u201clagan style.\u201d"
+    },
+    {
+        "timestamp": "2026-05-03T23:26:52.974379",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response X",
+        "perspective_used": "Decompositional Reasoning with Scenario Planning: This approach breaks the complex request into logical stages (SRS necessity, documentation strategy) and then further refines each stage with sub-tasks and verification steps. It also incorporates scenario planning to handle missing context and provide nuanced advice, ensuring comprehensive coverage for various project types."
+    },
+    {
+        "timestamp": "2026-05-03T23:37:07.593045",
+        "topic_domain": "education",
+        "format_domain": "blog post",
+        "winning_model": "Response X",
+        "perspective_used": "Structured Lyric Brief: Uses a two-part verse specification with embedded content checklists (context/apology+request) and genre/tone constraints to ensure completeness, verifiability, and adherence to the original request's core intent while adding necessary fictional detail."
+    },
+    {
+        "timestamp": "2026-05-03T23:46:43.096786",
+        "topic_domain": "general",
+        "format_domain": "report",
+        "winning_model": "Response X",
+        "perspective_used": "Chess Coach (practical coaching curriculum): framed as an actionable, repertoire-focused coaching report for a ~1450 player, including realistic assumptions, phased progression, drills, and an assessment/feedback loop."
+    },
+    {
+        "timestamp": "2026-05-03T23:50:32.787893",
+        "topic_domain": "general",
+        "format_domain": "report",
+        "winning_model": "Response X",
+        "perspective_used": "Chain-of-Thought Reasoning"
+    },
+    {
+        "timestamp": "2026-05-03T23:55:35.544640",
+        "topic_domain": "legal",
+        "format_domain": "general",
+        "winning_model": "Response Y",
+        "perspective_used": "Universal Procedural Framework: Structured the response as a generic, multi-section guide applicable to common scenarios without specific jurisdiction details. Used sections, checklists, a decision schema table, an argument framework, and a process flowchart to ensure completeness, reliability, and a clear output shape that emphasizes actionable steps while adhering to the constraint of providing general information, not guaranteed outcomes."
     }
 ]
