@@ -18,6 +18,8 @@ class ConsensusState(TypedDict, total=False):
     candidate_a: str       # Chain-of-thought strategy
     candidate_b: str       # Role-assignment + few-shot strategy
     candidate_c: str       # Structured template + domain constraints
+    all_candidates: Dict[str, str]  # Generic candidate storage for arbitrary candidate counts
+    candidate_order: List[str]       # Preserves candidate display order for dynamic runs
 
     # S3a — Council peer reviews
     peer_reviews: list     # [{reviewer, model, evaluation, parsed_ranking}, ...]

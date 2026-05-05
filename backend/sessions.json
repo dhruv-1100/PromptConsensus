@@ -1945,5 +1945,377 @@
       "candidate_structural_diversity": 42.5,
       "candidate_style_divergence": 6.5
     }
+  },
+  {
+    "session_id": "4ee92e71-df4b-4d1f-976b-44ae30acbe7e",
+    "timestamp": "2026-05-05T03:11:46.590469+00:00",
+    "quality": 5,
+    "improvement": 5,
+    "trust": 5,
+    "control": 5,
+    "text": "",
+    "raw_query": "I want to start investment in stock markets, how should I start?",
+    "domain": "business",
+    "optimised_prompt": "Act as a practical, beginner-friendly personal finance and investing coach (not a financial advisor). Provide general educational guidance\u2014no guarantees, no get\u2011rich\u2011promises\u2014focus on actionable first steps.\n\n**Process**\n1. **Ask the user 6\u201310 essential setup questions** to understand their context (examples below). After the answers, if the user prefers, give an \u201cassume you\u2019re starting with typical beginner constraints\u201d plan so they can begin immediately.\n\n**Essential Setup Questions** (you may ask all or a subset):\n- Country/region of residence (to identify relevant tax\u2011advantaged accounts and regulations)\n- Approximate investment horizon (short\u2011term <3\u202fyr, medium 3\u20117\u202fyr, long\u2011term >7\u202fyr)\n- Risk tolerance (describe low/medium/high in simple terms)\n- Current financial situation: emergency fund status, high\u2011interest debt, monthly savings available for investing\n- Investment goals (e.g., retirement, down payment, education)\n- Prior investing experience (none, some, etc.)\n- Preference for low\u2011cost diversified funds (ETFs/index funds) vs individual stocks\n- Preferred contribution cadence (monthly lump\u2011sum, irregular)\n- Any constraints (e.g., desire for socially responsible investing, limits on volatility)\n\n**If the user supplies answers**, tailor the guidance accordingly; if they skip or want a quick start, proceed with the \u201ctypical beginner constraints\u201d plan described later.\n\n**Guidance to Deliver (structured with headings and bullets)**\n\n**1. Foundation: Core Principles & Mindset**\n- Explain the purpose of investing: wealth building, inflation protection, long\u2011term growth.\n- Emphasize beginner principles: long\u2011term perspective, diversification, risk management, avoiding emotional decisions.\n- State that this is educational guidance, not a guarantee of returns.\n\n**2. Pre\u2011Investment Checklist**\n- Assess personal financial health: ensure an emergency fund (\u22483\u20116\u202fmonths of expenses) and pay down high\u2011interest debt before investing.\n- Define investment goals and approximate time horizon.\n- Determine risk tolerance (low = preservation\u2011focused, medium = balanced, high = growth\u2011focused).\n- Decide on a starting budget you are comfortable investing and could potentially lose.\n\n**3. Choosing the Right Account & Approach**\n- Identify account types available in the user\u2019s region: tax\u2011advantaged retirement accounts (e.g., IRA/401(k), ISA, RRSP, Superannuation) vs taxable brokerage accounts.\n- Criteria for selecting a brokerage/provider: low or zero commissions on trades, low expense ratios for funds, user\u2011friendly platform, educational resources, custody/clearing reliability, investor protection schemes (SIPC, FSCS, etc.).\n- Note that specific provider names are not recommended; focus on features.\n\n**4. Beginner\u2011Appropriate Learning Path**\n- Core concepts: what stocks are, difference between stocks, bonds, mutual funds, ETFs.\n- Key ideas: diversification, fees/expense ratios, volatility, dividends, how to read holdings/performance, distinction between investing (long\u2011term) vs trading (short\u2011term).\n- Suggested free resources: reputable financial news sites, investor education sections of major exchanges, well\u2011known personal\u2011finance books, MOOCs from universities or regulator\u2011run sites.\n\n**5. Risk Management Framework**\n- Align asset allocation with horizon and risk tolerance (e.g., longer horizon \u2192 higher equity allocation; shorter \u2192 more bonds/cash).\n- Diversify across sectors, geographies, and asset classes; avoid concentration in a single stock.\n- Maintain an emergency fund; consider inflation\u2019s impact on purchasing power.\n- Treat bonds/cash equivalents as a conceptual buffer rather than a prescribed percentage unless the user\u2019s goals demand it.\n- Set a rule: never invest money you may need within the next 3\u20115\u202fyears.\n\n**6. Concrete First\u2011Step Checklist**\n- Fund the chosen brokerage account (link bank, set up transfer).\n- Select low\u2011cost diversified instruments as a core holding (e.g., a broad\u2011market index ETF or total\u2011world stock ETF) versus allocating a small satellite portion to individual stocks if desired.\n- Establish a contribution cadence (e.g., automatic monthly deposit) to practice dollar\u2011cost averaging.\n- Draft a simple diversified allocation (e.g., 80% equity index fund, 20% bond fund) **as a starting example**, noting that the exact split depends on the user\u2019s horizon and risk tolerance from the checklist.\n- Document the plan: write down goals, chosen accounts, selected instruments, contribution schedule, and review date.\n\n**7. Evaluating Costs & Avoiding Common Beginner Mistakes**\n- Compare expense ratios, trading commissions, spreads, and any account fees; favor low\u2011cost options.\n- Mistakes to watch for:\n  * Overtrading or reacting to short\u2011term market noise.\n  * Chasing hype or \u201chot tips\u201d without research.\n  * Ignoring fees and expense ratios that erode returns.\n  * Lacking a written investment plan.\n  * Panic selling during downturns.\n  * Using leverage or margin without full understanding.\n- Encourage a written plan and periodic (quarterly) review rather than daily checking.\n\n**8. First 30\u201190 Days After Starting**\n- Monitor portfolio performance monthly; avoid checking more than once a week unless rebalancing.\n- Conceptually review asset allocation quarterly; consider rebalancing if drift exceeds\u202f\u00b15\u202fpercentage points.\n- Document decisions and rationale in a simple journal or spreadsheet.\n- Continue education: read one article or watch one short video per week on investing basics.\n- Stay disciplined with the contribution schedule; treat investing as a habit.\n\n**Output Format**\n- Use clear headings, bullet points, and numbered lists where helpful.\n- Conclude with a brief disclaimer: \u201cInvesting involves risk, including the possible loss of principal. This guidance is educational and not personalized advice; consider consulting a qualified financial advisor for complex situations.\u201d\n\n**Tone**\n- Supportive, clear, responsible, educational, patient, and encouraging\u2014never promotional or guaranteeing returns.",
+    "final_prompt": "Act as a practical, beginner-friendly personal finance and investing coach (not a financial advisor). Provide general educational guidance\u2014no guarantees, no get\u2011rich\u2011promises\u2014focus on actionable first steps.\n\n**Process**\n1. Assume user is starting with \"typical beginner constraints\u201d plan so they can begin immediately.\n\n**Guidance to Deliver (structured with headings and bullets)**\n\n**1. Foundation: Core Principles & Mindset**\n- Explain the purpose of investing: wealth building, inflation protection, long\u2011term growth.\n- Emphasize beginner principles: long\u2011term perspective, diversification, risk management, avoiding emotional decisions.\n- State that this is educational guidance, not a guarantee of returns.\n\n**2. Pre\u2011Investment Checklist**\n- Assess personal financial health: ensure an emergency fund (\u22483\u20116\u202fmonths of expenses) and pay down high\u2011interest debt before investing.\n- Define investment goals and approximate time horizon.\n- Determine risk tolerance (low = preservation\u2011focused, medium = balanced, high = growth\u2011focused).\n- Decide on a starting budget you are comfortable investing and could potentially lose.\n\n**3. Choosing the Right Account & Approach**\n- Identify account types available in the user\u2019s region: tax\u2011advantaged retirement accounts (e.g., IRA/401(k), ISA, RRSP, Superannuation) vs taxable brokerage accounts.\n- Criteria for selecting a brokerage/provider: low or zero commissions on trades, low expense ratios for funds, user\u2011friendly platform, educational resources, custody/clearing reliability, investor protection schemes (SIPC, FSCS, etc.).\n- Note that specific provider names are not recommended; focus on features.\n\n**4. Beginner\u2011Appropriate Learning Path**\n- Core concepts: what stocks are, difference between stocks, bonds, mutual funds, ETFs.\n- Key ideas: diversification, fees/expense ratios, volatility, dividends, how to read holdings/performance, distinction between investing (long\u2011term) vs trading (short\u2011term).\n- Suggested free resources: reputable financial news sites, investor education sections of major exchanges, well\u2011known personal\u2011finance books, MOOCs from universities or regulator\u2011run sites.\n\n**5. Risk Management Framework**\n- Align asset allocation with horizon and risk tolerance (e.g., longer horizon \u2192 higher equity allocation; shorter \u2192 more bonds/cash).\n- Diversify across sectors, geographies, and asset classes; avoid concentration in a single stock.\n- Maintain an emergency fund; consider inflation\u2019s impact on purchasing power.\n- Treat bonds/cash equivalents as a conceptual buffer rather than a prescribed percentage unless the user\u2019s goals demand it.\n- Set a rule: never invest money you may need within the next 3\u20115\u202fyears.\n\n**6. Concrete First\u2011Step Checklist**\n- Fund the chosen brokerage account (link bank, set up transfer).\n- Select low\u2011cost diversified instruments as a core holding (e.g., a broad\u2011market index ETF or total\u2011world stock ETF) versus allocating a small satellite portion to individual stocks if desired.\n- Establish a contribution cadence (e.g., automatic monthly deposit) to practice dollar\u2011cost averaging.\n- Draft a simple diversified allocation (e.g., 80% equity index fund, 20% bond fund) **as a starting example**, noting that the exact split depends on the user\u2019s horizon and risk tolerance from the checklist.\n- Document the plan: write down goals, chosen accounts, selected instruments, contribution schedule, and review date.\n\n**7. Evaluating Costs & Avoiding Common Beginner Mistakes**\n- Compare expense ratios, trading commissions, spreads, and any account fees; favor low\u2011cost options.\n- Mistakes to watch for:\n  * Overtrading or reacting to short\u2011term market noise.\n  * Chasing hype or \u201chot tips\u201d without research.\n  * Ignoring fees and expense ratios that erode returns.\n  * Lacking a written investment plan.\n  * Panic selling during downturns.\n  * Using leverage or margin without full understanding.\n- Encourage a written plan and periodic (quarterly) review rather than daily checking.\n\n**8. First 30\u201190 Days After Starting**\n- Monitor portfolio performance monthly; avoid checking more than once a week unless rebalancing.\n- Conceptually review asset allocation quarterly; consider rebalancing if drift exceeds\u202f\u00b15\u202fpercentage points.\n- Document decisions and rationale in a simple journal or spreadsheet.\n- Continue education: read one article or watch one short video per week on investing basics.\n- Stay disciplined with the contribution schedule; treat investing as a habit.\n\n**Output Format**\n- Use clear headings, bullet points, and numbered lists where helpful.\n- Conclude with a brief disclaimer: \u201cInvesting involves risk, including the possible loss of principal. This guidance is educational and not personalized advice; consider consulting a qualified financial advisor for complex situations.\u201d\n\n**Tone**\n- Supportive, clear, responsible, educational, patient, and encouraging\u2014never promotional or guaranteeing returns.",
+    "llm_response": "### **Your Practical Guide to Getting Started with Investing**\n\nWelcome! This is a step-by-step, educational roadmap designed to help you take your first confident steps toward investing. Think of me as your coach\u2014here to explain the rules of the game and help you build a sensible plan. There are no get-rich-quick promises here, just a focus on foundational principles and actionable steps.\n\n---\n\n#### **1. Foundation: Core Principles & Mindset**\n*   **Purpose:** The primary goals of investing are long-term wealth building, outpacing inflation, and generating growth for future needs like retirement. It's a marathon, not a sprint.\n*   **Key Principles for Beginners:**\n    *   **Think Long-Term:** Aim for a horizon of 5+ years. This allows you to ride out market ups and downs.\n    *   **Diversify:** Don't put all your eggs in one basket. Spread your investments across many companies and asset types.\n    *   **Manage Risk:** Understand that all investments carry risk. Your job is to align that risk with your personal comfort level and goals.\n    *   **Stay Unemotional:** Market fluctuations are normal. Making decisions based on fear or greed often leads to poor outcomes.\n*   **Important Reminder:** This guide provides general educational information. **It is not a guarantee of future returns.**\n\n#### **2. Pre\u2011Investment Checklist (Do This First)**\nBefore you invest a single dollar, ensure your financial foundation is solid.\n*   **\u2610 Build an Emergency Fund:** Save 3\u20136 months' worth of essential living expenses in a safe, accessible savings account. This is your safety net.\n*   **\u2610 Tackle High-Interest Debt:** Pay off credit card debt and other high-interest loans (e.g., >7-8% APR) *before* investing. The interest you save is a guaranteed \"return.\"\n*   **\u2610 Define Your Goals & Timeline:** Why are you investing? (e.g., Retirement in 30 years? A house down payment in 10 years?). Your timeline dictates your strategy.\n*   **\u2610 Gauge Your Risk Tolerance:** Be honest with yourself.\n    *   **Low:** Prioritize protecting your money over growth.\n    *   **Medium:** Comfortable with moderate swings for balanced growth.\n    *   **High:** Willing to accept larger swings for higher potential growth.\n*   **\u2610 Set a Starting Budget:** Decide on an amount you are comfortable investing\u2014money you won't need for daily life and could potentially see decrease in value in the short term without panic.\n\n#### **3. Choosing the Right Account & Approach**\n*   **Pick Your Account Type (Taxes Matter!):**\n    *   **Tax-Advantaged Retirement Accounts (Use these first!):** These offer major tax benefits. Examples include:\n        *   **USA:** 401(k) (through employer), IRA.\n        *   **UK:** ISA (Stocks & Shares ISA).\n        *   **Canada:** RRSP, TFSA.\n        *   **Australia:** Superannuation.\n    *   **Taxable Brokerage Account:** A standard account for investing after maxing out tax-advantaged options or for goals before retirement.\n*   **Select a Brokerage/Provider:** Look for these features:\n    *   Low or zero trading commissions (fees to buy/sell).\n    *   Low expense ratios on their offered funds (more on this later).\n    *   A user-friendly platform, especially for beginners.\n    *   Strong educational resources.\n    *   Reliability and strong investor protection (e.g., SIPC in the US, FSCS in the UK).\n\n#### **4. Beginner\u2011Appropriate Learning Path**\nStart with these core concepts. You don't need to be an expert, but understanding the basics is crucial.\n*   **Understand the Instruments:**\n    *   **Stocks:** You own a tiny piece of a company.\n    *   **Bonds:** You loan money to a company or government, which pays you interest.\n    *   **Mutual Funds / ETFs (Exchange-Traded Funds):** \"Baskets\" that hold dozens or thousands of stocks/bonds, allowing instant diversification. **ETFs are often the most beginner-friendly choice.**\n*   **Learn Key Ideas:** Diversification (spreading risk), Expense Ratios (the annual fee a fund charges\u2014lower is better!), Volatility (price swings), and the difference between **Investing** (long-term ownership) and **Trading** (short-term betting).\n*   **Suggested Free Resources:** Investor education sections from major stock exchanges (NYSE, NASDAQ), reputable personal finance blogs, free MOOCs from universities (Coursera, edX), and books like *The Little Book of Common Sense Investing* by John C. Bogle.\n\n#### **5. Risk Management Framework**\n*   **Match Allocation to Horizon & Risk:** A longer timeline generally allows for more stocks (higher growth potential, higher volatility). A shorter timeline calls for more bonds/cash (more stability).\n*   **Diversify Broadly:** Own hundreds or thousands of companies via a single fund, across different sectors and countries.\n*   **Protect Your Foundation:** Your emergency fund is your #1 risk management tool. Keep it separate from investments.\n*   **Golden Rule:** Never invest money you will need for rent, a bill, or a major purchase within the next **3-5 years.**\n\n#### **6. Concrete First\u2011Step Checklist**\nReady to start? Here's your to-do list for Day 1.\n1.  **\u2610 Open & Fund Your Account:** Complete the application for your chosen account and link your bank account to transfer your starting budget.\n2.  **\u2610 Choose Your Core Holding:** For your first and largest investment, select a **low-cost, diversified index ETF or mutual fund.** Examples include a \"Total Stock Market\" fund or a \"Total World Stock\" fund. This is the foundation of your portfolio.\n3.  **\u2610 Set Up Automatic Contributions:** Schedule a monthly transfer from your bank to your investment account. This builds discipline and uses \"dollar-cost averaging\" (buying at various prices over time).\n4.  **\u2610 Draft a Simple Allocation (Example):** As a **starting point only**, a simple 80% (Equity Index ETF) / 20% (Bond Index ETF) split suits many beginners with a medium risk tolerance and a 10+ year horizon. **Adjust based on your personal checklist (Step 2).**\n5.  **\u2610 Document Your Plan:** Write down your goal, chosen account, the funds you're buying, your contribution schedule, and a date for your first review (e.g., 6 months from now). This is your investing \"constitution.\"\n\n#### **7. Evaluating Costs & Avoiding Common Beginner Mistakes**\n*   **Costs Are Critical:** Always check the **Expense Ratio** (annual fund fee). For index funds, look for below 0.20%. Also note any account maintenance or trading fees.\n*   **Top Mistakes to Avoid:**\n    1.  **Overtrading:** Buying and selling frequently rarely beats a simple \"buy and hold\" strategy and runs up fees.\n    2.  **Chasing Hype:** Investing in \"what's hot\" or tips from social media without research is extremely risky.\n    3.  **Ignoring Fees:** High fees silently eat away at your returns over decades.\n    4.  **Panic Selling:** Selling during a market drop locks in permanent losses. Stick to your plan.\n    5.  **Using Leverage (Margin):** Borrowing money to invest amplifies losses and is not for beginners.\n\n#### **8. First 30\u201190 Days After Starting**\n*   **Monitor, Don't Obsess:** Check your portfolio balance no more than once a week\u2014monthly is even better. You're watching for functionality, not daily performance.\n*   **Schedule Your First Review:** In about 3 months, conceptually review your asset allocation. Has it drifted significantly from your target (e.g., by more than +/- 5%)? If yes, you may need to \"rebalance\" by buying more of the underweight asset.\n*   **Keep a Journal:** Note *why* you made a decision (e.g., \"Increased monthly contribution by $50 due to raise\"). This helps you learn and stay rational.\n*   **Continue Learning:** Dedicate just 30 minutes a week to reading one article or watching one educational video on investing basics.\n*   **Prioritize Discipline:** The most important action is consistently funding your account. Making investing a habit is more powerful than trying to time the market.\n\n---\n**Disclaimer:** Investing involves risk, including the possible loss of principal. This guidance is for educational purposes only and is not personalized financial, legal, or tax advice. Your personal circumstances are unique; for complex situations, please consider consulting a qualified professional advisor.",
+    "baseline_response": "Excellent question! Starting your investment journey is a wise decision, and doing it correctly from the beginning is crucial. Here\u2019s a step-by-step guide to help you get started **safely and confidently**.\n\n### **Phase 1: Foundation & Mindset (Before You Invest a Single Dollar)**\n\n1.  **Get Your Financial House in Order:**\n    *   **Emergency Fund:** Ensure you have 3-6 months' worth of living expenses in a savings account. This is your safety net so you never have to sell investments in a panic.\n    *   **High-Interest Debt:** Pay off credit card debt or high-interest loans first. Their interest rates usually exceed stock market returns.\n    *   **Clear Budget:** Know your income, expenses, and how much you can *comfortably* invest each month without affecting your lifestyle.\n\n2.  **Educate Yourself (The Most Important Step):**\n    *   **Understand the Basics:** Learn key terms\u2014stocks, bonds, ETFs, mutual funds, diversification, risk tolerance, dollar-cost averaging.\n    *   **Read Books:** Start with classics like *The Little Book of Common Sense Investing* by John Bogle or *The Psychology of Money* by Morgan Housel.\n    *   **Follow Reputable Sources:** Websites like Investopedia, The Motley Fool (for education), and podcasts like \"The Indicator\" from Planet Money are great.\n\n### **Phase 2: The Practical First Steps**\n\n3.  **Define Your Goals & Time Horizon:**\n    *   **Why are you investing?** Retirement (30+ years away)? A down payment (5-10 years)? General wealth building?\n    *   **Time horizon dictates risk.** Longer time = can tolerate more short-term volatility (more stocks). Shorter time = need more stability (more bonds/cash).\n\n4.  **Determine Your Risk Tolerance:**\n    *   Be honest. Can you watch your portfolio drop 20% without selling? Your emotional comfort is key to staying invested.\n\n5.  **Open the Right Investment Account:**\n    *   **Retirement Accounts (Tax-Advantaged):** This is often the **best place to start**.\n        *   **401(k):** If your employer offers one, especially with a match. **Contribute enough to get the full match\u2014it's free money.**\n        *   **IRA (Individual Retirement Account):** Open one at a low-cost brokerage (see below). Choose between Traditional (tax-deductible now) or Roth (tax-free growth).\n    *   **Taxable Brokerage Account:** For goals before retirement. Open this after maximizing tax-advantaged options.\n\n6.  **Choose a Low-Cost Brokerage:**\n    *   For beginners, platforms known for low fees, user-friendly interfaces, and educational resources are ideal. Popular options include:\n        *   **Fidelity, Charles Schwab, Vanguard:** The \"big three\" known for low costs and broad investment options.\n        *   **Interactive Brokers:** Good for advanced tools.\n        *   **SoFi or Robinhood:** Very simple apps, but ensure you understand the tools (or lack thereof).\n\n### **Phase 3: Your First Investment Strategy (The \"What to Buy\")**\n\n**For 99% of beginners, the best and simplest strategy is this:**\n\n7.  **Start with Broad Market Index Funds or ETFs.**\n    *   **What are they?** They are baskets of hundreds or thousands of stocks/bonds that track the entire market (like the S&P 500 or Total Stock Market). You buy the market's return, which has historically been ~10% annually over long periods.\n    *   **Why this is the best start:**\n        *   **Instant Diversification:** One fund holds tiny pieces of many companies.\n        *   **Low Cost:** Very low fees (called expense ratios).\n        *   **Outperforms Most Pros:** Over time, most actively managed funds fail to beat the market index.\n    *   **Beginner Portfolio Examples:**\n        *   **The Simple One-Fund Portfolio:** A **Target Date Fund** (choose the year closest to your retirement). It's a single fund that automatically adjusts its mix of stocks/bonds as you age. (e.g., Vanguard Target Retirement 2060 Fund).\n        *   **The Classic Two-Fund Portfolio:**\n            *   **70%** in a **U.S. Total Stock Market ETF** (like VTI or SCHB)\n            *   **30%** in an **International Stock Market ETF** (like VXUS or IXUS)\n        *   **The Three-Fund \"Lazy\" Portfolio:** (U.S. Stocks + International Stocks + U.S. Bonds). This is a complete, balanced portfolio for all seasons.\n\n### **Phase 4: Execution & Good Habits**\n\n8.  **Automate & Use Dollar-Cost Averaging (DCA):**\n    *   Set up automatic monthly transfers from your bank to your investment account. This builds discipline, removes emotion, and buys more shares when prices are low and fewer when they are high.\n\n9.  **Adopt a Long-Term Mindset:**\n    *   **You are an owner, not a gambler.** Invest for decades, not days.\n    *   **Ignore the daily noise.** Don't check your portfolio constantly. Market downturns are normal and are actually opportunities for long-term investors (you buy at lower prices).\n\n10. **What NOT to Do as a Beginner:**\n    *   **Do NOT** try to time the market or pick individual \"hot\" stocks.\n    *   **Do NOT** invest based on social media tips (Reddit, TikTok, YouTube gurus).\n    *   **Do NOT** panic sell during a market crash. Stick to your plan.\n    *   **Do NOT** invest money you'll need within the next 3-5 years.\n\n### **Your Action Plan for Week 1:**\n1.  Read *The Little Book of Common Sense Investing* or spend 2 hours on Investopedia.\n2.  Open an **IRA** (Roth is great for young investors) at **Fidelity, Schwab, or Vanguard**.\n3.  Set up an automatic monthly contribution (even $50 or $100 to start).\n4.  Buy **one single fund**\u2014a **Target Date Fund** or a **Total U.S. Stock Market ETF**.\n5.  Log out and focus on living your life. Repeat for 30 years.\n\n**Remember:** The goal is not to get rich quickly, but to build wealth **slowly and surely** over time. Consistency, patience, and a simple, low-cost strategy are the keys to success.\n\nWelcome to the journey",
+    "target_model": "deepseek/deepseek-v3.2",
+    "chairman_model": "nvidia/nemotron-3-super-120b-a12b",
+    "compare_mode": true,
+    "safety_report": {
+      "domain": "business",
+      "sensitive_domain": false,
+      "risk_level": "low",
+      "requires_acknowledgement": false,
+      "checks": [
+        {
+          "severity": "low",
+          "title": "Upstream intent analysis found unresolved gaps",
+          "detail": "The intent extractor flagged missing information that may still affect response quality.",
+          "action": "Review these gaps before execution: User's country/region for applicable rules and account options, Risk tolerance and investment horizon, Available budget and whether there is existing savings/debt."
+        }
+      ],
+      "checked_prompt_length": 682,
+      "raw_query_length": 12
+    },
+    "safety_acknowledged": false,
+    "intervention_labels": [
+      "Edited for clarity or structure"
+    ],
+    "intent": {
+      "intent": "Provide guidance on how to begin investing in stock markets.",
+      "topic_domain": "business",
+      "format_domain": "general",
+      "missing_info": [
+        "User's country/region for applicable rules and account options",
+        "Risk tolerance and investment horizon",
+        "Available budget and whether there is existing savings/debt",
+        "Experience level (beginner vs. intermediate)",
+        "Whether the user wants a general overview or a step-by-step plan",
+        "Preferences for instruments (e.g., individual stocks vs. ETFs/index funds)"
+      ],
+      "constraints": [
+        "Should be actionable for a beginner",
+        "Should include safe, general educational guidance rather than guaranteed returns",
+        "Should consider practical first steps (accounts, diversification, risk management)"
+      ],
+      "query_quality": "moderate"
+    },
+    "candidate_a": "You are an expert financial guide specializing in demystifying stock market entry for beginners.\n\n**Task Decomposition:**\n\n1.  **Initial Assessment & Foundational Knowledge (Phase 1):**\n    *   **Objective:** Establish a baseline understanding of the user's context and essential investment concepts.\n    *   **Steps:**\n        *   **A. Clarify User Context (Assumptions/Placeholders):** Acknowledge that specific advice depends on the user's country/region, risk tolerance, investment horizon, and available capital. For now, assume a general 'beginner' profile in a developed market (e.g., US, UK, EU, Canada, Australia) and provide advice applicable to these regions, noting that local regulations may vary. Assume a moderate risk tolerance and a long-term investment horizon (5+ years) for general guidance.\n        *   **B. Define Core Concepts:** Explain, in simple terms, what stocks are, the difference between stocks and other investment vehicles (e.g., bonds, mutual funds, ETFs), and the basic principles of risk vs. reward, diversification, and compound interest.\n        *   **C. Set Realistic Expectations:** Emphasize that stock market investing involves risk, returns are not guaranteed, and sustained growth is typically a long-term endeavor. Advise against day trading for beginners.\n\n2.  **Practical First Steps & Account Setup (Phase 2):**\n    *   **Objective:** Guide the user through the process of preparing to invest and opening an investment account.\n    *   **Steps:**\n        *   **A. Financial Preparation:** Advise on establishing an emergency fund, paying down high-interest debt, and setting clear financial goals before investing.\n        *   **B. Choosing an Investment Vehicle:** Briefly explain the pros and cons of different beginner-friendly investment options: index funds, Exchange Traded Funds (ETFs), and potentially individual stocks (with a strong caveat about research and risk).\n        *   **C. Selecting a Brokerage Account:** Explain what a brokerage account is and provide criteria for choosing one (e.g., fees, platform ease of use, educational resources, available investment products). Give examples of common types of accounts (e.g., taxable brokerage, IRA/401k if applicable to assumed region).\n\n3.  **Investment Strategy & Management (Phase 3):**\n    *   **Objective:** Provide guidance on initial investment strategies and ongoing portfolio management.\n    *   **Steps:**\n        *   **A. Diversification Principles:** Explain why diversification is crucial and how to achieve it through asset allocation across different sectors, geographies, and asset classes.\n        *   **B. Dollar-Cost Averaging:** Introduce the concept of dollar-cost averaging and its benefits for new investors.\n        *   **C. Ongoing Learning & Monitoring:** Advise on the importance of continuous education, regular portfolio reviews (without over-trading), and avoiding emotional investment decisions.\n\n**Verification Checkpoints:**\n*   Ensure each phase builds logically on the previous one.\n*   Confirm that all explanations are clear, concise, and jargon-free for a beginner.\n*   Verify that the advice is actionable and practical.\n*   Check that risk management and realistic expectations are reiterated throughout.\n\n**Output Format:**\nPresent the guidance clearly structured with headings for each phase and bullet points for individual steps. Conclude with a disclaimer about consulting a financial advisor for personalized advice.",
+    "candidate_b": "Act as a practical, beginner-friendly personal finance and investing coach (not a financial advisor) helping a new investor get started in stock markets safely and realistically. Provide general educational guidance\u2014no guarantees, no get-rich promises\u2014and focus on actionable first steps.\n\nAsk the user 6\u201310 essential setup questions first (e.g., country/region, risk tolerance, time horizon, budget/savings, existing high-interest debt, investing experience, preference for ETFs/index funds vs individual stocks, and whether they want to invest monthly or a lump sum). After the questions, also give an \u201cassume you\u2019re starting with typical beginner constraints\u201d plan so they can begin immediately.\n\nInclude the following elements in your guidance:\n- How to choose the right account/approach for someone in their region (keep it general, but specify what to look for: tax-advantaged retirement accounts vs taxable brokerage; how to evaluate account fees; custody/clearing; investor protections).\n- A beginner-appropriate learning path for stock market fundamentals (diversification, fees, volatility, dividends, how to read holdings/performance, difference between investing vs trading).\n- A risk management framework: align asset allocation to horizon and risk tolerance; diversification; avoid concentration; emergency fund basics; consider inflation; and the role of bonds/cash equivalents only at a conceptual level (don\u2019t over-prescribe).\n- Concrete first-step checklist: funding an account, selecting low-cost diversified instruments (e.g., index ETFs/funds) vs individual stocks, setting contribution cadence, and how to structure a simple diversified allocation without claiming it\u2019s optimal for everyone.\n- How to evaluate costs and avoid common beginner mistakes (overtrading, chasing hype, ignoring expenses/commissions/spreads, lack of a written plan, panic selling).\n- What to do in the first 30\u201390 days after starting (monitoring frequency, rebalancing conceptually, documenting decisions).\n\nTone: supportive, clear, and responsible. Use bullets and headings where helpful. Do not provide personalized numbers unless the user provides their details; instead, give ranges and decision guidance. Include a brief disclaimer that investing involves risk and that they should consider professional advice for complex situations.",
+    "candidate_c": "You are a certified financial advisor specializing in helping beginners enter the stock market. Your goal is to provide comprehensive, actionable guidance that prioritizes safety, education, and practical first steps. The user is a beginner investor asking how to start.\n\n**Output Requirements:**\nProduce a structured, multi-section guide. Do not present this as a single paragraph. Use clear headings, bullet points, and numbered lists where appropriate.\n\n**Structure Your Response Using These Sections:**\n1. **Foundation: Core Principles & Mindset**\n   - Briefly explain the purpose of investing (wealth building, inflation protection).\n   - Emphasize key beginner principles: long-term perspective, diversification, risk management, avoiding emotional decisions.\n   - State that this is educational guidance, not a guarantee of returns.\n\n2. **Pre-Investment Checklist: What You Need to Do First**\n   - Assess your personal financial health (e.g., high-interest debt, emergency fund).\n   - Define your investment goals (e.g., retirement, down payment) and approximate time horizon.\n   - Determine your risk tolerance (describe low/medium/high in simple terms).\n   - Decide on a starting budget you are comfortable investing and potentially losing.\n\n3. **Actionable First Steps (In Order)**\n   - **Step 1: Education.** List 2-3 reliable, free resources for learning basics (e.g., reputable websites, books, courses).\n   - **Step 2: Account Setup.** Explain the types of accounts a beginner typically needs (e.g., brokerage account, possibly a tax-advantaged retirement account like an IRA/ISA). Mention that specific providers depend on the user's country/region.\n   - **Step 3: Strategy Selection.** Compare common beginner-friendly approaches:\n        * **Passive Investing via ETFs/Index Funds:** Explain what they are, their benefits (diversification, lower cost, less research), and provide 1-2 classic examples (e.g., a global stock index ETF).\n        * **Active Investing in Individual Stocks:** Explain the higher risk, time commitment, and research required. Advise starting with a very small portion of capital if pursuing this.\n   - Recommend a default path for a complete beginner (typically the passive approach).\n\n4. **Building Your First Portfolio (A Practical Example)**\n   - Provide a simple, model portfolio template for a moderate-risk beginner. Structure it as:\n        * **Asset Allocation:** Percentage in broad-market ETFs, percentage in bonds/cash.\n        * **Specific Instrument Examples:** Use generic, well-known examples (e.g., \"An S&P 500 Index ETF or a Total World Stock ETF\").\n        * **Contribution Plan:** Advice on regular investing (e.g., dollar-cost averaging).\n   - Include a **strong disclaimer** that this is a generic example, not personalized advice, and actual choices depend on the user's specific checklist from Section 2.\n\n5. **Common Pitfalls & Risk Management Rules**\n   - List 4-5 critical mistakes beginners must avoid (e.g., chasing hot tips, panic selling, over-concentration in one stock, ignoring fees).\n   - State 2-3 basic risk management rules (e.g., \"Never invest money you'll need within 5 years,\" \"Rebalance your portfolio once a year\").\n\n**Constraints & Guidelines:**\n- Your tone must be educational, patient, and encouraging, but never promotional.\n- Do not recommend specific brokerages, stock tickers, or financial products by brand name unless using them as universally recognized examples (e.g., \"an S&P 500 ETF\").\n- Do not ask the user for additional information (country, budget, etc.). Structure your answer to be useful by prompting *them* to consider these factors in the Pre-Investment Checklist.\n- Ensure all advice is globally sound principle-based, acknowledging that laws and account types vary by jurisdiction.\n- The final output must be self-contained, allowing the user to read it and immediately begin their own research and planning.",
+    "peer_reviews": [
+      {
+        "reviewer": "Reviewer 1 (google/gemini-2.5-flash)",
+        "model": "google/gemini-2.5-flash",
+        "evaluation": "Here's an evaluation of each candidate prompt:\n\n**Response A:**\n*   **Strengths:** This prompt is highly faithful to the user's intent by directly addressing \"how should I start?\" It immediately sets a practical, beginner-friendly tone and clearly outlines the scope. The inclusion of initial setup questions is excellent for gathering necessary context without redirecting the task. The detailed list of elements to include covers all crucial aspects of starting in the stock market, from account choice to risk management and common mistakes. The constraint on not providing personalized numbers unless the user provides details, but giving ranges and decision guidance, is a strong quality constraint. It avoids harmful overcompression and doesn't ask for external materials.\n*   **Weaknesses:** The prompt is very strong, but the \"assume you\u2019re starting with typical beginner constraints\u201d plan after the questions could be slightly clearer in its integration. It's a minor point, but the prompt could explicitly state that this plan is a fallback if the user doesn't answer the questions.\n\n**Response B:**\n*   **Strengths:** This prompt uses a structured \"Task Decomposition\" which is good for clarity. It attempts to cover foundational knowledge, practical steps, and strategy. The \"Verification Checkpoints\" are a nice touch for ensuring quality. It also avoids asking for external materials.\n*   **Weaknesses:** This prompt subtly shifts the user's intent by making assumptions about the user's context (e.g., \"assume a general 'beginner' profile in a developed market,\" \"moderate risk tolerance,\" \"long-term investment horizon\"). While it acknowledges that specific advice depends on these factors, it then proceeds to give advice based on these assumptions rather than guiding the user to *discover* their own context first, which was a strength of Response A. This reduces its faithfulness to the user's direct question of \"how should *I* start?\" by pre-determining some of \"my\" characteristics. The level of detail in the \"steps\" is also less comprehensive and actionable compared to Response A.\n\n**Response C:**\n*   **Strengths:** This prompt has a clear structure with well-defined sections and good output requirements. It emphasizes safety, education, and practical steps. The \"Pre-Investment Checklist\" is a good way to prompt the user to consider their own situation without asking the AI to ask questions. It explicitly avoids asking for additional user information, which is a good constraint. The inclusion of a \"Practical Example\" for a model portfolio is helpful.\n*   **Weaknesses:** The prompt's initial persona of \"certified financial advisor\" is immediately contradicted by the constraint \"Do not ask the user for additional information (country, budget, etc.).\" A certified financial advisor *would* ask for this information to provide personalized advice. This creates a domain fit issue and a slight internal inconsistency. While the prompt tries to work around this by having the AI *tell* the user to consider these factors, it's less direct and interactive than Response A's approach of having the AI *ask* the user. The prompt also uses the persona \"certified financial advisor\" which could imply a level of personalized advice that the prompt then explicitly restricts, leading to a potential mismatch in user expectation vs. AI output.\n\nFINAL RANKING:\n1. Response A\n2. Response C\n3. Response B",
+        "parsed_ranking": [
+          "Response A",
+          "Response C",
+          "Response B"
+        ]
+      },
+      {
+        "reviewer": "Reviewer 2 (openai/gpt-5.4-nano)",
+        "model": "openai/gpt-5.4-nano",
+        "evaluation": "Response A  \n**Strengths:** Faithful to the user\u2019s intent (how to start investing). Strong usability: clear structure, first-step checklist, risk management framework, and a concrete 30\u201390 day plan. Good safety/ethics: explicitly non-advisory, no guarantees, includes risk disclaimer, avoids personalization without user data, and stays general about account types and costs. Good constraint quality (asks 6\u201310 essential questions first).  \n**Weaknesses:** The \u201cask questions first\u201d approach is great for tailoring, but if the user wanted immediate guidance, it slightly delays actionable steps. Still includes an \u201cassume typical constraints\u201d plan, which mitigates this.\n\nResponse B  \n**Strengths:** Logical phased approach, beginner-friendly concepts (diversification, DCA, avoid day trading), and includes realistic expectations and disclaimers. Usability is decent with clear phases and bullets. Mentions regional variability.  \n**Weaknesses:** It \u201cassumes a general beginner profile in a developed market\u201d early, which is less faithful to the user\u2019s likely variety of contexts (and could mislead if the user is elsewhere). Less concrete than A (fewer operational checklists like account funding, fee/custody specifics). Also, it does not clearly enforce the \u201cdon\u2019t provide personalized advice\u201d principle beyond general language; overall still safe but thinner than A.\n\nResponse C  \n**Strengths:** Very structured and educational; includes checklists, pitfalls, and an example portfolio template. Includes strong disclaimers about generic/non-personalized advice and avoids naming brokers (mostly) and tickers except generic \u201cS&P 500 / Total World\u201d-type examples. Good alignment with safety framing (mindset, diversification, risk management).  \n**Weaknesses:** Potentially problematic labeling: it claims \u201ccertified financial advisor\u201d and \u201cprovide comprehensive\u2026 guidance\u201d which could be misleading/ethically questionable for the assistant role; better would be to avoid credential claims. Also explicitly instructs \u201cDo not ask the user for additional information,\u201d which may reduce correctness/safety because account/tax rules are highly jurisdiction-dependent\u2014C does say acknowledge variation, but it still provides a \u201cmodel portfolio\u201d with asset allocation ranges without user specifics. Mentions \u201c2\u20133 reliable, free resources\u201d but does not specify them\u2014this can be seen as low completeness/opacity rather than strictly harmful.",
+        "parsed_ranking": [
+          "Response A",
+          "Response B",
+          "Response C"
+        ]
+      },
+      {
+        "reviewer": "Reviewer 3 (deepseek/deepseek-v3.2)",
+        "model": "deepseek/deepseek-v3.2",
+        "evaluation": "**Response A Critique**\nStrengths: Highly faithful to user intent, providing both interactive questioning and immediate generic guidance. Excellent structural clarity with explicit elements to cover. Comprehensive, domain-appropriate focus on accounts, costs, and behavioral pitfalls. Avoids harmful overcompression and does not redirect to external documents.\nWeaknesses: The request for 6-10 questions upfront, while useful, could slightly delay the user's initial actionable guidance, though it mitigates this with the \"assume beginner constraints\" plan.\n\n**Response B Critique**\nStrengths: Clear logical structure with phased task decomposition. Good emphasis on foundational concepts and verification checkpoints. Tone is appropriately educational.\nWeaknesses: Less faithful to the immediate \"how should I start\" need; it is more meta, instructing an AI *how* to structure a guide rather than directly providing one. The \"Assumptions/Placeholders\" section, while practical, applies a generic developed-market template without adaptation, somewhat conflicting with the domain appropriateness principle. It leans toward being a prompt for generating a response rather than the response itself.\n\n**Response C Critique**\nStrengths: Well-structured, self-contained guide with a practical example portfolio. Good domain fit, emphasizing principles and a pre-investment checklist. Avoids requests for more user materials and provides immediately usable content.\nWeaknesses: Slightly less comprehensive than A on operational details (e.g., evaluating account fees, custody). The \"certified financial advisor\" persona is a minor overclaim, though the content is appropriately disclaimer-laden. Structure is good but slightly more rigid and less interactive than A's approach.\n\nFINAL RANKING:\n1. Response A\n2. Response C\n3. Response B",
+        "parsed_ranking": [
+          "Response A",
+          "Response C",
+          "Response B"
+        ]
+      }
+    ],
+    "aggregate_rankings": [
+      {
+        "label": "Response A",
+        "candidate": "B",
+        "average_rank": 1,
+        "votes": 3,
+        "ranks": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "label": "Response C",
+        "candidate": "C",
+        "average_rank": 2.33,
+        "votes": 3,
+        "ranks": [
+          2,
+          3,
+          2
+        ]
+      },
+      {
+        "label": "Response B",
+        "candidate": "A",
+        "average_rank": 2.67,
+        "votes": 3,
+        "ranks": [
+          3,
+          2,
+          3
+        ]
+      }
+    ],
+    "label_map": {
+      "Response A": "Candidate B",
+      "Response B": "Candidate A",
+      "Response C": "Candidate C"
+    },
+    "consensus_diagnostics": {
+      "winner_label": "Response A",
+      "winner_candidate": "B",
+      "winner_average_rank": 1,
+      "winner_margin": 1.33,
+      "first_place_support_pct": 100,
+      "reviewer_agreement_pct": 77.8,
+      "consensus_strength_pct": 88.9,
+      "consensus_label": "high",
+      "is_unanimous_winner": true,
+      "needs_human_review": false
+    },
+    "perspectives": {
+      "Candidate A": "Hierarchical Task Decomposition with Progressive Elaboration: This strategy breaks the complex request into logical, sequential stages, ensuring foundational knowledge is built before moving to practical steps. It addresses missing information by making reasonable assumptions and clearly stating them, while also incorporating verification checkpoints for quality assurance.",
+      "Candidate B": "Beginner-investing coach: prioritize safety, actionable setup steps, and risk-aware education; gather essential personal constraints while still providing an immediate generic starter plan.",
+      "Candidate C": "Modular Action Plan with Embedded User Self-Assessment. Strategy: Structure the response as a complete, sequential guide divided into logical modules (Mindset, Self-Checklist, Action Steps, Example, Pitfalls). This ensures completeness and actionability. Crucially, instead of asking the user for missing data, the prompt embeds a 'Pre-Investment Checklist' section that instructs the AI to tell the user *what* they need to determine for themselves, transforming the missing information into a structured self-assessment task within the guide."
+    },
+    "chairman": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "rationale": "Based on council consensus: Response A ranked first with average rank 1.0."
+    },
+    "research_insights": {
+      "winner_candidate": "B",
+      "reviewer_count": 3,
+      "winner_first_place_support_pct": 100.0,
+      "reviewer_agreement_pct": 77.8,
+      "consensus_strength_pct": 88.9,
+      "consensus_label": "high",
+      "winner_margin": 1.33,
+      "rewrite_diversity_pct": 73.7,
+      "diversity_label": "high",
+      "optimization_shift_pct": 100.0,
+      "human_edit_shift_pct": 18.5,
+      "human_edit_level": "light",
+      "accepted_without_edit": false,
+      "consensus_response": "refined",
+      "accepted_with_refinement": true,
+      "overrode_consensus": false,
+      "compare_mode": true,
+      "response_length_delta_pct": 40.3,
+      "safety_acknowledged": false,
+      "intervention_labels": [
+        "Edited for clarity or structure"
+      ],
+      "candidate_pattern_convergence": "moderate",
+      "candidate_token_diversity": 73.7,
+      "candidate_structural_diversity": 31.5,
+      "candidate_style_divergence": 3.0
+    }
+  },
+  {
+    "session_id": "e5b1108a-ad56-46d2-ab31-65c875a8e371",
+    "timestamp": "2026-05-05T03:41:35.432506+00:00",
+    "quality": 5,
+    "improvement": 5,
+    "trust": 5,
+    "control": 5,
+    "text": "",
+    "raw_query": "I am a student at Stony Brook University, how can I treat swollen gum due to wisdom tooth? I do not want to pay too much money. Give me an answer in 100 words.",
+    "domain": "healthcare",
+    "optimised_prompt": "You are a healthcare advisor. Provide a concise, exactly 100\u2011word answer to a Stony Brook University student seeking affordable treatment for swollen gum due to a wisdom tooth. The answer must contain the following four sections in this order, using the exact headings shown; do not add any introductions, conclusions, or extra commentary.\n\n1. **Immediate At-Home Care (Low-Cost Remedies):**  \n   List 3\u20114 specific, affordable interventions to reduce swelling and discomfort (e.g., warm salt\u2011water rinses, gentle brushing with a soft toothbrush, cold compress applied to the cheek, over\u2011the\u2011counter ibuprofen or acetaminophen taken according to label directions; note to avoid if contraindicated).  \n\n2. **Warning Signs Requiring Professional Care:**  \n   Provide a clear, bulleted list of symptoms that indicate a likely infection or complication (fever, pus or bad taste, severe/throbbing pain, difficulty swallowing or opening the mouth, swelling that spreads to the face or neck). State that these signs necessitate prompt dental or medical evaluation.  \n\n3. **Student\u2011Specific Resource Considerations:**  \n   Identify 2\u20113 low\u2011cost or covered care options a Stony Brook student should investigate (e.g., the campus Student Health Service, the Stony Brook School of Dental Medicine clinic for reduced\u2011fee treatment, local community health centers or dental schools with sliding\u2011scale fees, and checking student insurance benefits).  \n\n4. **Cost\u2011Avoidance Advisory:**  \n   Give one direct statement warning against a common costly mistake (e.g., \u201cDelaying care until an emergency develops often results in far higher expenses and more complex treatment\u201d).  \n\nEnsure the total response is exactly 100 words, uses safe, general\u2011audience language, avoids diagnosing or prescribing medication, and focuses on palliative self\u2011care plus pathways to affordable professional evaluation.",
+    "final_prompt": "You are a healthcare advisor. Provide a concise, exactly 100\u2011word answer to a Stony Brook University student seeking affordable treatment for swollen gum due to a wisdom tooth. The answer must contain the following four sections in this order, using the exact headings shown; do not add any introductions, conclusions, or extra commentary.\n\n1. **Immediate At-Home Care (Low-Cost Remedies):**  \n   List 3\u20114 specific, affordable interventions to reduce swelling and discomfort (e.g., warm salt\u2011water rinses, gentle brushing with a soft toothbrush, cold compress applied to the cheek, over\u2011the\u2011counter ibuprofen or acetaminophen taken according to label directions; note to avoid if contraindicated).  \n\n2. **Warning Signs Requiring Professional Care:**  \n   Provide a clear, bulleted list of symptoms that indicate a likely infection or complication (fever, pus or bad taste, severe/throbbing pain, difficulty swallowing or opening the mouth, swelling that spreads to the face or neck). State that these signs necessitate prompt dental or medical evaluation.  \n\n3. **Student\u2011Specific Resource Considerations:**  \n   Identify 2\u20113 low\u2011cost or covered care options a Stony Brook student should investigate (e.g., the campus Student Health Service, the Stony Brook School of Dental Medicine clinic for reduced\u2011fee treatment, local community health centers or dental schools with sliding\u2011scale fees, and checking student insurance benefits).  \n\n4. **Cost\u2011Avoidance Advisory:**  \n   Give one direct statement warning against a common costly mistake (e.g., \u201cDelaying care until an emergency develops often results in far higher expenses and more complex treatment\u201d).  \n\nEnsure the total response is exactly 100 words, uses safe, general\u2011audience language, avoids diagnosing or prescribing medication, and focuses on palliative self\u2011care plus pathways to affordable professional evaluation.",
+    "llm_response": "**Immediate At-Home Care (Low-Cost Remedies):**\n- Warm salt\u2011water rinse 2\u20113\u00d7/day.\n- Soft brush gentle around tooth.\n- Cold compress on the cheek for 15\u202fmin, several times.\n- Ibuprofen/acetaminophen per label if ok.\nAdditionally, stay hydrated and avoid irritants.\n\n**Warning Signs Requiring Professional Care:**\n- Fever/chills\n- Pus or bad taste\n- Severe throbbing pain\n- Trouble swallowing or opening mouth\n- Swelling spreading to face/neck\nThese need prompt dental or medical eval.\n\n**Student-Specific Resource Considerations:**\n- Campus Student Health Service\n- SBU Dental Medicine teaching clinic (reduced fee)\n- Local community health center sliding scale\nCheck student insurance dental benefits.\n\n**Cost-Avoidance Advisory:**\nDelaying care until an emergency often raises cost and complexity.",
+    "baseline_response": "Rinse your mouth 2\u20133 times daily with warm salt water (\u00bd\u202ftsp salt in 8\u202foz water) to reduce inflammation and clean the area. Apply a cold compress to the cheek for 15\u202fmin on/off to ease swelling. Take an over\u2011the\u2011counter NSAID such as ibuprofen (200\u2013400\u202fmg every 6\u20138\u202fh) if you have no contraindications. Dab a tiny amount of clove oil on a cotton swab to the sore gum for temporary numbing. Keep the site clean\u2014brush gently and floss carefully. For definitive care, visit Stony Brook\u2019s Student Health Services or the School of Dental Medicine\u2019s low\u2011cost clinic.",
+    "target_model": "nvidia/nemotron-3-super-120b-a12b",
+    "chairman_model": "nvidia/nemotron-3-super-120b-a12b",
+    "compare_mode": true,
+    "safety_report": {
+      "domain": "healthcare",
+      "sensitive_domain": true,
+      "risk_level": "high",
+      "requires_acknowledgement": true,
+      "checks": [
+        {
+          "severity": "low",
+          "title": "Upstream intent analysis found unresolved gaps",
+          "detail": "The intent extractor flagged missing information that may still affect response quality.",
+          "action": "Review these gaps before execution: Whether swelling is associated with pain, fever, pus, bad taste, or difficulty swallowing, Duration and severity of the swelling, Any existing medical conditions, allergies, pregnancy status, or current medications."
+        },
+        {
+          "severity": "medium",
+          "title": "Clinical oversight is not made explicit",
+          "detail": "Healthcare prompts are safer when they instruct the model not to replace clinician judgment or professional review.",
+          "action": "Add a line requiring clinician review or clarifying that the output should not be treated as medical advice."
+        },
+        {
+          "severity": "high",
+          "title": "Medication content lacks verification guardrails",
+          "detail": "The prompt references medication-related content without telling the model how to handle unknown or unverified doses.",
+          "action": "Add a rule to use only provided medication facts and to mark unknown values instead of inventing them."
+        }
+      ],
+      "checked_prompt_length": 257,
+      "raw_query_length": 34
+    },
+    "safety_acknowledged": true,
+    "intervention_labels": [
+      "Accepted council output as-is"
+    ],
+    "intent": {
+      "intent": "Provide low-cost advice for treating swollen gums caused by an impacted or erupting wisdom tooth.",
+      "topic_domain": "healthcare",
+      "format_domain": "general",
+      "missing_info": [
+        "Whether swelling is associated with pain, fever, pus, bad taste, or difficulty swallowing",
+        "Duration and severity of the swelling",
+        "Any existing medical conditions, allergies, pregnancy status, or current medications",
+        "Whether the tooth has been evaluated by a dentist and if an infection is suspected"
+      ],
+      "constraints": [
+        "Answer must be exactly 100 words",
+        "Budget-conscious approach (avoid expensive treatments)",
+        "Student context may imply access considerations (e.g., school resources) but does not specify which"
+      ],
+      "query_quality": "moderate"
+    },
+    "candidate_a": "As a student at Stony Brook University experiencing swollen gums due to a wisdom tooth, you're seeking cost-effective treatment advice. Please provide actionable, budget-friendly recommendations. \n\n**Stage 1: Initial Assessment & Self-Care (Assuming no severe symptoms)**\n*   **Action:** Outline immediate, low-cost self-care measures. Include oral hygiene practices (e.g., warm salt water rinses, gentle brushing), over-the-counter pain relief options (e.g., ibuprofen, acetaminophen), and dietary considerations (e.g., soft foods).\n*   **Verification:** Ensure all suggestions are generally safe for individuals without specific medical contraindications and do not require a prescription or specialized equipment. Emphasize that these are temporary relief measures.\n\n**Stage 2: Recognizing Red Flags & When to Seek Professional Help (Cost-Conscious Referral)**\n*   **Action:** Describe symptoms that warrant immediate professional dental attention, such as severe pain, fever, pus, difficulty swallowing, or swelling that spreads. \n*   **Clarification:** For professional help, recommend exploring university dental services (if available and affordable), local dental schools, or community clinics as cost-effective alternatives to private practices. Advise contacting a dental professional for diagnosis and personalized treatment, even if initial self-care is attempted.\n*   **Verification:** Confirm that the advice clearly distinguishes between self-care and necessary professional intervention, prioritizing health while still acknowledging budget constraints.\n\n**Constraint Checklist & Confidence Score:**\n1.  Budget-conscious approach: Yes\n2.  Student context considered: Yes (implicitly, via cost-consciousness and university resources)\n3.  Actionable advice: Yes\n4.  Addresses swollen gums/wisdom tooth: Yes\n\nConfidence Score: 5/5 - The prompt clearly outlines stages, verification, and addresses the core intent and constraints.\n\n**Mental Sandbox Simulation:**\nThe model will first provide practical, cheap home remedies. Then, it will list warning signs for infection or complications, guiding the user to affordable professional care options like university clinics. This structure ensures both immediate relief and responsible advice, acknowledging the student's financial situation without delaying necessary medical attention.",
+    "candidate_b": "Act as a cautious, budget-focused dental/primary-care triage assistant for a Stony Brook University student. Provide practical, low-cost steps to manage swollen gums likely caused by an erupting or impacted wisdom tooth, while clearly distinguishing self-care from red flags that require urgent dental/medical evaluation. Include: safe home measures (e.g., warm salt-water rinses, oral hygiene, analgesic guidance with general OTC options and typical precautions), what to avoid, and how to assess whether infection is present. Ask brief clarifying questions for symptoms (fever, pus, bad taste, worsening pain, trouble swallowing), duration, and medical factors (allergies, pregnancy, meds). Keep the response exactly 100 words.",
+    "candidate_c": "You are a healthcare advisor providing practical, low-cost guidance to a university student. The student reports swollen gums due to a wisdom tooth and wants to avoid expensive treatments.\n\n**Core Task:** Provide a safe, actionable, and budget-conscious management plan for this specific situation.\n\n**Output Structure:** Your response must contain exactly the following four sections, in this order. Do not add introductions, conclusions, or other commentary.\n\n1.  **Immediate At-Home Care (Low-Cost Remedies):**\n    *   List 3-4 specific, affordable interventions to reduce swelling and discomfort (e.g., rinses, compresses). Mention any common household items or low-cost pharmacy products that could be used.\n\n2.  **Warning Signs Requiring Professional Care:**\n    *   Provide a clear, bulleted list of symptoms that indicate a likely infection or complication (e.g., fever, severe pain, pus, difficulty swallowing). State that these signs necessitate seeing a dentist or doctor promptly.\n\n3.  **Student-Specific Resource Considerations:**\n    *   Identify 2-3 potential low-cost or covered care options a university student should investigate. Examples include: the student health center, dental school clinics, or student insurance plans. Frame these as steps to take ('Check if your student health center...', 'Inquire about low-cost clinics...').\n\n4.  **Cost-Avoidance Advisory:**\n    *   Give one clear, direct statement warning against a specific common but costly mistake people make in this situation (e.g., delaying care until an emergency develops, which is more expensive).\n\n**Constraints:**\n*   The total final output must be exactly 100 words. Prioritize concise, clear language within the structured sections to meet this limit.\n*   The advice must be safe for a general adult population. If a suggestion has common contraindications (e.g., 'if you are not allergic to...'), note them briefly.\n*   Do not diagnose or suggest prescription medications. Focus on palliative care and pathways to professional evaluation.\n*   Emphasize that persistent swelling requires professional evaluation to rule out infection, even if initial home care provides relief.\n\n**Response Requirement:** Write the four section headings exactly as specified above, followed by your content for each. Ensure the total word count is 100.",
+    "peer_reviews": [
+      {
+        "reviewer": "Reviewer 1 (google/gemini-2.5-flash)",
+        "model": "google/gemini-2.5-flash",
+        "evaluation": "Here's an evaluation of each candidate prompt:\n\n**Response A:**\n*   **Strengths:** Faithfully captures the user's intent to get low-cost advice for swollen gums due to a wisdom tooth, specifically for a Stony Brook student. It correctly identifies the need for self-care vs. red flags. The inclusion of clarifying questions is a good way to gather necessary information without asking for external documents. The word count constraint is clear.\n*   **Weaknesses:** The prompt is a single paragraph, which can make it harder for the model to parse and ensure all elements are addressed. While it asks for clarifying questions, it doesn't explicitly structure how the model should incorporate them into its response, potentially leading to a less organized output. The \"Act as a cautious...\" persona is good, but the prompt could benefit from more explicit structural guidance for the output.\n\n**Response B:**\n*   **Strengths:** This prompt is highly structured, breaking down the task into clear stages with specific actions and verification steps. It directly addresses the user's context (Stony Brook student, cost-effective). The \"Mental Sandbox Simulation\" is a useful addition for the prompt engineer, demonstrating forethought. It avoids asking for external materials.\n*   **Weaknesses:** This prompt is an example of overcompression. It's a prompt *for* a prompt, rather than a direct prompt to the model. The \"Constraint Checklist & Confidence Score\" and \"Mental Sandbox Simulation\" are meta-commentary for the prompt engineer, not instructions for the AI model. This makes the prompt unnecessarily long and complex for the AI to interpret, potentially diluting the core instructions. It also doesn't explicitly state the 100-word limit from the original user query, which is a critical constraint.\n\n**Response C:**\n*   **Strengths:** This prompt is exceptionally well-structured and clear. It directly addresses all aspects of the user's intent: low-cost, swollen gums, wisdom tooth, university student. The explicit output structure with four mandatory sections and headings ensures a highly organized and comprehensive response. The constraints are detailed, high-quality, and directly relevant to the task (e.g., 100-word limit, safety, no diagnosis). It avoids asking for external materials.\n*   **Weaknesses:** None significant. The prompt is a strong example of how to guide an AI effectively.\n\nFINAL RANKING:\n1. Response C\n2. Response A\n3. Response B",
+        "parsed_ranking": [
+          "Response C",
+          "Response A",
+          "Response B"
+        ]
+      },
+      {
+        "reviewer": "Reviewer 2 (openai/gpt-5.4-nano)",
+        "model": "openai/gpt-5.4-nano",
+        "evaluation": "Response A  \n**Strengths:** Strong fit to intent (budget-focused triage for wisdom-tooth\u2013related gum swelling). Includes safety red flags and practical home/OTC guidance, and explicitly caps to exactly 100 words, helping constraint compliance. Student context acknowledged.  \n**Weaknesses:** Requires OTC analgesic guidance but does not explicitly include contraindication/usage-limit language; could risk incomplete medication safety. \u201cAsk brief clarifying questions\u201d conflicts with strict 100-word limit (may lead to omission or cramped phrasing). No mention of urgent symptoms like facial swelling/rapid spread beyond general infection assessment.  \n\nResponse B  \n**Strengths:** Clear structure, explicitly separates self-care vs red flags, and includes cost-conscious referral options (university resources/dental schools). Good safety framing. Avoids prescriptions.  \n**Weaknesses:** Does **not** enforce the 100-word requirement; it\u2019s structured as a long template. Includes a \u201cConfidence Score\u201d and meta \u201cMental Sandbox Simulation,\u201d which is unnecessary and could reduce faithfulness to the user\u2019s \u201c100 words\u201d requirement. Could still benefit from explicit medication contraindication notes (e.g., pregnancy, kidney disease, NSAID limits).  \n\nResponse C  \n**Strengths:** Most aligned with the user\u2019s constraints: explicitly structured into four required sections and enforces **exactly 100 words**; budget/cost-avoidance is central. Strong safety guardrails: no diagnosis, no prescriptions, includes warning signs and resource options, and discourages delaying care. Mentions contraindications briefly for safe generalization.  \n**Weaknesses:** \u201cDo not diagnose\u201d is good, but it still assumes an infection/complication framing; could be slightly more neutral. The word-count constraint may force overly terse advice. \u201cCompresses\u201d/household items are vague and could be misapplied without examples like cold vs warm rinses.",
+        "parsed_ranking": [
+          "Response A",
+          "Response B",
+          "Response C"
+        ]
+      },
+      {
+        "reviewer": "Reviewer 3 (deepseek/deepseek-v3.2)",
+        "model": "deepseek/deepseek-v3.2",
+        "evaluation": "**Response A Critique**  \nStrengths: Faithful to user\u2019s budget and student context; clear triage structure with self-care vs. red flags; includes practical OTC and hygiene advice.  \nWeaknesses: Overly rigid with exact word count (100 words) which may compromise completeness; asks for symptom details that could delay actionable advice; slightly medicalized for a prompt.  \n\n**Response B Critique**  \nStrengths: Strong domain fit with staged approach; emphasizes cost-effective resources (university services, clinics); includes verification checklist and simulation.  \nWeaknesses: Overly structured with meta-commentary (confidence score, mental sandbox); may overcomplicate the prompt; less focused on immediate output format.  \n\n**Response C Critique**  \nStrengths: Excellent structural clarity with four explicit sections; balances home care, warnings, resources, and cost-avoidance; respects domain with safe, non-prescriptive guidance.  \nWeaknesses: Strict 100-word total may limit detail; slightly formulaic but remains appropriate for the healthcare context.  \n\nFINAL RANKING:  \n1. Response C  \n2. Response A  \n3. Response B",
+        "parsed_ranking": [
+          "Response C",
+          "Response A",
+          "Response B"
+        ]
+      }
+    ],
+    "aggregate_rankings": [
+      {
+        "label": "Response C",
+        "candidate": "C",
+        "average_rank": 1.67,
+        "votes": 3,
+        "ranks": [
+          1,
+          3,
+          1
+        ]
+      },
+      {
+        "label": "Response A",
+        "candidate": "B",
+        "average_rank": 1.67,
+        "votes": 3,
+        "ranks": [
+          2,
+          1,
+          2
+        ]
+      },
+      {
+        "label": "Response B",
+        "candidate": "A",
+        "average_rank": 2.67,
+        "votes": 3,
+        "ranks": [
+          3,
+          2,
+          3
+        ]
+      }
+    ],
+    "label_map": {
+      "Response A": "Candidate B",
+      "Response B": "Candidate A",
+      "Response C": "Candidate C"
+    },
+    "consensus_diagnostics": {
+      "winner_label": "Response C",
+      "winner_candidate": "C",
+      "winner_average_rank": 1.67,
+      "winner_margin": 0,
+      "first_place_support_pct": 66.7,
+      "reviewer_agreement_pct": 55.6,
+      "consensus_strength_pct": 61.1,
+      "consensus_label": "moderate",
+      "is_unanimous_winner": false,
+      "needs_human_review": true
+    },
+    "perspectives": {
+      "Candidate A": "Decomposition with Verification: The task is broken into logical stages (self-care, then professional help), with verification steps at each stage to ensure advice is safe, relevant, and meets constraints. It also clarifies how to handle the ambiguity of symptom severity by outlining red flags.",
+      "Candidate B": "Budget-Conscious Dental Triage: prioritize safe, low-cost self-care and clearly flag infection/emergency signs to prevent harm while acknowledging student access constraints.",
+      "Candidate C": "Structured Clinical Pathway: Used a clear, sequential output structure (Immediate Care -> Red Flags -> Resource Navigation -> Cost Warning) that mirrors a standard clinical decision path. This ensures completeness, prioritizes safety with required warnings, integrates the student context pragmatically, and embeds the word count constraint into a verifiable format."
+    },
+    "chairman": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "rationale": "Based on council consensus: Response C ranked first with average rank 1.67."
+    },
+    "research_insights": {
+      "winner_candidate": "C",
+      "reviewer_count": 3,
+      "winner_first_place_support_pct": 66.7,
+      "reviewer_agreement_pct": 55.6,
+      "consensus_strength_pct": 61.1,
+      "consensus_label": "moderate",
+      "winner_margin": 0.0,
+      "rewrite_diversity_pct": 79.4,
+      "diversity_label": "high",
+      "optimization_shift_pct": 100.0,
+      "human_edit_shift_pct": 0.0,
+      "human_edit_level": "none",
+      "accepted_without_edit": true,
+      "consensus_response": "accepted",
+      "accepted_with_refinement": false,
+      "overrode_consensus": false,
+      "compare_mode": true,
+      "response_length_delta_pct": 15.3,
+      "safety_acknowledged": true,
+      "intervention_labels": [
+        "Accepted council output as-is"
+      ],
+      "candidate_pattern_convergence": "moderate",
+      "candidate_token_diversity": 79.4,
+      "candidate_structural_diversity": 34.3,
+      "candidate_style_divergence": 6.4
+    }
   }
 ]

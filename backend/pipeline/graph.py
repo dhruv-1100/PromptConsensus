@@ -1,7 +1,7 @@
 """
 pipeline/graph.py
 Pipeline orchestrating all ConsensusPrompt agents.
-Runs intent extraction → three parallel rewrites → council peer review → chairman synthesis.
+Runs intent extraction → parallel rewrites → council peer review → chairman synthesis.
 """
 import json
 import os
@@ -16,44 +16,103 @@ from agents.intent_extractor import extract_intent
 from agents.rewriter_a import rewrite_chain_of_thought
 from agents.rewriter_b import rewrite_role_assignment
 from agents.rewriter_c import rewrite_structured_template
-from agents.council import peer_review, chairman_synthesise
+from agents.council import peer_review_candidates, chairman_synthesise_candidates
 from live_mode_utils import invoke_openrouter_model, extract_prompt_and_perspective
 
 load_dotenv()
 
 
+DEFAULT_REWRITER_SPECS = [
+    {
+        "candidate_name": "Candidate A",
+        "agent_key": "A",
+        "perspective": "Chain-of-Thought Reasoning",
+        "runner": rewrite_chain_of_thought,
+    },
+    {
+        "candidate_name": "Candidate B",
+        "agent_key": "B",
+        "perspective": "Role-Assignment & Few-Shot",
+        "runner": rewrite_role_assignment,
+    },
+    {
+        "candidate_name": "Candidate C",
+        "agent_key": "C",
+        "perspective": "Structured Domain Templates",
+        "runner": rewrite_structured_template,
+    },
+]
+
+
+def _index_to_label(index: int) -> str:
+    """Convert a zero-based index to spreadsheet-style labels: A, B, ..., Z, AA, AB, ..."""
+    if index < 0:
+        raise ValueError("Index must be non-negative.")
+
+    label = ""
+    value = index
+    while True:
+        value, remainder = divmod(value, 26)
+        label = chr(ord("A") + remainder) + label
+        if value == 0:
+            break
+        value -= 1
+    return label
+
+
+def build_rewriter_specs_for_models(model_names: list[str]) -> list[dict[str, Any]]:
+    """Duplicate the A/B/C prompt families as needed for longer model lists."""
+    if not model_names:
+        raise ValueError("At least one rewriter model must be provided.")
+
+    specs: list[dict[str, Any]] = []
+    base_count = len(DEFAULT_REWRITER_SPECS)
+    for idx, model_name in enumerate(model_names):
+        base_spec = dict(DEFAULT_REWRITER_SPECS[idx % base_count])
+        label = _index_to_label(idx)
+        base_spec["candidate_name"] = f"Candidate {label}"
+        base_spec["agent_key"] = label
+        base_spec["model_name"] = model_name
+        base_spec["prompt_family"] = DEFAULT_REWRITER_SPECS[idx % base_count]["candidate_name"]
+        specs.append(base_spec)
+    return specs
+
+
 async def run_rewriters_async(
-    raw_query: str, intent: dict, demo_mode: bool
-) -> tuple[str, str, str]:
-    """Run all three rewriting agents concurrently."""
+    raw_query: str,
+    intent: dict,
+    demo_mode: bool,
+    rewriter_specs: list[dict[str, Any]],
+) -> list[str]:
+    """Run configured rewriting agents concurrently."""
     loop = asyncio.get_event_loop()
     tasks = [
-        loop.run_in_executor(None, rewrite_chain_of_thought, raw_query, intent, demo_mode),
-        loop.run_in_executor(None, rewrite_role_assignment, raw_query, intent, demo_mode),
-        loop.run_in_executor(None, rewrite_structured_template, raw_query, intent, demo_mode),
+        loop.run_in_executor(
+            None,
+            spec["runner"],
+            raw_query,
+            intent,
+            demo_mode,
+            spec.get("model_name"),
+        )
+        for spec in rewriter_specs
     ]
-    results = await asyncio.gather(*tasks)
-    return results[0], results[1], results[2]
+    return list(await asyncio.gather(*tasks))
 
 
-def _validate_candidate_outputs(candidate_a: str, candidate_b: str, candidate_c: str) -> None:
-    candidates = {
-        "Candidate A": candidate_a,
-        "Candidate B": candidate_b,
-        "Candidate C": candidate_c,
-    }
+def _validate_candidate_outputs(candidates: dict[str, str]) -> None:
     missing = [name for name, text in candidates.items() if not str(text or "").strip()]
     if missing:
         raise RuntimeError(
-            "Prompt generation failed because not all three rewriter roles produced usable output: "
+            "Prompt generation failed because not all configured rewriter roles produced usable output: "
             + ", ".join(missing)
         )
 
 
-def _validate_review_outputs(peer_reviews: list[dict]) -> None:
-    if len(peer_reviews) != 3:
+def _validate_review_outputs(peer_reviews: list[dict], expected_candidate_count: int) -> None:
+    if len(peer_reviews) == 0:
         raise RuntimeError(
-            f"Review process failed because exactly 3 reviewer outputs were expected, but received {len(peer_reviews)}."
+            "Review process failed because no reviewer outputs were returned."
         )
 
     incomplete = []
@@ -62,12 +121,12 @@ def _validate_review_outputs(peer_reviews: list[dict]) -> None:
         evaluation = str(review.get("evaluation") or "").strip()
         ranking = review.get("parsed_ranking") or []
         unique_ranking = list(dict.fromkeys(ranking))
-        if not evaluation or len(unique_ranking) != 3:
+        if not evaluation or len(unique_ranking) != expected_candidate_count:
             incomplete.append(reviewer)
 
     if incomplete:
         raise RuntimeError(
-            "Review process failed because these reviewer roles did not return exactly three distinct ranked candidates: "
+            f"Review process failed because these reviewer roles did not return exactly {expected_candidate_count} distinct ranked candidates: "
             + ", ".join(incomplete)
         )
 
@@ -77,6 +136,12 @@ def run_pipeline(
     domain: str = "general",
     demo_mode: bool = False,
     progress_callback=None,
+    *,
+    intent_model: str | None = None,
+    rewriter_specs: list[dict[str, Any]] | None = None,
+    reviewer_models: list[str] | None = None,
+    chairman_model: str | None = None,
+    record_analytics: bool = True,
 ) -> ConsensusState:
     """
     Execute the full ConsensusPrompt pipeline (S1 → S2 → S3a/b/c).
@@ -95,74 +160,78 @@ def run_pipeline(
                 "progress": pct,
             })
 
+    active_rewriter_specs = rewriter_specs or DEFAULT_REWRITER_SPECS
+    if not active_rewriter_specs:
+        raise RuntimeError("At least one rewriter must be configured.")
+
     # S1: Intent Extraction
     notify("intent", "Extracting intent from query", 10)
-    intent = extract_intent(raw_query, demo_mode=demo_mode)
+    intent = extract_intent(raw_query, demo_mode=demo_mode, model_name=intent_model)
     state["intent"] = intent
     notify("intent_complete", "Intent extraction complete", 25)
 
     # S2: Parallel Agent Rewriting
-    notify("rewriters", "Rewriting with three parallel strategies", 30)
+    notify("rewriters", f"Rewriting with {len(active_rewriter_specs)} parallel strategies", 30)
     # Use a fresh event loop to avoid conflicts when called from asyncio.to_thread()
     loop = asyncio.new_event_loop()
     try:
-        candidate_a, candidate_b, candidate_c = loop.run_until_complete(
-            run_rewriters_async(raw_query, intent, demo_mode)
+        candidate_outputs = loop.run_until_complete(
+            run_rewriters_async(raw_query, intent, demo_mode, active_rewriter_specs)
         )
     finally:
         loop.close()
-    _validate_candidate_outputs(candidate_a, candidate_b, candidate_c)
-
-    DEFAULT_PERSPECTIVES = {
-        "A": "Chain-of-Thought Reasoning",
-        "B": "Role-Assignment & Few-Shot",
-        "C": "Structured Domain Templates",
+    raw_candidates = {
+        spec["candidate_name"]: text
+        for spec, text in zip(active_rewriter_specs, candidate_outputs)
     }
+    _validate_candidate_outputs(raw_candidates)
 
-    def parse_cand(cand_text: str, agent_key: str):
-        return extract_prompt_and_perspective(
-            cand_text,
-            DEFAULT_PERSPECTIVES[agent_key],
-            step=f"rewriter_{agent_key.lower()}",
+    state["candidate_a"] = ""
+    state["candidate_b"] = ""
+    state["candidate_c"] = ""
+    state["all_candidates"] = {}
+    state["candidate_order"] = []
+    state["perspectives"] = {}
+
+    candidates_for_review: list[tuple[str, str]] = []
+    for spec, candidate_text in zip(active_rewriter_specs, candidate_outputs):
+        prompt, perspective = extract_prompt_and_perspective(
+            candidate_text,
+            spec["perspective"],
+            step=f"rewriter_{str(spec['agent_key']).lower()}",
         )
-
-    prompt_a, persp_a = parse_cand(candidate_a, "A")
-    prompt_b, persp_b = parse_cand(candidate_b, "B")
-    prompt_c, persp_c = parse_cand(candidate_c, "C")
-
-    state["candidate_a"] = prompt_a
-    state["candidate_b"] = prompt_b
-    state["candidate_c"] = prompt_c
-    state["perspectives"] = {"Candidate A": persp_a, "Candidate B": persp_b, "Candidate C": persp_c}
+        state[f"candidate_{str(spec['agent_key']).lower()}"] = prompt
+        state["all_candidates"][spec["candidate_name"]] = prompt
+        state["candidate_order"].append(spec["candidate_name"])
+        state["perspectives"][spec["candidate_name"]] = perspective
+        candidates_for_review.append((spec["candidate_name"], prompt))
     notify("rewriters_complete", "All rewriters finished", 60)
 
     # S3a + S3b: Council peer review + aggregate ranking
     notify("review", "Council: anonymised peer review in progress", 65)
-    reviews, aggregate, label_map, diagnostics = peer_review(
+    reviews, aggregate, label_map, diagnostics = peer_review_candidates(
         raw_query=raw_query,
-        candidate_a=prompt_a,
-        candidate_b=prompt_b,
-        candidate_c=prompt_c,
+        candidates=candidates_for_review,
+        reviewer_models=reviewer_models,
         demo_mode=demo_mode,
     )
     state["peer_reviews"] = reviews
     state["aggregate_rankings"] = aggregate
     state["label_map"] = label_map
     state["consensus_diagnostics"] = diagnostics
-    _validate_review_outputs(reviews)
+    _validate_review_outputs(reviews, len(candidates_for_review))
     notify("review_complete", "Council review complete — aggregating rankings", 85)
 
     # S3c: Chairman synthesis
     notify("chairman", "Chairman synthesising final prompt", 88)
-    optimised_prompt, chairman_info = chairman_synthesise(
+    optimised_prompt, chairman_info = chairman_synthesise_candidates(
         raw_query=raw_query,
-        candidate_a=prompt_a,
-        candidate_b=prompt_b,
-        candidate_c=prompt_c,
+        candidates=candidates_for_review,
         peer_reviews=reviews,
         aggregate=aggregate,
         label_map=label_map,
         topic_domain=intent.get("topic_domain", domain),
+        chairman_model=chairman_model,
         demo_mode=demo_mode,
     )
     state["chairman"] = chairman_info
@@ -171,7 +240,7 @@ def run_pipeline(
 
     # Analytics Logging
     try:
-        if aggregate and len(aggregate) > 0:
+        if record_analytics and aggregate and len(aggregate) > 0:
             winning_label = aggregate[0].get("label", "Unknown") # 'Candidate A'
             winning_candidate = state["label_map"].get(winning_label, "Unknown")
             winning_perspective = state["perspectives"].get(winning_candidate, "Unknown")
@@ -202,6 +271,7 @@ def execute_prompt(
     final_prompt: str,
     target_model: str = "tencent/hy3-preview:free",
     demo_mode: bool = False,
+    model_name: str | None = None,
 ) -> str:
     """
     S5: Execute the approved final prompt against the chosen target LLM.
@@ -257,7 +327,7 @@ He is being discharged in stable condition on insulin therapy and metformin. He 
 
     content, _ = invoke_openrouter_model(
         [HumanMessage(content=final_prompt)],
-        target_model,
+        model_name or target_model,
         temperature=0.7,
         max_tokens=None,
     )

@@ -52,7 +52,12 @@ def _domain_specific_guidance(intent: dict) -> str:
     return ""
 
 
-def rewrite_structured_template(raw_query: str, intent: dict, demo_mode: bool = False) -> str:
+def rewrite_structured_template(
+    raw_query: str,
+    intent: dict,
+    demo_mode: bool = False,
+    model_name: str | None = None,
+) -> str:
     """
     Agent C: Rewrite using structured templates + domain constraints strategy.
     Returns the rewritten prompt string.
@@ -84,7 +89,7 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
 
     content, actual_model = invoke_openrouter_model(
         messages,
-        MODELS["rewriter_c"],
+        model_name or MODELS["rewriter_c"],
         temperature=0.7,
         max_tokens=4096,
     )

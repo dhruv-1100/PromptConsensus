@@ -52,7 +52,12 @@ def _domain_specific_guidance(intent: dict) -> str:
     return ""
 
 
-def rewrite_chain_of_thought(raw_query: str, intent: dict, demo_mode: bool = False) -> str:
+def rewrite_chain_of_thought(
+    raw_query: str,
+    intent: dict,
+    demo_mode: bool = False,
+    model_name: str | None = None,
+) -> str:
     """
     Agent A: Rewrite using chain-of-thought reasoning strategy.
     Returns the rewritten prompt string.
@@ -84,7 +89,7 @@ Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
 
     content, model_name = invoke_openrouter_model(
         messages,
-        MODELS["rewriter_a"],
+        model_name or MODELS["rewriter_a"],
         temperature=0.7,
         max_tokens=4096,
     )

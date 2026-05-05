@@ -698,5 +698,33 @@
         "format_domain": "general",
         "winning_model": "Response Y",
         "perspective_used": "Universal Procedural Framework: Structured the response as a generic, multi-section guide applicable to common scenarios without specific jurisdiction details. Used sections, checklists, a decision schema table, an argument framework, and a process flowchart to ensure completeness, reliability, and a clear output shape that emphasizes actionable steps while adhering to the constraint of providing general information, not guaranteed outcomes."
+    },
+    {
+        "timestamp": "2026-05-05T02:59:52.504020",
+        "topic_domain": "business",
+        "format_domain": "general",
+        "winning_model": "Response A",
+        "perspective_used": "Beginner-investing coach: prioritize safety, actionable setup steps, and risk-aware education; gather essential personal constraints while still providing an immediate generic starter plan."
+    },
+    {
+        "timestamp": "2026-05-05T03:28:37.154420",
+        "topic_domain": "healthcare",
+        "format_domain": "general",
+        "winning_model": "Response A",
+        "perspective_used": "Dental triage + budget-conscious campus-aware self-care: balances safety screening for infection/complications with immediately actionable, low-cost home measures and guidance for affordable local dental evaluation options suitable for a Stony Brook student."
+    },
+    {
+        "timestamp": "2026-05-05T03:32:44.555484",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-05T03:34:15.933246",
+        "topic_domain": "healthcare",
+        "format_domain": "general",
+        "winning_model": "Response C",
+        "perspective_used": "Structured Clinical Pathway: Used a clear, sequential output structure (Immediate Care -> Red Flags -> Resource Navigation -> Cost Warning) that mirrors a standard clinical decision path. This ensures completeness, prioritizes safety with required warnings, integrates the student context pragmatically, and embeds the word count constraint into a verifiable format."
     }
 ]

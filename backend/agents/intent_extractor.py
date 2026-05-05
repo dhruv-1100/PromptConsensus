@@ -51,7 +51,7 @@ Return ONLY valid JSON with this exact schema:
 }"""
 
 
-def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
+def extract_intent(raw_query: str, demo_mode: bool = False, model_name: str | None = None) -> dict:
     """
     Extract structured intent from the user's raw query.
     Returns a dict with keys: intent, domain, missing_info, constraints, query_quality.
@@ -72,7 +72,7 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
 
     intent_text, actual_model = invoke_openrouter_model(
         messages,
-        MODELS["intent_extractor"],
+        model_name or MODELS["intent_extractor"],
         temperature=0.0,
         max_tokens=4096,
     )
@@ -81,6 +81,6 @@ def extract_intent(raw_query: str, demo_mode: bool = False) -> dict:
     except Exception as exc:
         log_structured_parse_failure("intent_extractor", actual_model, intent_text, str(exc))
         raise RuntimeError(
-            f"Intent extraction returned invalid structured output from {model_name}. "
+            f"Intent extraction returned invalid structured output from {actual_model}. "
             "Check backend/structured_parse_failures.json for the raw response."
         )
