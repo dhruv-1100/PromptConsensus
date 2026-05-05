@@ -1,0 +1,386 @@
+{
+  "input_csv": "/Users/adityapatel/Documents/Projects/PromptConsensus/PromptConsensus/backend/ablation/output/ablation_results.csv",
+  "summary_csv": "/Users/adityapatel/Documents/Projects/PromptConsensus/PromptConsensus/backend/ablation/output/ablation_summary.csv",
+  "count_summary_csv": "/Users/adityapatel/Documents/Projects/PromptConsensus/PromptConsensus/backend/ablation/output/ablation_summary_by_model_count.csv",
+  "total_rows": 9,
+  "total_groups": 9,
+  "total_count_groups": 3,
+  "groups": [
+    {
+      "run_name": "Model3_ab1",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "3",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 194.0404,
+      "avg_execution_elapsed_seconds": 14.773,
+      "avg_consensus_strength_pct": 44.4,
+      "avg_reviewer_agreement_pct": 55.6,
+      "avg_first_place_support_pct": 33.3,
+      "most_frequent_winning_rewriter_model": "google/gemini-2.5-flash",
+      "most_frequent_winner_candidate": "B",
+      "most_common_first_place_vote": "Response B",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "google/gemini-2.5-flash": 1
+      },
+      "winner_candidate_counts": {
+        "B": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 1,
+        "Response B": 2
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model3_ab2",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "3",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 70.231,
+      "avg_execution_elapsed_seconds": 7.4292,
+      "avg_consensus_strength_pct": 72.2,
+      "avg_reviewer_agreement_pct": 77.8,
+      "avg_first_place_support_pct": 66.7,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 1
+      },
+      "winner_candidate_counts": {
+        "C": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 2,
+        "Response B": 1
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model3_ab3",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "3",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 95.038,
+      "avg_execution_elapsed_seconds": 38.904,
+      "avg_consensus_strength_pct": 72.2,
+      "avg_reviewer_agreement_pct": 77.8,
+      "avg_first_place_support_pct": 66.7,
+      "most_frequent_winning_rewriter_model": "openai/gpt-5.4-nano",
+      "most_frequent_winner_candidate": "A",
+      "most_common_first_place_vote": "Response B",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "openai/gpt-5.4-nano": 1
+      },
+      "winner_candidate_counts": {
+        "A": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 1,
+        "Response B": 2
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model5_ab1",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "5",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 174.4967,
+      "avg_execution_elapsed_seconds": 13.3097,
+      "avg_consensus_strength_pct": 73.3,
+      "avg_reviewer_agreement_pct": 80.0,
+      "avg_first_place_support_pct": 66.7,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 1
+      },
+      "winner_candidate_counts": {
+        "C": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 2,
+        "Response D": 1
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model5_ab2",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "5",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 106.5416,
+      "avg_execution_elapsed_seconds": 8.7119,
+      "avg_consensus_strength_pct": 76.7,
+      "avg_reviewer_agreement_pct": 86.7,
+      "avg_first_place_support_pct": 66.7,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response D",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 1
+      },
+      "winner_candidate_counts": {
+        "C": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 1,
+        "Response D": 2
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model5_ab3",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "5",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 97.2075,
+      "avg_execution_elapsed_seconds": 40.8292,
+      "avg_consensus_strength_pct": 86.7,
+      "avg_reviewer_agreement_pct": 73.3,
+      "avg_first_place_support_pct": 100.0,
+      "most_frequent_winning_rewriter_model": "openai/gpt-5.4-nano",
+      "most_frequent_winner_candidate": "A",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "openai/gpt-5.4-nano": 1
+      },
+      "winner_candidate_counts": {
+        "A": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 3
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model7_ab1",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "7",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 193.532,
+      "avg_execution_elapsed_seconds": 21.1071,
+      "avg_consensus_strength_pct": 78.6,
+      "avg_reviewer_agreement_pct": 90.5,
+      "avg_first_place_support_pct": 66.7,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response D",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 1
+      },
+      "winner_candidate_counts": {
+        "C": 1
+      },
+      "first_place_vote_counts": {
+        "Response D": 2,
+        "Response B": 1
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model7_ab2",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "7",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 65.4252,
+      "avg_execution_elapsed_seconds": 7.5646,
+      "avg_consensus_strength_pct": 55.6,
+      "avg_reviewer_agreement_pct": 77.8,
+      "avg_first_place_support_pct": 33.3,
+      "most_frequent_winning_rewriter_model": "google/gemini-2.5-flash",
+      "most_frequent_winner_candidate": "B",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "google/gemini-2.5-flash": 1
+      },
+      "winner_candidate_counts": {
+        "B": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 1,
+        "Response B": 1,
+        "Response D": 1
+      },
+      "unique_errors": []
+    },
+    {
+      "run_name": "Model7_ab3",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "7",
+      "row_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 94.2084,
+      "avg_execution_elapsed_seconds": 10.4467,
+      "avg_consensus_strength_pct": 87.3,
+      "avg_reviewer_agreement_pct": 74.6,
+      "avg_first_place_support_pct": 100.0,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 1,
+      "non_empty_hybrid_prompt_responses": 1,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 1
+      },
+      "winner_candidate_counts": {
+        "C": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 3
+      },
+      "unique_errors": []
+    }
+  ],
+  "groups_by_model_count": [
+    {
+      "run_name": "combined_3_models",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "3",
+      "row_count": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 119.7698,
+      "avg_execution_elapsed_seconds": 20.3687,
+      "avg_consensus_strength_pct": 62.9333,
+      "avg_reviewer_agreement_pct": 70.4,
+      "avg_first_place_support_pct": 55.5667,
+      "most_frequent_winning_rewriter_model": "google/gemini-2.5-flash",
+      "most_frequent_winner_candidate": "B",
+      "most_common_first_place_vote": "Response B",
+      "non_empty_original_query_responses": 3,
+      "non_empty_hybrid_prompt_responses": 3,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "google/gemini-2.5-flash": 1,
+        "deepseek/deepseek-v3.2": 1,
+        "openai/gpt-5.4-nano": 1
+      },
+      "winner_candidate_counts": {
+        "B": 1,
+        "C": 1,
+        "A": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 4,
+        "Response B": 5
+      },
+      "unique_errors": [],
+      "combined_run_count": 3,
+      "source_run_names": "Model3_ab1,Model3_ab2,Model3_ab3"
+    },
+    {
+      "run_name": "combined_5_models",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "5",
+      "row_count": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 126.0819,
+      "avg_execution_elapsed_seconds": 20.9503,
+      "avg_consensus_strength_pct": 78.9,
+      "avg_reviewer_agreement_pct": 80.0,
+      "avg_first_place_support_pct": 77.8,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 3,
+      "non_empty_hybrid_prompt_responses": 3,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 2,
+        "openai/gpt-5.4-nano": 1
+      },
+      "winner_candidate_counts": {
+        "C": 2,
+        "A": 1
+      },
+      "first_place_vote_counts": {
+        "Response A": 6,
+        "Response D": 3
+      },
+      "unique_errors": [],
+      "combined_run_count": 3,
+      "source_run_names": "Model5_ab1,Model5_ab2,Model5_ab3"
+    },
+    {
+      "run_name": "combined_7_models",
+      "target_model": "openai/gpt-5.4-nano",
+      "rewriter_count": "7",
+      "row_count": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "avg_pipeline_elapsed_seconds": 117.7219,
+      "avg_execution_elapsed_seconds": 13.0395,
+      "avg_consensus_strength_pct": 73.8333,
+      "avg_reviewer_agreement_pct": 80.9667,
+      "avg_first_place_support_pct": 66.6667,
+      "most_frequent_winning_rewriter_model": "deepseek/deepseek-v3.2",
+      "most_frequent_winner_candidate": "C",
+      "most_common_first_place_vote": "Response A",
+      "non_empty_original_query_responses": 3,
+      "non_empty_hybrid_prompt_responses": 3,
+      "sample_errors": "",
+      "winning_rewriter_model_counts": {
+        "deepseek/deepseek-v3.2": 2,
+        "google/gemini-2.5-flash": 1
+      },
+      "winner_candidate_counts": {
+        "C": 2,
+        "B": 1
+      },
+      "first_place_vote_counts": {
+        "Response D": 3,
+        "Response B": 2,
+        "Response A": 4
+      },
+      "unique_errors": [],
+      "combined_run_count": 3,
+      "source_run_names": "Model7_ab1,Model7_ab2,Model7_ab3"
+    }
+  ]
+}

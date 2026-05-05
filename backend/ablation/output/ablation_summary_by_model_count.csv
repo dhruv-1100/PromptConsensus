@@ -1,0 +1,4 @@
+run_name,target_model,rewriter_count,row_count,success_count,failure_count,avg_pipeline_elapsed_seconds,avg_execution_elapsed_seconds,avg_consensus_strength_pct,avg_reviewer_agreement_pct,avg_first_place_support_pct,most_frequent_winning_rewriter_model,most_frequent_winner_candidate,most_common_first_place_vote,non_empty_original_query_responses,non_empty_hybrid_prompt_responses,sample_errors,combined_run_count,source_run_names
+combined_3_models,openai/gpt-5.4-nano,3,3,3,0,119.7698,20.3687,62.9333,70.4,55.5667,google/gemini-2.5-flash,B,Response B,3,3,,3,"Model3_ab1,Model3_ab2,Model3_ab3"
+combined_5_models,openai/gpt-5.4-nano,5,3,3,0,126.0819,20.9503,78.9,80.0,77.8,deepseek/deepseek-v3.2,C,Response A,3,3,,3,"Model5_ab1,Model5_ab2,Model5_ab3"
+combined_7_models,openai/gpt-5.4-nano,7,3,3,0,117.7219,13.0395,73.8333,80.9667,66.6667,deepseek/deepseek-v3.2,C,Response A,3,3,,3,"Model7_ab1,Model7_ab2,Model7_ab3"

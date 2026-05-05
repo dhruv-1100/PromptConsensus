@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ablation Study Dashboard</title>
+  <style>
+    :root {
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --text: #17202a;
+      --muted: #5d6d7e;
+      --line: #d6e4f0;
+      --blue: #2e86de;
+      --green: #27ae60;
+      --orange: #f39c12;
+      --red: #e74c3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    main { max-width: 1400px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    .subtitle { color: var(--muted); margin: 0 0 24px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card, .card, .group-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(20, 40, 80, 0.05);
+    }
+    .metric-card { padding: 18px; }
+    .metric-label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .metric-value { font-size: 30px; font-weight: 700; margin-top: 8px; }
+    .card { padding: 20px; margin-bottom: 24px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eef4f8; vertical-align: top; }
+    th { background: #f8fbfe; position: sticky; top: 0; }
+    .chart-svg { width: 100%; height: auto; }
+    .label { fill: #32475b; font-size: 13px; }
+    .sub-label { fill: #6b7c93; font-size: 11px; }
+    .value { fill: #32475b; font-size: 13px; font-weight: 600; }
+    .group-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .group-card { padding: 18px; }
+    .group-card h3 { margin-top: 0; margin-bottom: 10px; }
+    .group-card h4 { margin-bottom: 8px; }
+    .group-card p { margin: 6px 0; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f8fbfe;
+      border: 1px solid #edf2f7;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ablation Study Dashboard</h1>
+    <p class="subtitle">Generated from /Users/adityapatel/Documents/Projects/PromptConsensus/PromptConsensus/backend/ablation/output/ablation_results.csv</p>
+    <section class='cards'><div class='metric-card'><div class='metric-label'>Total Rows</div><div class='metric-value'>9</div></div><div class='metric-card'><div class='metric-label'>Run Groups</div><div class='metric-value'>9</div></div><div class='metric-card'><div class='metric-label'>Successes</div><div class='metric-value'>9</div></div><div class='metric-card'><div class='metric-label'>Failures</div><div class='metric-value'>0</div></div><div class='metric-card'><div class='metric-label'>Avg Consensus</div><div class='metric-value'>71.89%</div></div></section>
+    <section class='card'>
+      <h2>Per-Run Metrics</h2>
+      <p class="subtitle">Each row below represents one run name and target model combination.</p>
+    </section>
+    <section class='card'><h2>Average Consensus Strength (%)</h2><svg viewBox='0 0 900 436' class='chart-svg' role='img' aria-label='Average Consensus Strength (%)'><text x='12' y='42' class='label'>Model3_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='24' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='24' width='257.52' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='42' class='value'>44.40</text><text x='12' y='86' class='label'>Model3_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='68' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='68' width='418.76' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='86' class='value'>72.20</text><text x='12' y='130' class='label'>Model3_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='112' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='112' width='418.76' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='130' class='value'>72.20</text><text x='12' y='174' class='label'>Model5_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='156' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='156' width='425.14' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='174' class='value'>73.30</text><text x='12' y='218' class='label'>Model5_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='200' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='200' width='444.86' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='218' class='value'>76.70</text><text x='12' y='262' class='label'>Model5_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='244' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='244' width='502.86' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='262' class='value'>86.70</text><text x='12' y='306' class='label'>Model7_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='288' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='288' width='455.88' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='306' class='value'>78.60</text><text x='12' y='350' class='label'>Model7_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='332' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='332' width='322.48' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='350' class='value'>55.60</text><text x='12' y='394' class='label'>Model7_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='376' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='376' width='506.34' height='28' rx='8' fill='#2e86de'></rect><text x='822' y='394' class='value'>87.30</text></svg></section>
+    <section class='card'><h2>Average Reviewer Agreement (%)</h2><svg viewBox='0 0 900 436' class='chart-svg' role='img' aria-label='Average Reviewer Agreement (%)'><text x='12' y='42' class='label'>Model3_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='24' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='24' width='322.48' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='42' class='value'>55.60</text><text x='12' y='86' class='label'>Model3_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='68' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='68' width='451.24' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='86' class='value'>77.80</text><text x='12' y='130' class='label'>Model3_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='112' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='112' width='451.24' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='130' class='value'>77.80</text><text x='12' y='174' class='label'>Model5_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='156' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='156' width='464.00' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='174' class='value'>80.00</text><text x='12' y='218' class='label'>Model5_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='200' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='200' width='502.86' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='218' class='value'>86.70</text><text x='12' y='262' class='label'>Model5_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='244' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='244' width='425.14' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='262' class='value'>73.30</text><text x='12' y='306' class='label'>Model7_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='288' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='288' width='524.90' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='306' class='value'>90.50</text><text x='12' y='350' class='label'>Model7_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='332' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='332' width='451.24' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='350' class='value'>77.80</text><text x='12' y='394' class='label'>Model7_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='376' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='376' width='432.68' height='28' rx='8' fill='#27ae60'></rect><text x='822' y='394' class='value'>74.60</text></svg></section>
+    <section class='card'><h2>Average Pipeline Time (seconds)</h2><svg viewBox='0 0 900 436' class='chart-svg' role='img' aria-label='Average Pipeline Time (seconds)'><text x='12' y='42' class='label'>Model3_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='24' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='24' width='580.00' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='42' class='value'>194.04</text><text x='12' y='86' class='label'>Model3_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='68' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='68' width='407.34' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='86' class='value'>70.23</text><text x='12' y='130' class='label'>Model3_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='112' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='112' width='551.22' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='130' class='value'>95.04</text><text x='12' y='174' class='label'>Model5_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='156' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='156' width='580.00' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='174' class='value'>174.50</text><text x='12' y='218' class='label'>Model5_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='200' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='200' width='580.00' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='218' class='value'>106.54</text><text x='12' y='262' class='label'>Model5_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='244' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='244' width='563.80' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='262' class='value'>97.21</text><text x='12' y='306' class='label'>Model7_ab1 [openai/gpt-5.4-nano]</text><rect x='230' y='288' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='288' width='580.00' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='306' class='value'>193.53</text><text x='12' y='350' class='label'>Model7_ab2 [openai/gpt-5.4-nano]</text><rect x='230' y='332' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='332' width='379.47' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='350' class='value'>65.43</text><text x='12' y='394' class='label'>Model7_ab3 [openai/gpt-5.4-nano]</text><rect x='230' y='376' width='580' height='28' rx='8' fill='#edf2f7'></rect><rect x='230' y='376' width='546.41' height='28' rx='8' fill='#f39c12'></rect><text x='822' y='394' class='value'>94.21</text></svg></section>
+    <section class='card'><h2>Summary Table</h2><div class='table-wrap'><table><thead><tr><th>run_name</th><th>target_model</th><th>rewriter_count</th><th>row_count</th><th>success_count</th><th>failure_count</th><th>avg_pipeline_elapsed_seconds</th><th>avg_execution_elapsed_seconds</th><th>avg_consensus_strength_pct</th><th>avg_reviewer_agreement_pct</th><th>most_frequent_winning_rewriter_model</th><th>sample_errors</th></tr></thead><tbody><tr><td>Model3_ab1</td><td>openai/gpt-5.4-nano</td><td>3</td><td>1</td><td>1</td><td>0</td><td>194.0404</td><td>14.773</td><td>44.4</td><td>55.6</td><td>google/gemini-2.5-flash</td><td></td></tr><tr><td>Model3_ab2</td><td>openai/gpt-5.4-nano</td><td>3</td><td>1</td><td>1</td><td>0</td><td>70.231</td><td>7.4292</td><td>72.2</td><td>77.8</td><td>deepseek/deepseek-v3.2</td><td></td></tr><tr><td>Model3_ab3</td><td>openai/gpt-5.4-nano</td><td>3</td><td>1</td><td>1</td><td>0</td><td>95.038</td><td>38.904</td><td>72.2</td><td>77.8</td><td>openai/gpt-5.4-nano</td><td></td></tr><tr><td>Model5_ab1</td><td>openai/gpt-5.4-nano</td><td>5</td><td>1</td><td>1</td><td>0</td><td>174.4967</td><td>13.3097</td><td>73.3</td><td>80.0</td><td>deepseek/deepseek-v3.2</td><td></td></tr><tr><td>Model5_ab2</td><td>openai/gpt-5.4-nano</td><td>5</td><td>1</td><td>1</td><td>0</td><td>106.5416</td><td>8.7119</td><td>76.7</td><td>86.7</td><td>deepseek/deepseek-v3.2</td><td></td></tr><tr><td>Model5_ab3</td><td>openai/gpt-5.4-nano</td><td>5</td><td>1</td><td>1</td><td>0</td><td>97.2075</td><td>40.8292</td><td>86.7</td><td>73.3</td><td>openai/gpt-5.4-nano</td><td></td></tr><tr><td>Model7_ab1</td><td>openai/gpt-5.4-nano</td><td>7</td><td>1</td><td>1</td><td>0</td><td>193.532</td><td>21.1071</td><td>78.6</td><td>90.5</td><td>deepseek/deepseek-v3.2</td><td></td></tr><tr><td>Model7_ab2</td><td>openai/gpt-5.4-nano</td><td>7</td><td>1</td><td>1</td><td>0</td><td>65.4252</td><td>7.5646</td><td>55.6</td><td>77.8</td><td>google/gemini-2.5-flash</td><td></td></tr><tr><td>Model7_ab3</td><td>openai/gpt-5.4-nano</td><td>7</td><td>1</td><td>1</td><td>0</td><td>94.2084</td><td>10.4467</td><td>87.3</td><td>74.6</td><td>deepseek/deepseek-v3.2</td><td></td></tr></tbody></table></div></section>
+    <section class='card'><h2>Per-Group Details</h2><div class='group-grid'><article class='group-card'><h3>Model3_ab1</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 3</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 44.4%</p><p><strong>Top Winning Model:</strong> google/gemini-2.5-flash</p><p><strong>Top Winner Candidate:</strong> B</p><h4>Winning Model Counts</h4><pre>{
+  &quot;google/gemini-2.5-flash&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 1,
+  &quot;Response B&quot;: 2
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model3_ab2</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 3</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 72.2%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 2,
+  &quot;Response B&quot;: 1
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model3_ab3</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 3</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 72.2%</p><p><strong>Top Winning Model:</strong> openai/gpt-5.4-nano</p><p><strong>Top Winner Candidate:</strong> A</p><h4>Winning Model Counts</h4><pre>{
+  &quot;openai/gpt-5.4-nano&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 1,
+  &quot;Response B&quot;: 2
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model5_ab1</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 5</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 73.3%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 2,
+  &quot;Response D&quot;: 1
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model5_ab2</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 5</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 76.7%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 1,
+  &quot;Response D&quot;: 2
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model5_ab3</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 5</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 86.7%</p><p><strong>Top Winning Model:</strong> openai/gpt-5.4-nano</p><p><strong>Top Winner Candidate:</strong> A</p><h4>Winning Model Counts</h4><pre>{
+  &quot;openai/gpt-5.4-nano&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 3
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model7_ab1</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 7</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 78.6%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response D&quot;: 2,
+  &quot;Response B&quot;: 1
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model7_ab2</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 7</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 55.6%</p><p><strong>Top Winning Model:</strong> google/gemini-2.5-flash</p><p><strong>Top Winner Candidate:</strong> B</p><h4>Winning Model Counts</h4><pre>{
+  &quot;google/gemini-2.5-flash&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 1,
+  &quot;Response B&quot;: 1,
+  &quot;Response D&quot;: 1
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>Model7_ab3</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Rewriters:</strong> 7</p><p><strong>Success / Failure:</strong> 1 / </p><p><strong>Avg Consensus:</strong> 87.3%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 3
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article></div></section>
+    <section class='card'>
+      <h2>Combined By Rewriter Count</h2>
+      <p class="subtitle">These statistics combine all runs that used the same number of rewriter models.</p>
+    </section>
+    <section class='cards'><div class='metric-card'><div class='metric-label'>Model Count Groups</div><div class='metric-value'>3</div></div><div class='metric-card'><div class='metric-label'>Combined Source Runs</div><div class='metric-value'>9</div></div><div class='metric-card'><div class='metric-label'>Avg Count Consensus</div><div class='metric-value'>71.89%</div></div><div class='metric-card'><div class='metric-label'>Avg Count Pipeline Time</div><div class='metric-value'>121.19s</div></div></section>
+    <section class='card'><h2>Combined Consensus Strength By Model Count (%)</h2><svg viewBox='0 0 900 214' class='chart-svg' role='img' aria-label='Combined Consensus Strength By Model Count (%)'><text x='12' y='40' class='label'>3 models</text><rect x='190' y='24' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='24' width='371.31' height='36' rx='10' fill='#2e86de'></rect><text x='792' y='48' class='value'>62.93</text><text x='12' y='98' class='label'>5 models</text><rect x='190' y='82' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='82' width='465.51' height='36' rx='10' fill='#2e86de'></rect><text x='792' y='106' class='value'>78.90</text><text x='12' y='156' class='label'>7 models</text><rect x='190' y='140' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='140' width='435.62' height='36' rx='10' fill='#2e86de'></rect><text x='792' y='164' class='value'>73.83</text></svg></section>
+    <section class='card'><h2>Combined Reviewer Agreement By Model Count (%)</h2><svg viewBox='0 0 900 214' class='chart-svg' role='img' aria-label='Combined Reviewer Agreement By Model Count (%)'><text x='12' y='40' class='label'>3 models</text><rect x='190' y='24' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='24' width='415.36' height='36' rx='10' fill='#27ae60'></rect><text x='792' y='48' class='value'>70.40</text><text x='12' y='98' class='label'>5 models</text><rect x='190' y='82' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='82' width='472.00' height='36' rx='10' fill='#27ae60'></rect><text x='792' y='106' class='value'>80.00</text><text x='12' y='156' class='label'>7 models</text><rect x='190' y='140' width='590' height='36' rx='10' fill='#edf2f7'></rect><rect x='190' y='140' width='477.70' height='36' rx='10' fill='#27ae60'></rect><text x='792' y='164' class='value'>80.97</text></svg></section>
+    <section class='card'><h2>Combined Pipeline Time By Model Count (seconds)</h2><svg viewBox='0 0 900 340' class='chart-svg' role='img' aria-label='Combined Pipeline Time By Model Count (seconds)'><line x1='80' y1='280.00' x2='860' y2='280.00' stroke='#e6edf5' stroke-width='1'></line><text x='16' y='284.00' class='value'>0</text><line x1='80' y1='217.00' x2='860' y2='217.00' stroke='#e6edf5' stroke-width='1'></line><text x='16' y='221.00' class='value'>25</text><line x1='80' y1='154.00' x2='860' y2='154.00' stroke='#e6edf5' stroke-width='1'></line><text x='16' y='158.00' class='value'>50</text><line x1='80' y1='91.00' x2='860' y2='91.00' stroke='#e6edf5' stroke-width='1'></line><text x='16' y='95.00' class='value'>75</text><line x1='80' y1='28.00' x2='860' y2='28.00' stroke='#e6edf5' stroke-width='1'></line><text x='16' y='32.00' class='value'>100</text><line x1='80' y1='28' x2='80' y2='280' stroke='#9fb3c8' stroke-width='1.2'></line><line x1='80' y1='280' x2='860' y2='280' stroke='#9fb3c8' stroke-width='1.2'></line><text x='80.00' y='302' text-anchor='middle' class='label'>3 models</text><circle cx='80.00' cy='28.00' r='6' fill='#f39c12'></circle><text x='80.00' y='16.00' text-anchor='middle' class='value'>119.77</text><text x='470.00' y='302' text-anchor='middle' class='label'>5 models</text><circle cx='470.00' cy='28.00' r='6' fill='#f39c12'></circle><text x='470.00' y='16.00' text-anchor='middle' class='value'>126.08</text><text x='860.00' y='302' text-anchor='middle' class='label'>7 models</text><circle cx='860.00' cy='28.00' r='6' fill='#f39c12'></circle><text x='860.00' y='16.00' text-anchor='middle' class='value'>117.72</text><polyline fill='none' stroke='#f39c12' stroke-width='3' points='80.00,28.00 470.00,28.00 860.00,28.00'></polyline></svg></section>
+    <section class='card'><h2>Combined By Model Count</h2><div class='table-wrap'><table><thead><tr><th>rewriter_count</th><th>combined_run_count</th><th>target_model</th><th>row_count</th><th>success_count</th><th>failure_count</th><th>avg_pipeline_elapsed_seconds</th><th>avg_consensus_strength_pct</th><th>avg_reviewer_agreement_pct</th><th>most_frequent_winning_rewriter_model</th><th>sample_errors</th></tr></thead><tbody><tr><td>3</td><td>3</td><td>openai/gpt-5.4-nano</td><td>3</td><td>3</td><td>0</td><td>119.7698</td><td>62.9333</td><td>70.4</td><td>google/gemini-2.5-flash</td><td></td></tr><tr><td>5</td><td>3</td><td>openai/gpt-5.4-nano</td><td>3</td><td>3</td><td>0</td><td>126.0819</td><td>78.9</td><td>80.0</td><td>deepseek/deepseek-v3.2</td><td></td></tr><tr><td>7</td><td>3</td><td>openai/gpt-5.4-nano</td><td>3</td><td>3</td><td>0</td><td>117.7219</td><td>73.8333</td><td>80.9667</td><td>deepseek/deepseek-v3.2</td><td></td></tr></tbody></table></div></section>
+    <section class='card'><h2>Combined Count Details</h2><div class='group-grid'><article class='group-card'><h3>3 Models</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Combined Run Count:</strong> 3</p><p><strong>Success / Failure:</strong> 3 / </p><p><strong>Avg Consensus:</strong> 62.9333%</p><p><strong>Top Winning Model:</strong> google/gemini-2.5-flash</p><p><strong>Top Winner Candidate:</strong> B</p><h4>Winning Model Counts</h4><pre>{
+  &quot;google/gemini-2.5-flash&quot;: 1,
+  &quot;deepseek/deepseek-v3.2&quot;: 1,
+  &quot;openai/gpt-5.4-nano&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 4,
+  &quot;Response B&quot;: 5
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>5 Models</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Combined Run Count:</strong> 3</p><p><strong>Success / Failure:</strong> 3 / </p><p><strong>Avg Consensus:</strong> 78.9%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 2,
+  &quot;openai/gpt-5.4-nano&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response A&quot;: 6,
+  &quot;Response D&quot;: 3
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article><article class='group-card'><h3>7 Models</h3><p><strong>Target:</strong> openai/gpt-5.4-nano</p><p><strong>Combined Run Count:</strong> 3</p><p><strong>Success / Failure:</strong> 3 / </p><p><strong>Avg Consensus:</strong> 73.8333%</p><p><strong>Top Winning Model:</strong> deepseek/deepseek-v3.2</p><p><strong>Top Winner Candidate:</strong> C</p><h4>Winning Model Counts</h4><pre>{
+  &quot;deepseek/deepseek-v3.2&quot;: 2,
+  &quot;google/gemini-2.5-flash&quot;: 1
+}</pre><h4>First-Place Vote Counts</h4><pre>{
+  &quot;Response D&quot;: 3,
+  &quot;Response B&quot;: 2,
+  &quot;Response A&quot;: 4
+}</pre><h4>Errors</h4><ul><li>None</li></ul></article></div></section>
+  </main>
+</body>
+</html>
