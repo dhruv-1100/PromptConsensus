@@ -4,6 +4,7 @@ S2 Agent A: Chain-of-Thought Reasoning Strategy
 Rewrites the user's query by inserting explicit step-by-step reasoning scaffolds.
 Uses Gemini.
 """
+from __future__ import annotations
 import os
 import os
 from langchain_core.messages import HumanMessage

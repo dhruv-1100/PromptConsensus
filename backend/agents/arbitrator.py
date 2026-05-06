@@ -5,6 +5,7 @@ Evaluates the three candidate prompts and recommends the best one,
 or synthesises a hybrid incorporating the strongest elements of each.
 Uses Gemini as the judge LLM.
 """
+from __future__ import annotations
 import json
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI

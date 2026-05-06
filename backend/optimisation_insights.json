@@ -726,5 +726,40 @@
         "format_domain": "general",
         "winning_model": "Response C",
         "perspective_used": "Structured Clinical Pathway: Used a clear, sequential output structure (Immediate Care -> Red Flags -> Resource Navigation -> Cost Warning) that mirrors a standard clinical decision path. This ensures completeness, prioritizes safety with required warnings, integrates the student context pragmatically, and embeds the word count constraint into a verifiable format."
+    },
+    {
+        "timestamp": "2026-05-05T16:19:42.671172",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-05T16:19:53.637338",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-05T16:20:18.933510",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-05T16:26:00.250090",
+        "topic_domain": "healthcare",
+        "format_domain": "clinical document",
+        "winning_model": "Response Z",
+        "perspective_used": "Rigid Formatting Constraints"
+    },
+    {
+        "timestamp": "2026-05-05T17:42:09.740910",
+        "topic_domain": "general",
+        "format_domain": "code snippet",
+        "winning_model": "Response C",
+        "perspective_used": "Data-quality auditor perspective: Frame the task as an automated validation prompt that infers an ID\u2192expected-name mapping from the provided dataset, defines explicit matching/normalization rules, handles ambiguous mappings, and outputs mismatching IDs with expected vs actual names."
     }
 ]

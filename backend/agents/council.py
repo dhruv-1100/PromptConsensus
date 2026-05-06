@@ -7,6 +7,7 @@ After the rewriting agents produce candidates, this module:
   S3b  Aggregate ranking        (pure computation)
   S3c  Chairman synthesis       (1 LLM call)
 """
+from __future__ import annotations
 import json
 import os
 import re
@@ -22,7 +23,7 @@ from live_mode_utils import invoke_openrouter_model
 DEMO_PEER_REVIEWS = [
     {
         "reviewer": "Autonomous Engineer A",
-        "model": "gpt-4o",
+        "model": "google/gemini-2.5-flash",
         "evaluation": (
             "Response X provides strong step-by-step reasoning scaffolds that guide the model through "
             "each section of the discharge summary. However, it lacks explicit output format constraints "
@@ -38,7 +39,7 @@ DEMO_PEER_REVIEWS = [
     },
     {
         "reviewer": "Autonomous Engineer B",
-        "model": "claude-3-5-sonnet",
+        "model": "openai/gpt-5.4-nano",
         "evaluation": (
             "Response X excels at breaking down the task into numbered steps, ensuring no section is "
             "missed. The instruction to 'complete each section before proceeding' is effective for "
@@ -55,7 +56,7 @@ DEMO_PEER_REVIEWS = [
     },
     {
         "reviewer": "Autonomous Engineer C",
-        "model": "gpt-4o",
+        "model": "deepseek/deepseek-v3.2",
         "evaluation": (
             "Response X: Strong reasoning scaffolds with clear step numbers. Good for ensuring "
             "completeness. Lacks format specification — the model might choose its own layout.\n\n"
@@ -83,7 +84,7 @@ DEMO_LABEL_MAP = {
 }
 
 DEMO_CHAIRMAN = {
-    "model": "claude-3-5-sonnet",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
     "rationale": (
         "All three reviewers ranked the structured-template candidate first, citing its complete "
         "output format, domain compliance constraints, and combined step-by-step guidance. "

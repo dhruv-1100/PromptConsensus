@@ -4,6 +4,7 @@ S2 Agent B: Role-Assignment + Few-Shot Formatting Strategy
 Rewrites the user's query by assigning an expert persona and providing few-shot examples.
 Uses Gemini.
 """
+from __future__ import annotations
 import os
 import os
 from langchain_core.messages import HumanMessage

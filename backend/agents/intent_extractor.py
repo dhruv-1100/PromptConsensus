@@ -3,6 +3,7 @@ agents/intent_extractor.py
 S1: Analyzes the user's raw query to extract intent, domain, and missing constraints.
 Uses Gemini as the backbone LLM for structured intent analysis.
 """
+from __future__ import annotations
 import json
 import os
 import os

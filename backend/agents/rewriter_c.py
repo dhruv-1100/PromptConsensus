@@ -4,6 +4,7 @@ S2 Agent C: Structured Templates + Domain Constraints Strategy
 Rewrites the user's query using domain-specific output templates and explicit constraints.
 Uses Gemini.
 """
+from __future__ import annotations
 import os
 import os
 from langchain_core.messages import HumanMessage

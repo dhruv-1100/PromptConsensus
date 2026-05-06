@@ -3,6 +3,7 @@ pipeline/graph.py
 Pipeline orchestrating all ConsensusPrompt agents.
 Runs intent extraction → parallel rewrites → council peer review → chairman synthesis.
 """
+from __future__ import annotations
 import json
 import os
 import datetime
