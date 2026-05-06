@@ -56,7 +56,7 @@ graph TD
 
 ## Key Findings & Study Results
 
-Based on our user study (n=13) and longitudinal optimisation logs (n=104):
+Based on our user study (n=13) and optimisation logs:
 
 1. **Multi-agent peer review builds trust.** Mean trust was 4.77/5, and the consensus override rate was exactly 0%.
 2. **Domain determines the winning strategy.** Structured Templates win 94.1% of healthcare sessions. Chain-of-Thought leads in general/research contexts. Role Assignment leads in education. No single strategy dominates across all domains.
