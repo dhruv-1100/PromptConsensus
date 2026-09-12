@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import threading
 import time
 from dataclasses import dataclass, field
@@ -28,13 +29,28 @@ _INFLIGHT: Dict[str, InflightRequest] = {}
 _COMPLETED: Dict[str, Tuple[float, Any]] = {}
 _TTL_SECONDS = 300
 
+# A full pipeline is four sequential LLM stages, each capped at 120s, so a joined
+# caller has to wait generously. It must still be bounded: without a timeout a
+# leader thread that dies without signalling would block every joiner forever.
+_JOIN_TIMEOUT_SECONDS = float(os.getenv("PIPELINE_JOIN_TIMEOUT_SECONDS", "600"))
 
-def build_request_key(raw_query: str, domain: str, demo_mode: bool) -> str:
+
+def build_request_key(
+    raw_query: str,
+    domain: str,
+    demo_mode: bool,
+    engine: str = "asyncio",
+) -> str:
+    """
+    Identity of a pipeline request. The engine is part of it so a run on one
+    orchestrator never serves a cached result to a request for the other.
+    """
     payload = json.dumps(
         {
             "raw_query": raw_query.strip(),
             "domain": (domain or "general").strip().lower(),
             "demo_mode": bool(demo_mode),
+            "engine": (engine or "asyncio").strip().lower(),
         },
         sort_keys=True,
     )
@@ -68,24 +84,30 @@ def run_deduplicated(
             source = "new"
 
     if source == "joined":
-        inflight.event.wait()
+        if not inflight.event.wait(_JOIN_TIMEOUT_SECONDS):
+            raise RuntimeError(
+                "Timed out waiting for an identical in-flight optimisation request to finish "
+                f"after {_JOIN_TIMEOUT_SECONDS:g}s. Retry the request."
+            )
         if inflight.error:
             raise RuntimeError(inflight.error)
         return inflight.result, "joined"
 
+    # BaseException, not Exception: a cancelled or killed worker must still release
+    # everyone waiting on this key.
     try:
         result = worker()
-    except Exception as exc:
+    except BaseException as exc:
         with _LOCK:
-            inflight.error = str(exc)
-            inflight.event.set()
+            inflight.error = str(exc) or exc.__class__.__name__
             _INFLIGHT.pop(request_key, None)
+            inflight.event.set()
         raise
 
     with _LOCK:
         inflight.result = result
         _COMPLETED[request_key] = (time.time(), result)
-        inflight.event.set()
         _INFLIGHT.pop(request_key, None)
+        inflight.event.set()
 
     return result, "new"

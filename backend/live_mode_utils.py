@@ -11,6 +11,8 @@ import os
 import re
 from typing import Any, Sequence
 
+from json_store import append_json_list
+
 
 PARSE_FAILURE_LOG = os.path.join(os.path.dirname(__file__), "structured_parse_failures.json")
 
@@ -113,15 +115,7 @@ def log_structured_parse_failure(step: str, model_name: str, content: str, error
         "content_length": len(content or ""),
     }
     try:
-        logs = []
-        if os.path.exists(PARSE_FAILURE_LOG):
-            with open(PARSE_FAILURE_LOG, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-                if isinstance(loaded, list):
-                    logs = loaded
-        logs.append(entry)
-        with open(PARSE_FAILURE_LOG, "w", encoding="utf-8") as f:
-            json.dump(logs[-50:], f, indent=2, ensure_ascii=True)
+        append_json_list(PARSE_FAILURE_LOG, entry, max_entries=50)
     except Exception:
         pass
 

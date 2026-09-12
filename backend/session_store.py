@@ -6,11 +6,12 @@ from __future__ import annotations
 
 import csv
 import io
-import json
 import os
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
+
+from json_store import append_json_list, read_json_list
 from research_insights import build_research_insights
 
 
@@ -19,32 +20,18 @@ SESSIONS_FILE = os.path.join(os.path.dirname(__file__), "sessions.json")
 
 def _read_sessions() -> List[Dict[str, Any]]:
     """Load stored sessions, returning an empty list on failure."""
-    if not os.path.exists(SESSIONS_FILE):
-        return []
-
-    try:
-        with open(SESSIONS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except Exception:
-        return []
+    return read_json_list(SESSIONS_FILE)
 
 
 def append_session_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     """Persist a full session record and return the stored payload."""
-    sessions = _read_sessions()
     stored = {
         "session_id": str(uuid.uuid4()),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         **entry,
     }
     stored["research_insights"] = build_research_insights(stored)
-    sessions.append(stored)
-
-    with open(SESSIONS_FILE, "w", encoding="utf-8") as f:
-        json.dump(sessions, f, indent=2, ensure_ascii=True)
-
-    return stored
+    return append_json_list(SESSIONS_FILE, stored)
 
 
 def list_sessions(limit: int | None = None) -> List[Dict[str, Any]]:
