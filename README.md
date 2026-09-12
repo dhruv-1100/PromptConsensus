@@ -27,7 +27,10 @@ Across 13 controlled user sessions, the system achieved mean trust and control r
 
 ## System Architecture
 
-ConsensusPrompt runs a five-stage sequential pipeline orchestrated by LangGraph and FastAPI.
+ConsensusPrompt runs a five-stage sequential pipeline behind a FastAPI service. Two
+interchangeable orchestrators implement it over the same agent functions:
+an asyncio fan-out (`pipeline/graph.py`, the default) and a LangGraph `StateGraph`
+(`pipeline/langgraph_graph.py`). See [Pipeline Engines](#pipeline-engines).
 
 ```mermaid
 graph TD
@@ -68,6 +71,7 @@ Based on our user study (n=13) and optimisation logs:
 ## Tech Stack
 
 - **Backend**: Python 3.9+, FastAPI, LangChain, LangGraph, Uvicorn
+- **Testing**: pytest (167 tests, no API key required), GitHub Actions on Python 3.9 and 3.12
 - **Frontend**: Next.js 14, React 18, TypeScript, Vanilla CSS
 - **Model Transport**: OpenRouter via `langchain-openai` API
 - **Persistence**: Local JSON storage (`sessions.json`, `feedback.json`)
@@ -77,12 +81,16 @@ Based on our user study (n=13) and optimisation logs:
 ## Repository Structure
 
 - `backend/main.py`: API routes for optimize, execute, safety checks, feedback, sessions, and exports.
-- `backend/pipeline/graph.py`: Main pipeline orchestration and execution path.
+- `backend/pipeline/graph.py`: Default pipeline orchestration (asyncio) and the execution path.
+- `backend/pipeline/langgraph_graph.py`: The same pipeline as a LangGraph `StateGraph`.
+- `backend/pipeline/engine.py`: Selects the orchestrator for a run.
 - `backend/agents/`: Intent extractor, three rewriters, and council/chairman logic.
 - `backend/live_mode_utils.py`: OpenRouter invocation and structured-output helpers.
+- `backend/json_store.py`: Locked, atomic appends for the local JSON data files.
 - `backend/feedback_memory.py`: Same-domain feedback examples for chairman synthesis.
 - `backend/adaptation_memory.py`: Same-domain acceptance/override summaries for chairman synthesis.
 - `backend/session_store.py`: Local session persistence and analytics.
+- `backend/tests/`: pytest suite (no API key needed; network calls are blocked).
 - `frontend/app/page.tsx`: Main multi-stage application UI.
 - `frontend/app/CouncilScene.tsx`: Council visualization component.
 
@@ -91,8 +99,53 @@ Based on our user study (n=13) and optimisation logs:
 The application uses local JSON files in `backend/` for lightweight persistence:
 - `feedback.json`: User feedback entries and prompt edit histories.
 - `sessions.json`: Full saved study sessions including agent logic and rankings.
-- `optimisation_insights.json`: Historical winning-perspective logs.
-- `structured_parse_failures.json`: Failed structured-output captures.
+- `optimisation_insights.json`: Historical winning-perspective logs (live runs only — demo runs are never recorded).
+- `structured_parse_failures.json`: Failed structured-output captures (most recent 50).
+
+---
+
+## Pipeline Engines
+
+The same five stages are implemented by two orchestrators, both calling the same
+agent functions and returning the same state:
+
+| Engine | Module | Fan-out |
+|---|---|---|
+| `asyncio` (default) | `pipeline/graph.py` | `asyncio.gather` over the rewriter specs |
+| `langgraph` | `pipeline/langgraph_graph.py` | `StateGraph` with a `Send` map to one task per rewriter |
+
+Set the default for the process:
+
+```env
+PIPELINE_ENGINE=langgraph   # defaults to asyncio
+```
+
+Or choose per request, which is the useful form when comparing them on identical
+input (the deduplication cache keys on the engine, so neither serves the other's
+result):
+
+```bash
+curl -s localhost:8000/api/optimize \
+  -H 'Content-Type: application/json' \
+  -d '{"raw_query": "Write a discharge summary", "domain": "healthcare", "demo_mode": false, "engine": "langgraph"}'
+```
+
+`GET /api/config` reports the active engine and the available ones. The test suite
+asserts the two produce identical state, identical progress events and identical
+errors, so the frontend council visualisation behaves the same either way.
+
+---
+
+## Tests
+
+```bash
+cd backend
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest
+```
+
+167 tests, ~2 seconds, no API key required: agents are stubbed or run in demo
+mode, and `tests/conftest.py` fails any test that tries to reach OpenRouter.
 
 ---
 
@@ -125,7 +178,12 @@ MODEL_CHAIRMAN=nvidia/nemotron-3-super-120b-a12b
 TARGET_MODEL_PRIMARY=tencent/hy3-preview:free
 TARGET_MODEL_SECONDARY=google/gemma-3n-e4b-it:free
 TARGET_MODEL_TERTIARY=meta-llama/llama-3.3-70b-instruct
+
+# Optional: pipeline orchestrator ("asyncio" default, or "langgraph")
+PIPELINE_ENGINE=asyncio
 ```
+
+See `backend/.env.example` for every supported variable, including `ALLOWED_ORIGINS`.
 
 Run the FastAPI server:
 ```bash
