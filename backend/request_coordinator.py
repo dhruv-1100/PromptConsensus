@@ -35,12 +35,22 @@ _TTL_SECONDS = 300
 _JOIN_TIMEOUT_SECONDS = float(os.getenv("PIPELINE_JOIN_TIMEOUT_SECONDS", "600"))
 
 
-def build_request_key(raw_query: str, domain: str, demo_mode: bool) -> str:
+def build_request_key(
+    raw_query: str,
+    domain: str,
+    demo_mode: bool,
+    engine: str = "asyncio",
+) -> str:
+    """
+    Identity of a pipeline request. The engine is part of it so a run on one
+    orchestrator never serves a cached result to a request for the other.
+    """
     payload = json.dumps(
         {
             "raw_query": raw_query.strip(),
             "domain": (domain or "general").strip().lower(),
             "demo_mode": bool(demo_mode),
+            "engine": (engine or "asyncio").strip().lower(),
         },
         sort_keys=True,
     )

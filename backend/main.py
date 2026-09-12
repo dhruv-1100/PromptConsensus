@@ -9,10 +9,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
+from typing import Optional
 from dotenv import load_dotenv
 from feedback_memory import append_feedback_entry
 from session_store import append_session_entry, list_sessions, export_sessions_csv, get_session_analytics
 from safety_checks import run_safety_checks
+from pipeline.engine import AVAILABLE_ENGINES, get_pipeline_runner, resolve_engine_name
 from request_coordinator import build_request_key, run_deduplicated
 from preference_pairs import export_preferences_jsonl, get_preference_stats
 
@@ -51,6 +53,8 @@ class OptimizeRequest(BaseModel):
     raw_query: str
     domain: str = "general"
     demo_mode: bool = True
+    # "asyncio" (default) or "langgraph"; None falls back to PIPELINE_ENGINE.
+    engine: Optional[str] = None
 
 class ExecuteRequest(BaseModel):
     final_prompt: str
@@ -122,7 +126,19 @@ def health():
 @app.get("/api/config")
 def get_config():
     from config import MODELS, TARGET_MODELS
-    return {"models": MODELS, "target_models": TARGET_MODELS}
+    try:
+        engine = resolve_engine_name()
+    except ValueError:
+        # A bad PIPELINE_ENGINE should not take down the config endpoint the UI
+        # needs to load; /api/optimize still reports it as a 400.
+        engine = os.getenv("PIPELINE_ENGINE", "")
+
+    return {
+        "models": MODELS,
+        "target_models": TARGET_MODELS,
+        "pipeline_engine": engine,
+        "available_engines": list(AVAILABLE_ENGINES),
+    }
 
 @app.post("/api/optimize")
 def optimize(req: OptimizeRequest):
@@ -131,10 +147,13 @@ def optimize(req: OptimizeRequest):
     Intent extraction → 3 parallel rewrites → arbitration.
     Returns full pipeline state for the frontend to render.
     """
-    from pipeline.graph import run_pipeline
+    try:
+        run_pipeline, engine = get_pipeline_runner(req.engine)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     try:
-        request_key = build_request_key(req.raw_query, req.domain, req.demo_mode)
+        request_key = build_request_key(req.raw_query, req.domain, req.demo_mode, engine)
         state, _ = run_deduplicated(
             request_key,
             lambda: run_pipeline(
@@ -153,7 +172,10 @@ async def optimize_stream(req: OptimizeRequest):
     """
     Run the full pipeline and stream progress events to the frontend.
     """
-    from pipeline.graph import run_pipeline
+    try:
+        run_pipeline, engine = get_pipeline_runner(req.engine)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     async def event_generator():
         queue: asyncio.Queue = asyncio.Queue()
@@ -164,7 +186,7 @@ async def optimize_stream(req: OptimizeRequest):
 
         async def run_and_publish():
             try:
-                request_key = build_request_key(req.raw_query, req.domain, req.demo_mode)
+                request_key = build_request_key(req.raw_query, req.domain, req.demo_mode, engine)
                 state, source = await asyncio.to_thread(
                     run_deduplicated,
                     request_key,
@@ -211,7 +233,7 @@ async def optimize_stream(req: OptimizeRequest):
         
         # Send 2KB of padding to bypass Nginx/Vercel/browser initial buffering
         yield f": {' ' * 2048}\n\n"
-        yield f"data: {json.dumps({'type': 'start', 'message': 'Connecting to backend', 'progress': 2})}\n\n"
+        yield f"data: {json.dumps({'type': 'start', 'message': 'Connecting to backend', 'progress': 2, 'engine': engine})}\n\n"
 
         while True:
             event = await queue.get()

@@ -4,7 +4,6 @@ Pipeline orchestrating all ConsensusPrompt agents.
 Runs intent extraction → parallel rewrites → council peer review → chairman synthesis.
 """
 from __future__ import annotations
-import json
 import os
 import datetime
 import asyncio
@@ -136,6 +135,35 @@ def _validate_review_outputs(peer_reviews: list[dict], expected_candidate_count:
         )
 
 
+def record_optimisation_insight(
+    state: ConsensusState,
+    intent: dict,
+    aggregate: list[dict],
+) -> None:
+    """Append this run's winning perspective to the insights log (best-effort)."""
+    try:
+        if not aggregate:
+            return
+
+        winning_label = aggregate[0].get("label", "Unknown")  # e.g. 'Response Z'
+        winning_candidate = state.get("label_map", {}).get(winning_label, "Unknown")
+        winning_perspective = state.get("perspectives", {}).get(winning_candidate, "Unknown")
+
+        append_json_list(
+            INSIGHTS_LOG_PATH,
+            {
+                "timestamp": datetime.datetime.utcnow().isoformat(),
+                "topic_domain": intent.get("topic_domain", "general"),
+                "format_domain": intent.get("format_domain", "general"),
+                "winning_model": winning_label,
+                "perspective_used": winning_perspective,
+            },
+            indent=4,
+        )
+    except Exception as exc:
+        print("Failed to write optimisation insights:", exc)
+
+
 def run_pipeline(
     raw_query: str,
     domain: str = "general",
@@ -165,7 +193,9 @@ def run_pipeline(
                 "progress": pct,
             })
 
-    active_rewriter_specs = rewriter_specs or DEFAULT_REWRITER_SPECS
+    # None means "use the defaults"; an explicitly empty list is a caller error,
+    # which the `or` idiom used to swallow by silently running the default three.
+    active_rewriter_specs = DEFAULT_REWRITER_SPECS if rewriter_specs is None else rewriter_specs
     if not active_rewriter_specs:
         raise RuntimeError("At least one rewriter must be configured.")
 
@@ -243,23 +273,10 @@ def run_pipeline(
     state["optimised_prompt"] = optimised_prompt
     notify("complete", "Consensus reached", 100)
 
-    # Analytics Logging
-    try:
-        if record_analytics and aggregate and len(aggregate) > 0:
-            winning_label = aggregate[0].get("label", "Unknown") # 'Candidate A'
-            winning_candidate = state["label_map"].get(winning_label, "Unknown")
-            winning_perspective = state["perspectives"].get(winning_candidate, "Unknown")
-            
-            entry = {
-                "timestamp": datetime.datetime.utcnow().isoformat(),
-                "topic_domain": intent.get("topic_domain", "general"),
-                "format_domain": intent.get("format_domain", "general"),
-                "winning_model": winning_label,
-                "perspective_used": winning_perspective
-            }
-            append_json_list(INSIGHTS_LOG_PATH, entry, indent=4)
-    except Exception as e:
-        print("Failed to write optimisation insights:", e)
+    # Demo runs are synthetic fixtures: /api/feedback already refuses to persist
+    # them, so they must not reach the research insights log either.
+    if record_analytics and not demo_mode:
+        record_optimisation_insight(state, intent, aggregate)
 
     return state
 
