@@ -335,6 +335,26 @@ def _consensus_diagnostics(peer_reviews: List[Dict], aggregate: List[Dict]) -> D
     }
 
 
+# Matches a chairman reply that merely names the winner ("Response Z", "**Candidate C.**",
+# "The winner is Response A") instead of returning a synthesised prompt. Anchored on the
+# whole reply so that a genuine prompt which happens to contain the words "candidate" or
+# "response" is never discarded.
+_BARE_LABEL_RE = re.compile(
+    r"(?i)^(?:the\s+)?(?:winner\s+is\s+)?(?:response|candidate)\s+[a-z]+$"
+)
+
+
+def _looks_like_bare_label(text: str) -> bool:
+    """True when the chairman echoed a candidate label instead of synthesising a prompt."""
+    stripped = (text or "").strip().strip("*_`#.:\"' \t")
+    if not stripped:
+        return True
+    if _BARE_LABEL_RE.match(stripped):
+        return True
+    # A usable prompt is never a handful of words, whatever it says.
+    return len(stripped.split()) < 15
+
+
 def _anonymise_candidates(candidates: List[Tuple[str, str]]) -> Tuple[str, Dict[str, str]]:
     """Shuffle candidates into anonymous labels and return (prompt_text, label_map)."""
     import random
@@ -590,8 +610,7 @@ def chairman_synthesise_candidates(
     )
 
     candidates_by_agent = {candidate_name: candidate_text for candidate_name, candidate_text in candidates}
-    is_label_like = len(optimised.split()) < 15 or "Response " in optimised or "Candidate " in optimised
-    if is_label_like and aggregate:
+    if _looks_like_bare_label(optimised) and aggregate:
         winner_label = aggregate[0]["label"]
         winner_agent = label_map.get(winner_label, "")
         optimised = candidates_by_agent.get(winner_agent, candidates[0][1])

@@ -18,9 +18,13 @@ from agents.rewriter_a import rewrite_chain_of_thought
 from agents.rewriter_b import rewrite_role_assignment
 from agents.rewriter_c import rewrite_structured_template
 from agents.council import peer_review_candidates, chairman_synthesise_candidates
+from json_store import append_json_list
 from live_mode_utils import invoke_openrouter_model, extract_prompt_and_perspective
 
 load_dotenv()
+
+
+INSIGHTS_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "optimisation_insights.json")
 
 
 DEFAULT_REWRITER_SPECS = [
@@ -253,15 +257,7 @@ def run_pipeline(
                 "winning_model": winning_label,
                 "perspective_used": winning_perspective
             }
-            log_path = os.path.join(os.path.dirname(__file__), "..", "optimisation_insights.json")
-            
-            logs = []
-            if os.path.exists(log_path):
-                with open(log_path, "r") as f:
-                    logs = json.load(f)
-            logs.append(entry)
-            with open(log_path, "w") as f:
-                json.dump(logs, f, indent=4)
+            append_json_list(INSIGHTS_LOG_PATH, entry, indent=4)
     except Exception as e:
         print("Failed to write optimisation insights:", e)
 

@@ -5,10 +5,11 @@ into lightweight chairman guidance examples.
 """
 from __future__ import annotations
 
-import json
 import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List
+
+from json_store import append_json_list, read_json_list
 
 
 FEEDBACK_FILE = os.path.join(os.path.dirname(__file__), "feedback.json")
@@ -16,30 +17,16 @@ FEEDBACK_FILE = os.path.join(os.path.dirname(__file__), "feedback.json")
 
 def _read_feedback_entries() -> List[Dict[str, Any]]:
     """Load feedback entries from disk, returning an empty list on failure."""
-    if not os.path.exists(FEEDBACK_FILE):
-        return []
-
-    try:
-        with open(FEEDBACK_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except Exception:
-        return []
+    return read_json_list(FEEDBACK_FILE)
 
 
 def append_feedback_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     """Persist one feedback entry and return the stored payload."""
-    entries = _read_feedback_entries()
     stored = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         **entry,
     }
-    entries.append(stored)
-
-    with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
-        json.dump(entries, f, indent=2, ensure_ascii=True)
-
-    return stored
+    return append_json_list(FEEDBACK_FILE, stored)
 
 
 def build_chairman_feedback_context(limit: int = 3, topic_domain: str | None = None) -> str:

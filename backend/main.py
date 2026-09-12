@@ -14,7 +14,6 @@ from feedback_memory import append_feedback_entry
 from session_store import append_session_entry, list_sessions, export_sessions_csv, get_session_analytics
 from safety_checks import run_safety_checks
 from request_coordinator import build_request_key, run_deduplicated
-from idiosyncrasy_detector import candidate_diversity_report
 from preference_pairs import export_preferences_jsonl, get_preference_stats
 
 load_dotenv()
@@ -25,11 +24,22 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow Next.js dev + production origins
+# CORS — Next.js dev origins by default; override with a comma-separated ALLOWED_ORIGINS.
+DEFAULT_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+] or DEFAULT_ALLOWED_ORIGINS
+
+# Browsers reject a wildcard origin whenever credentials are allowed, so the two
+# settings can never both be on.
+ALLOW_CREDENTIALS = "*" not in ALLOWED_ORIGINS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "*"],
-    allow_credentials=True,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=ALLOW_CREDENTIALS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
