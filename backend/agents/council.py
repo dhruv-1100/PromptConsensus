@@ -8,8 +8,6 @@ After the rewriting agents produce candidates, this module:
   S3c  Chairman synthesis       (1 LLM call)
 """
 from __future__ import annotations
-import json
-import os
 import re
 import asyncio
 from typing import List, Dict, Any, Tuple
@@ -586,21 +584,21 @@ def chairman_synthesise_candidates(
         f"{candidate_name}:\n{candidate_text}" for candidate_name, candidate_text in candidates
     ])
 
-    messages = [
-        HumanMessage(content=(
-            f"{CHAIRMAN_SYSTEM}\n\n"
-            f"{feedback_memory}\n\n" if feedback_memory else f"{CHAIRMAN_SYSTEM}\n\n"
-        ) + (
-            f"{adaptation_memory}\n\n" if adaptation_memory else ""
-        ) + (
-            f"Original query: {raw_query}\n\n"
-            f"Topic domain: {topic_domain}\n\n"
-            f"{candidate_sections}\n\n"
-            f"PEER REVIEWS:\n{reviews_text}\n\n"
-            f"AGGREGATE RANKING:\n{ranking_text}\n\n"
-            f"Synthesise the optimal prompt now."
-        )),
-    ]
+    sections = [CHAIRMAN_SYSTEM]
+    if feedback_memory:
+        sections.append(feedback_memory)
+    if adaptation_memory:
+        sections.append(adaptation_memory)
+    sections.append(
+        f"Original query: {raw_query}\n\n"
+        f"Topic domain: {topic_domain}\n\n"
+        f"{candidate_sections}\n\n"
+        f"PEER REVIEWS:\n{reviews_text}\n\n"
+        f"AGGREGATE RANKING:\n{ranking_text}\n\n"
+        "Synthesise the optimal prompt now."
+    )
+
+    messages = [HumanMessage(content="\n\n".join(sections))]
 
     optimised, actual_model = invoke_openrouter_model(
         messages,

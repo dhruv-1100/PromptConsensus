@@ -2,11 +2,9 @@
 agents/rewriter_c.py
 S2 Agent C: Structured Templates + Domain Constraints Strategy
 Rewrites the user's query using domain-specific output templates and explicit constraints.
-Uses Gemini.
+The backing model is configured per role in backend/config.py.
 """
 from __future__ import annotations
-import os
-import os
 from langchain_core.messages import HumanMessage
 from live_mode_utils import invoke_openrouter_model
 
@@ -75,18 +73,16 @@ Missing information to address: {', '.join(intent.get('missing_info', []))}
 Constraints to satisfy: {', '.join(intent.get('constraints', []))}"""
     domain_guidance = _domain_specific_guidance(intent)
 
-    messages = [
-        HumanMessage(
-            content=(
-                f"{SYSTEM_PROMPT}\n\n"
-                f"{domain_guidance}\n\n" if domain_guidance else f"{SYSTEM_PROMPT}\n\n"
-            ) + (
-                f"Rewrite this query dynamically using the best possible perspective:\n\n"
-                f"Original query: {raw_query}\n\n"
-                f"Context:\n{context}"
-            )
-        ),
-    ]
+    sections = [SYSTEM_PROMPT]
+    if domain_guidance:
+        sections.append(domain_guidance)
+    sections.append(
+        "Rewrite this query dynamically using the best possible perspective:\n\n"
+        f"Original query: {raw_query}\n\n"
+        f"Context:\n{context}"
+    )
+
+    messages = [HumanMessage(content="\n\n".join(sections))]
 
     content, actual_model = invoke_openrouter_model(
         messages,

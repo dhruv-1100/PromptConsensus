@@ -1,17 +1,14 @@
 """
 agents/intent_extractor.py
 S1: Analyzes the user's raw query to extract intent, domain, and missing constraints.
-Uses Gemini as the backbone LLM for structured intent analysis.
+The backing model is configured per role in backend/config.py.
 """
 from __future__ import annotations
-import json
-import os
-import os
 from langchain_core.messages import HumanMessage
 from live_mode_utils import invoke_openrouter_model, parse_json_response, log_structured_parse_failure
 
 # ---------------------------------------------------------------------------
-# Demo-mode fixtures (used when DEMO_MODE=True in Streamlit session state)
+# Demo-mode fixtures (returned when the request sets demo_mode)
 # ---------------------------------------------------------------------------
 DEMO_INTENT = {
     "intent": "Generate a professional clinical discharge summary for a diabetic patient",
